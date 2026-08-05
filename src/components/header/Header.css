@@ -4,6 +4,7 @@
 .edu-header h1 { overflow: hidden; margin: 0; color: var(--edu-text); font-size: clamp(15px, 1.6vw, 18px); text-overflow: ellipsis; white-space: nowrap; }
 .header-icon-button, .mobile-menu-button { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; padding: 0; color: #747b91; background: #f7f7fb; border: 1px solid var(--edu-border); border-radius: 8px; }
 .header-icon-button:hover, .mobile-menu-button:hover { color: var(--hostel-primary); background: var(--hostel-accent-soft); border-color: #8bd5cc; }
+.mobile-menu-button .anticon { font-size: 16px; line-height: 1; }
 .header-icon-button svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .header-user { max-width: 180px; overflow: hidden; color: var(--edu-text); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .mobile-menu-button { display: none; font-size: 18px; }

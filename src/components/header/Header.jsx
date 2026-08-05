@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { MenuOutlined } from '@ant-design/icons'
 import './Header.css'
 
 export function Header({ title, onOpenMenu, employee, onLogout }) {
@@ -17,7 +18,7 @@ export function Header({ title, onOpenMenu, employee, onLogout }) {
 
   return (
     <header className="edu-header">
-      <div className="edu-header-title"><button className="mobile-menu-button" onClick={onOpenMenu} aria-label="Menyu">☰</button><h1>{title}</h1></div>
+      <div className="edu-header-title"><button className="mobile-menu-button" onClick={onOpenMenu} aria-label="Menyu"><MenuOutlined /></button><h1>{title}</h1></div>
       <div className="edu-header-actions">
         <div className="notification-wrap" ref={notificationRef}>
           <button className="header-icon-button" aria-label="Bildirishnomalar" aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg></button>

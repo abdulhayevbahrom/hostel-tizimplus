@@ -60,6 +60,9 @@
 .contract-form-modal .ant-modal-header { padding-bottom: 9px; margin-bottom: 12px; border-bottom: 1px solid #e1eaec; }
 .contract-form-modal .ant-modal-title { color: #183f4e; font-weight: 750; }
 .contract-form-modal .ant-input, .contract-form-modal .ant-input-number, .contract-form-modal .ant-picker { border-color: #cbdde1 !important; }
+.contract-form-modal .ant-form-vertical .ant-form-item { margin-bottom: 12px; }
+.contract-form-modal .ant-form-vertical .ant-form-item-label { padding: 0 0 3px; }
+.contract-form-modal .ant-form-item-label > label { min-height: auto; font-size: 12px; line-height: 1.2; }
 .contract-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .contract-status-segmented .ant-segmented-item-selected { color: #fff; background: #155e75; }
 .contract-form-actions { display: flex; gap: 8px; margin-top: 12px; }
@@ -97,15 +100,32 @@
   .contract-a4 { width: 210mm; min-height: 297mm; padding: 16mm 18mm; margin: 0; box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
 @media (max-width: 700px) {
-  .student-profile-head { align-items: flex-start; padding: 16px; }
+  .student-profile-toolbar { align-items: stretch; }
+  .student-profile-toolbar > div { margin-left: auto; }
+  .student-profile-back, .student-profile-edit, .student-profile-delete { min-width: 34px; padding: 0 9px; gap: 0; }
+  .student-profile-back { font-size: 0; }
+  .student-profile-edit, .student-profile-delete { font-size: 0; }
+  .student-profile-back span { font-size: 18px; }
+  .student-profile-head { min-height: 0; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px; }
   .student-profile-photo { width: 72px; height: 72px; flex-basis: 72px; }
-  .student-profile-head h2 { font-size: 19px; }
-  .student-profile-gender { position: absolute; right: 12px; bottom: 12px; }
+  .student-profile-head small,
+  .student-profile-head p,
+  .student-profile-gender { display: none; }
+  .student-profile-head h2 { margin: 0; font-size: 19px; line-height: 1.2; }
+  .student-profile-head > div:last-child { min-width: 0; }
   .student-profile-section { padding: 14px; }
   .student-profile-grid { grid-template-columns: 1fr; }
-  .student-profile-tabs > .ant-tabs-nav { padding: 0 14px; }
+  .student-profile-grid { gap: 0; background: #f7fafb; border: 1px solid #e1eaec; border-radius: 9px; overflow: hidden; }
+  .student-profile-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 8px; background: transparent; border: 0; border-bottom: 1px solid #e1eaec; border-radius: 0; }
+  .student-profile-item:last-child { border-bottom: 0; }
+  .student-profile-item span { flex: 0 0 auto; }
+  .student-profile-item strong { flex: 1; text-align: right; }
+  .student-profile-tabs > .ant-tabs-nav { padding: 0 14px; overflow-x: auto; overflow-y: hidden; }
+  .student-profile-tabs > .ant-tabs-nav .ant-tabs-nav-wrap { overflow: visible !important; }
+  .student-profile-tabs > .ant-tabs-nav .ant-tabs-nav-list { flex-wrap: nowrap; width: max-content; min-width: 100%; }
+  .student-profile-tabs > .ant-tabs-nav .ant-tabs-tab { flex: 0 0 auto; }
   .student-contracts-tab { padding: 14px; }
-  .student-payments-tab{padding:14px}.student-payment-toolbar{align-items:stretch;flex-direction:column}.student-payment-stats{grid-template-columns:1fr 1fr}.student-payment-table,.student-payment-table tbody{display:block;width:100%}.student-payment-table thead{display:none}.student-payment-table tbody{display:grid;gap:8px;padding:8px}.student-payment-table tr{display:block;padding:7px 9px;border:1px solid #d8e5e8;border-radius:9px}.student-payment-table td{display:flex;justify-content:space-between;gap:10px;padding:6px 1px;border:0;background:transparent!important}.student-payment-table tbody tr:nth-child(even){background:#f1f8f7}.student-payment-table tbody tr:nth-child(odd){background:#fff}.student-payment-table td::before{content:attr(data-label);color:#37616c;font-size:10px;font-weight:800;text-transform:uppercase}.student-payment-table .student-payment-state{display:block}.student-payment-table .student-payment-state::before{content:none}
+  .student-payments-tab{padding:14px}.student-payment-toolbar{align-items:stretch;flex-direction:column}.student-payment-stats{grid-template-columns:1fr;gap:8px}.student-payment-stats article{min-height:0;gap:4px;padding:11px 12px}.student-payment-stats span{font-size:10px}.student-payment-stats strong{font-size:14px;line-height:1.25}.student-payment-title{min-height:44px;padding:9px 12px}.student-payment-title h3{font-size:14px}.student-payment-title span{padding:4px 9px;font-size:10px}.student-payment-table,.student-payment-table tbody{display:block;width:100%}.student-payment-table thead{display:none}.student-payment-table tbody{display:grid;gap:8px;padding:8px}.student-payment-table tr{display:block;padding:7px 9px;border:1px solid #d8e5e8;border-radius:9px}.student-payment-table td{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 1px;border:0;border-bottom:1px solid #e6eeef;background:transparent!important}.student-payment-table td:last-child{border-bottom:0}.student-payment-table tbody tr:nth-child(even){background:#f1f8f7}.student-payment-table tbody tr:nth-child(odd){background:#fff}.student-payment-table td::before{content:attr(data-label);color:#37616c;font-size:10px;font-weight:800;text-transform:uppercase}.student-payment-table .student-payment-state{display:block}.student-payment-table .student-payment-state::before{content:none}
   .student-contract-toolbar { align-items: stretch; flex-direction: column; }
   .contract-form-grid { grid-template-columns: 1fr; gap: 0; }
   .contract-payment-calculation { grid-template-columns: 1fr; }
@@ -113,8 +133,35 @@
   .contract-table thead { display: none; }
   .contract-table tbody { display: grid; gap: 8px; }
   .contract-table tr { display: block; padding: 7px 9px; border: 1px solid #d8e5e8; border-radius: 9px; }
-  .contract-table td { display: flex; justify-content: space-between; gap: 10px; padding: 6px 1px; border: 0; }
+  .contract-table td { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 1px; border: 0; border-bottom: 1px solid #e6eeef; }
+  .contract-table td:last-child { border-bottom: 0; }
   .contract-table td::before { content: attr(data-label); color: #37616c; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+  .contract-form-modal .ant-modal { top: 0; max-width: 100vw; padding-bottom: 0; margin: 0; }
+  .contract-form-modal .ant-modal-content { min-height: 100vh; min-height: 100dvh; border-radius: 0; border: 0; }
+  .contract-form-modal .ant-modal-header { padding: 14px 14px 8px; margin-bottom: 10px; }
+  .contract-form-modal .ant-modal-body { padding: 0 14px 14px; }
+  .contract-form-modal .ant-form-vertical .ant-form-item { margin-bottom: 10px; }
+  .contract-form-modal .ant-form-vertical .ant-form-item-label { padding-bottom: 2px; }
+  .contract-form-modal .ant-form-item-label > label { font-size: 11px; }
   .contract-a4-scroll { padding: 12px; }
   .contract-a4 { transform-origin: top left; }
+  .student-payment-modal .ant-modal { top: 0; max-width: 100vw; padding-bottom: 0; margin: 0; }
+  .student-payment-modal .ant-modal-content { min-height: 100vh; min-height: 100dvh; padding: 14px; border-radius: 0; border: 0; }
+  .student-payment-modal .ant-modal-header { padding: 0 0 8px; margin-bottom: 10px; }
+  .student-payment-modal .ant-modal-body { padding: 0; }
+  .student-payment-modal .ant-form-vertical .ant-form-item { margin-bottom: 10px; }
+  .student-payment-modal .ant-form-vertical .ant-form-item-label { padding-bottom: 2px; }
+  .student-payment-modal .ant-form-item-label > label { font-size: 11px; }
+  .student-payment-modal .ant-input,
+  .student-payment-modal .ant-input-number,
+  .student-payment-modal .ant-select-selector { min-height: 32px !important; }
+  .student-method-field { margin-bottom: 12px; }
+  .student-method-field > label { margin-bottom: 4px; font-size: 11px; }
+  .student-method-field > div { display: flex; justify-content: space-between; grid-template-columns: none; gap: 4px; padding: 4px; overflow-x: auto; }
+  .student-method-field > div::-webkit-scrollbar { display: none; }
+  .student-method-field button { min-width: max-content; min-height: 30px; padding: 0 10px; font-size: 12px; white-space: nowrap; }
+  .profile-payment-balance { padding: 9px 10px; margin: -2px 0 12px; }
+  .profile-payment-balance span { font-size: 11px; }
+  .payment-modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 10px; }
+  .payment-modal-actions .ant-btn { width: 100%; min-height: 32px; }
 }

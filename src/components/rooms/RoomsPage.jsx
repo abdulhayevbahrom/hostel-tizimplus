@@ -23,6 +23,7 @@ export function RoomsPage() {
   const [category, setCategory] = useState(undefined)
   const [gender, setGender] = useState(undefined)
   const [status, setStatus] = useState(undefined)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [galleryRoom, setGalleryRoom] = useState(null)
   const [residentsRoom, setResidentsRoom] = useState(null)
   const { data: residentsData, isLoading: residentsLoading, error: residentsError } = useGetRoomStudentsQuery(residentsRoom?.id, { skip: !residentsRoom })
@@ -55,13 +56,19 @@ export function RoomsPage() {
     <div className="rooms-page">
       <div className="rooms-panel">
         <div className="rooms-toolbar">
-          <h2>Xonalar ro‘yxati</h2>
           <div className="room-filters">
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Qidirish: xona raqami, blok" />
-            <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Qavat" options={floors} value={floor} onChange={setFloor} />
-            <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kategoriya" options={categoryOptions} value={category} onChange={setCategory} />
-            <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kimlar uchun" options={genderOptions} value={gender} onChange={setGender} />
-            <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Status" options={statusOptions} value={status} onChange={setStatus} />
+            <div className="room-filters-main">
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Qidirish: xona raqami, blok" />
+              <button className="room-filter-toggle" type="button" onClick={() => setFiltersOpen(true)} aria-label="Filterlarni ochish" title="Filterlar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+              </button>
+            </div>
+            <div className="room-filters-desktop">
+              <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Qavat" options={floors} value={floor} onChange={setFloor} />
+              <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kategoriya" options={categoryOptions} value={category} onChange={setCategory} />
+              <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kimlar uchun" options={genderOptions} value={gender} onChange={setGender} />
+              <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Status" options={statusOptions} value={status} onChange={setStatus} />
+            </div>
             <button className="add-room-btn" onClick={() => { setEditingRoom(null); setModalOpen(true) }}>+ Yangi xona</button>
           </div>
         </div>
@@ -69,6 +76,14 @@ export function RoomsPage() {
         {isLoading ? <div className="rooms-loading">Xonalar yuklanmoqda…</div> : <div className="rooms-grid">{filtered.map((room) => <RoomCard key={room.id} room={room} deleting={deleting} onResidents={setResidentsRoom} onView={setGalleryRoom} onEdit={(item) => { setEditingRoom(item); setModalOpen(true) }} onDelete={remove} />)}{!filtered.length && <div className="rooms-empty">Xonalar topilmadi</div>}</div>}
       </div>
       <RoomFormModal open={modalOpen} room={editingRoom} loading={creating || updating} error={error} onClose={closeModal} onSubmit={submit} />
+      <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" destroyOnHidden rootClassName="room-filters-modal">
+        <div className="room-filters-mobile">
+          <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Qavat" options={floors} value={floor} onChange={setFloor} />
+          <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kategoriya" options={categoryOptions} value={category} onChange={setCategory} />
+          <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kimlar uchun" options={genderOptions} value={gender} onChange={setGender} />
+          <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Status" options={statusOptions} value={status} onChange={setStatus} />
+        </div>
+      </Modal>
       <Modal open={Boolean(galleryRoom)} onCancel={() => setGalleryRoom(null)} footer={null} width={900} title={galleryRoom ? `Xona ${galleryRoom.roomNumber} rasmlari` : ''} rootClassName="room-gallery-modal">
         {galleryRoom?.images?.length ? <Image.PreviewGroup><div className="room-gallery-grid">{galleryRoom.images.map((image, index) => <Image key={image.url} src={image.displayUrl || image.url} alt={`Xona rasmi ${index + 1}`} />)}</div></Image.PreviewGroup> : <div className="room-gallery-empty">Bu xona uchun hali rasm qo‘shilmagan</div>}
       </Modal>

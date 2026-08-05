@@ -448,7 +448,8 @@ export function DashboardPage() {
                 <CardIcon type="students" />
               </i>
               <span>
-                Talabalar<strong>{data.students?.active || 0}</strong>
+                <b>Talabalar</b>
+                <strong>{data.students?.active || 0}</strong>
                 <small>Faol yashovchilar</small>
               </span>
             </button>
@@ -457,7 +458,8 @@ export function DashboardPage() {
                 <CardIcon type="rooms" />
               </i>
               <span>
-                Xonalar<strong>{r.total || 0}</strong>
+                <b>Xonalar</b>
+                <strong>{r.total || 0}</strong>
                 <small>{r.free || 0} ta bo‘sh joy</small>
               </span>
             </button>
@@ -466,7 +468,8 @@ export function DashboardPage() {
                 <CardIcon type="employee" />
               </i>
               <span>
-                Xodimlar<strong>{data.employees?.active || 0}</strong>
+                <b>Xodimlar</b>
+                <strong>{data.employees?.active || 0}</strong>
                 <small>Faol xodimlar</small>
               </span>
             </button>
@@ -475,7 +478,8 @@ export function DashboardPage() {
                 <CardIcon type="fine" />
               </i>
               <span>
-                Jarimalar<strong>{d.fineStudents || 0}</strong>
+                <b>Jarimalar</b>
+                <strong>{d.fineStudents || 0}</strong>
                 <small>{money(d.fineAmount)} qoldiq</small>
               </span>
             </button>
@@ -610,21 +614,29 @@ export function DashboardPage() {
             <tbody>
               {(data.transactions || []).map((item) => (
                 <tr key={item.id}>
-                  <td>{dayjs(item.createdAt).format("DD.MM.YYYY HH:mm")}</td>
+                  <td className="recent-date-cell">
+                    <strong>{dayjs(item.createdAt).format("DD.MM.YYYY")}</strong>
+                    <small>{dayjs(item.createdAt).format("HH:mm")}</small>
+                  </td>
                   <td>
-                    <span className={`operation ${item.type}`}>
-                      {item.type === "income"
-                        ? "Kirim"
-                        : item.type === "salary"
-                          ? "Oylik"
-                          : "Xarajat"}
-                    </span>
+                    <div className="recent-action-cell">
+                      <span className={`operation ${item.type}`}>
+                        {item.type === "income"
+                          ? "Kirim"
+                          : item.type === "salary"
+                            ? "Oylik"
+                            : "Xarajat"}
+                      </span>
+                      <b className={item.type}>
+                        {item.type === "income" ? "+" : "−"} {money(item.amount)}
+                      </b>
+                    </div>
                   </td>
                   <td>
                     <strong>{item.title}</strong>
                     <small>{item.subtitle}</small>
                   </td>
-                  <td>
+                  <td className="recent-amount-cell">
                     <b className={item.type}>
                       {item.type === "income" ? "+" : "−"} {money(item.amount)}
                     </b>

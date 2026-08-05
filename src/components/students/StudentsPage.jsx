@@ -1,5 +1,5 @@
 import { useDeferredValue, useMemo, useState } from "react";
-import { Pagination, Popconfirm, Select } from "antd";
+import { Modal, Pagination, Popconfirm, Select } from "antd";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -31,6 +31,7 @@ function StudentsListTab() {
   const [facultyFilter, setFacultyFilter] = useState(undefined);
   const [courseFilter, setCourseFilter] = useState(undefined);
   const [roomFilter, setRoomFilter] = useState(undefined);
+  const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const deferredQuery = useDeferredValue(query.trim());
   const {
     data,
@@ -105,79 +106,104 @@ function StudentsListTab() {
     <div className="students-page">
       <div className="students-card">
         <div className="students-toolbar">
-          <div>
-            <h2>Talabalar ro‘yxati</h2>
-            <p>Jami {pagination.total} ta talaba</p>
-          </div>
-          <div className="students-toolbar-actions">
-            <input
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setPage(1);
-              }}
-              placeholder="F.I.O, telefon, JSHR yoki pasport"
-            />
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              placeholder="Universitet"
-              value={universityFilter}
-              options={universities.map((item) => ({
-                value: item.id,
-                label: item.shortName || item.name,
-              }))}
-              onChange={(value) => {
-                setUniversityFilter(value);
-                setFacultyFilter(undefined);
-                setPage(1);
-              }}
-            />
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              placeholder="Fakultet"
-              value={facultyFilter}
-              options={faculties.map((item) => ({
-                value: item.id,
-                label: item.name,
-              }))}
-              onChange={(value) => {
-                setFacultyFilter(value);
-                setPage(1);
-              }}
-            />
-            <Select
-              allowClear
-              placeholder="Kurs"
-              value={courseFilter}
-              options={[1, 2, 3, 4, 5, 6].map((value) => ({
-                value,
-                label: `${value}-kurs`,
-              }))}
-              onChange={(value) => {
-                setCourseFilter(value);
-                setPage(1);
-              }}
-            />
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp="label"
-              placeholder="Xona"
-              value={roomFilter}
-              options={rooms.map((room) => ({
-                value: room.id,
-                label: `${room.block} blok · ${room.roomNumber}-xona`,
-              }))}
-              onChange={(value) => {
-                setRoomFilter(value);
-                setPage(1);
-              }}
-            />
-            <button onClick={() => setModalOpen(true)}>+ Yangi talaba</button>
+          <div className="students-toolbar-controls">
+            <div className="students-toolbar-actions">
+              <input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(1);
+                }}
+                placeholder="F.I.O, telefon, JSHR yoki pasport"
+              />
+              <button
+                type="button"
+                className="students-filter-toggle"
+                aria-label="Filterlarni ochish"
+                onClick={() => setFiltersModalOpen(true)}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h16M7 12h10M10 17h4" />
+                </svg>
+              </button>
+            </div>
+            <div className="students-toolbar-filters">
+              <input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(1);
+                }}
+                placeholder="F.I.O, telefon, JSHR yoki pasport"
+              />
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                placeholder="Universitet"
+                value={universityFilter}
+                options={universities.map((item) => ({
+                  value: item.id,
+                  label: item.shortName || item.name,
+                }))}
+                onChange={(value) => {
+                  setUniversityFilter(value);
+                  setFacultyFilter(undefined);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                placeholder="Fakultet"
+                value={facultyFilter}
+                options={faculties.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                }))}
+                onChange={(value) => {
+                  setFacultyFilter(value);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
+                placeholder="Kurs"
+                value={courseFilter}
+                options={[1, 2, 3, 4, 5, 6].map((value) => ({
+                  value,
+                  label: `${value}-kurs`,
+                }))}
+                onChange={(value) => {
+                  setCourseFilter(value);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                placeholder="Xona"
+                value={roomFilter}
+                options={rooms.map((room) => ({
+                  value: room.id,
+                  label: `${room.block} blok · ${room.roomNumber}-xona`,
+                }))}
+                onChange={(value) => {
+                  setRoomFilter(value);
+                  setPage(1);
+                }}
+              />
+              <button onClick={() => setModalOpen(true)}>+ Yangi talaba</button>
+            </div>
+            <button
+              type="button"
+              className="students-mobile-create"
+              onClick={() => setModalOpen(true)}
+            >
+              + Yangi talaba
+            </button>
           </div>
         </div>
         {listError && (
@@ -373,6 +399,75 @@ function StudentsListTab() {
         onClose={close}
         onSubmit={submit}
       />
+      <Modal
+        open={filtersModalOpen}
+        title="Filterlar"
+        footer={null}
+        onCancel={() => setFiltersModalOpen(false)}
+        className="students-filters-modal"
+      >
+        <div className="students-filters-modal-body">
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            placeholder="Universitet"
+            value={universityFilter}
+            options={universities.map((item) => ({
+              value: item.id,
+              label: item.shortName || item.name,
+            }))}
+            onChange={(value) => {
+              setUniversityFilter(value);
+              setFacultyFilter(undefined);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            placeholder="Fakultet"
+            value={facultyFilter}
+            options={faculties.map((item) => ({
+              value: item.id,
+              label: item.name,
+            }))}
+            onChange={(value) => {
+              setFacultyFilter(value);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
+            placeholder="Kurs"
+            value={courseFilter}
+            options={[1, 2, 3, 4, 5, 6].map((value) => ({
+              value,
+              label: `${value}-kurs`,
+            }))}
+            onChange={(value) => {
+              setCourseFilter(value);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            placeholder="Xona"
+            value={roomFilter}
+            options={rooms.map((room) => ({
+              value: room.id,
+              label: `${room.block} blok · ${room.roomNumber}-xona`,
+            }))}
+            onChange={(value) => {
+              setRoomFilter(value);
+              setPage(1);
+            }}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

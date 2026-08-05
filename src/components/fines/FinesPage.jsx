@@ -23,6 +23,7 @@ export function FinesPage({ currentEmployee }) {
   const [editing, setEditing] = useState(null)
   const [paymentFine, setPaymentFine] = useState(null)
   const [historyFine, setHistoryFine] = useState(null)
+  const [actionFine, setActionFine] = useState(null)
   const { data, isLoading, isFetching, error } = useGetFinesQuery({ page, month, ...(search ? { search } : {}), ...(studentFilter ? { student: studentFilter } : {}) })
   const { data: optionsData } = useGetFineOptionsQuery()
   const [createFine, { isLoading: creating }] = useCreateFineMutation()
@@ -60,7 +61,7 @@ export function FinesPage({ currentEmployee }) {
           <td data-label="Holat"><span className={`fine-payment-status ${paymentStatus}`}>{paymentStatus === 'paid' ? 'To‘langan' : paymentStatus === 'partial' ? 'Qisman to‘langan' : 'To‘lanmagan'}</span></td>
           <td data-label="Sana"><strong>{dayjs(fine.createdAt).format('DD.MM.YYYY')}</strong><small>{dayjs(fine.createdAt).format('HH:mm')}</small></td>
           <td data-label="Xodim"><strong>{employeeName(fine.issuedBy)}</strong><small>{fine.issuedBy?.position || '—'}</small></td>
-          <td data-label="Amal"><div className="fine-actions">{remaining > 0 && <button className="pay" onClick={() => setPaymentFine(fine)}>To‘lov</button>}<button className="history" title="To‘lovlar tarixi" onClick={() => setHistoryFine(fine)}>Tarix</button>{canManage && <><button className="edit" title="Tahrirlash" onClick={() => openEdit(fine)}>✎</button><Popconfirm title="Jarima o‘chirilsinmi?" description="Bu amalni ortga qaytarib bo‘lmaydi." okText="O‘chirish" cancelText="Bekor" onConfirm={() => remove(fine)}><button className="delete" title="O‘chirish">×</button></Popconfirm></>}</div></td>
+          <td data-label="Amal"><div className="fine-actions">{remaining > 0 && <button className="pay" onClick={() => setPaymentFine(fine)}>To‘lov</button>}<button className="history" title="To‘lovlar tarixi" onClick={() => setHistoryFine(fine)}>Tarix</button>{canManage && <><button className="edit" title="Tahrirlash" onClick={() => openEdit(fine)}>✎</button><Popconfirm title="Jarima o‘chirilsinmi?" description="Bu amalni ortga qaytarib bo‘lmaydi." okText="O‘chirish" cancelText="Bekor" onConfirm={() => remove(fine)}><button className="delete" title="O‘chirish">×</button></Popconfirm></>}<button className="fine-more-btn" onClick={() => setActionFine(actionFine?.id === fine.id ? null : fine)}>⋯</button>{actionFine?.id === fine.id && <div className="fine-inline-actions"><button onClick={() => { if (remaining > 0) setPaymentFine(fine); setActionFine(null) }}>To‘lov</button><button onClick={() => { setHistoryFine(fine); setActionFine(null) }}>Tarix</button>{canManage && <><button onClick={() => { openEdit(fine); setActionFine(null) }}>Tahrirlash</button><button onClick={() => { remove(fine); setActionFine(null) }}>O‘chirish</button></>}</div>}</div></td>
         </tr>})}{!data?.fines?.length && <tr><td colSpan="8" className="fine-state">Tanlangan oy bo‘yicha jarima topilmadi</td></tr>}</tbody>
       </table></div>}
       {(data?.pagination?.total || 0) > 25 && <div className="fine-pagination"><span>Jami {data.pagination.total} ta jarima</span><Pagination current={data.pagination.page} pageSize={25} total={data.pagination.total} showSizeChanger={false} onChange={setPage} /></div>}
