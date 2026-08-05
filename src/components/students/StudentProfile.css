@@ -2,7 +2,7 @@
 .student-profile-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .student-profile-toolbar > div { display: flex; gap: 8px; }
 .student-profile-back { display: inline-flex; width: max-content; min-height: 34px; align-items: center; gap: 7px; padding: 0 11px; color: #155e75; background: #fff; border: 1px solid #cbdde1; border-radius: 8px; font-weight: 700; }
-.student-profile-back span { font-size: 18px; }
+.student-profile-back .anticon { font-size: 18px; }
 .student-profile-edit, .student-profile-delete { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border-radius: 8px; font-weight: 700; }
 .student-profile-edit svg, .student-profile-delete svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .student-profile-edit { color: #fff; background: #159988; border: 1px solid #0f766e; }
@@ -105,7 +105,7 @@
   .student-profile-back, .student-profile-edit, .student-profile-delete { min-width: 34px; padding: 0 9px; gap: 0; }
   .student-profile-back { font-size: 0; }
   .student-profile-edit, .student-profile-delete { font-size: 0; }
-  .student-profile-back span { font-size: 18px; }
+  .student-profile-back .anticon { font-size: 18px; }
   .student-profile-head { min-height: 0; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px; }
   .student-profile-photo { width: 72px; height: 72px; flex-basis: 72px; }
   .student-profile-head small,

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Image, Popconfirm, Tabs } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { toast } from 'react-toastify'
 import { apiErrorMessage, useDeleteStudentMutation, useGetStudentQuery, useUpdateStudentMutation } from '../../store/baseApi'
 import { StudentFormModal } from './StudentFormModal'
@@ -49,7 +50,7 @@ export function StudentProfilePage({ currentEmployee }) {
 
   return (
     <div className="student-profile-page">
-      <div className="student-profile-toolbar"><button className="student-profile-back" onClick={() => navigate(-1)}><span>←</span> Orqaga</button><div><button className="student-profile-edit" onClick={() => { setFormError(''); setEditOpen(true) }}><svg viewBox="0 0 24 24"><path d="M4 20H8L18 10L14 6L4 16V20Z"/><path d="M12 8L16 12"/></svg>Tahrirlash</button><Popconfirm title="Talabani o‘chirish" description="Ushbu amalni tasdiqlaysizmi?" okText="O‘chirish" cancelText="Bekor" okButtonProps={{ danger: true, loading: deleting }} onConfirm={remove}><button className="student-profile-delete" disabled={deleting}><svg viewBox="0 0 24 24"><path d="M4 7H20M9 7V5H15V7M7 7L8 20H16L17 7"/></svg>O‘chirish</button></Popconfirm></div></div>
+      <div className="student-profile-toolbar"><button type="button" className="student-profile-back" onClick={() => navigate(-1)}><ArrowLeftOutlined /> Orqaga</button><div><button className="student-profile-edit" onClick={() => { setFormError(''); setEditOpen(true) }}><svg viewBox="0 0 24 24"><path d="M4 20H8L18 10L14 6L4 16V20Z"/><path d="M12 8L16 12"/></svg>Tahrirlash</button><Popconfirm title="Talabani o‘chirish" description="Ushbu amalni tasdiqlaysizmi?" okText="O‘chirish" cancelText="Bekor" okButtonProps={{ danger: true, loading: deleting }} onConfirm={remove}><button className="student-profile-delete" disabled={deleting}><svg viewBox="0 0 24 24"><path d="M4 7H20M9 7V5H15V7M7 7L8 20H16L17 7"/></svg>O‘chirish</button></Popconfirm></div></div>
       <section className="student-profile-card">
         <div className="student-profile-head">
           <div className="student-profile-photo">{student.photo ? <Image src={student.photo.displayUrl || student.photo.url} alt={student.fullName} preview={{ mask: 'Ko‘rish' }} /> : <span>{student.fullName.slice(0, 1).toUpperCase()}</span>}</div>
