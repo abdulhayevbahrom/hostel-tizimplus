@@ -1,4 +1,4 @@
-.edu-sidebar { position: relative; z-index: 20; height: 100vh; overflow-y: auto; color: var(--edu-text); background: #fff; border-right: 1px solid var(--edu-border); }
+.edu-sidebar { position: relative; z-index: 20; height: 100vh; height: 100dvh; padding-bottom: env(safe-area-inset-bottom, 0px); overflow-y: auto; color: var(--edu-text); background: #fff; border-right: 1px solid var(--edu-border); -webkit-overflow-scrolling: touch; }
 .edu-brand { display: flex; min-height: clamp(54px, 3.2vw, 62px); align-items: center; gap: 10px; padding: 0 clamp(12px, 1vw, 16px); border-bottom: 1px solid #f0f1f6; }
 .edu-brand-logo { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; overflow: hidden; color: #fff; background: linear-gradient(135deg, var(--hostel-accent), var(--hostel-primary)); border-radius: 8px; font-size: 23px; font-weight: 800; }
 .edu-brand-logo:not(.has-image)::after { content: '+'; line-height: 1; }
