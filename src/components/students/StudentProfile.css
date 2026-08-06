@@ -72,7 +72,7 @@
 .contract-payment-calculation strong { color: #0f5f5a; font-size: 15px; }
 .contract-payment-note { padding: 10px 12px; margin: -8px 0 16px; color: #526b74; background: #f7fafb; border-left: 3px solid #159988; border-radius: 4px; font-size: 13px; }
 .contract-submit-btn { color: #fff !important; background: #159988 !important; border-color: #0f766e !important; font-weight: 700; }
-.contract-pdf-viewer { position: fixed; inset: 0; z-index: 2000; display: grid; grid-template-rows: 56px minmax(0, 1fr); width: 100vw; height: 100dvh; overflow: hidden; background: #303438; }
+.contract-pdf-viewer { position: fixed; inset: 0; z-index: 2000; display: grid; grid-template-rows: 56px minmax(0, 1fr); width: 100%; height: 100vh; height: 100dvh; overflow: hidden; background: #303438; }
 .contract-pdf-toolbar { display: flex; align-items: center; justify-content: space-between; min-width: 0; padding: 0 22px; color: #fff; background: #202428; border-bottom: 1px solid #4a5055; }
 .contract-pdf-toolbar strong { font-size: 16px; }
 .contract-pdf-toolbar button { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: #fff; background: transparent; border: 0; border-radius: 8px; font: 300 30px/1 Arial, sans-serif; cursor: pointer; }
@@ -143,8 +143,23 @@
   .contract-form-modal .ant-form-vertical .ant-form-item { margin-bottom: 10px; }
   .contract-form-modal .ant-form-vertical .ant-form-item-label { padding-bottom: 2px; }
   .contract-form-modal .ant-form-item-label > label { font-size: 11px; }
-  .contract-a4-scroll { padding: 12px; }
-  .contract-a4 { transform-origin: top left; }
+  .contract-pdf-viewer { grid-template-rows: calc(50px + env(safe-area-inset-top, 0px)) minmax(0, 1fr); }
+  .contract-pdf-toolbar { padding: env(safe-area-inset-top, 0px) 10px 0 14px; }
+  .contract-pdf-toolbar strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+  .contract-pdf-toolbar button { width: 38px; height: 38px; flex: 0 0 38px; font-size: 28px; }
+  .contract-a4-scroll { padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px)); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .contract-a4 { width: 100%; min-height: 0; padding: 20px 16px 28px; overflow-wrap: anywhere; box-shadow: none; font-size: 12px; line-height: 1.5; }
+  .contract-document-header { gap: 9px; padding-bottom: 11px; }
+  .contract-document-header img { width: 44px; height: 44px; }
+  .contract-document-header h1 { margin-bottom: 5px; font-size: 16px; }
+  .contract-document-header p { margin: 2px 0; font-size: 10px; }
+  .contract-a4 > h2 { margin: 12px 0 10px; font-size: 14px; line-height: 1.35; }
+  .contract-document-meta { gap: 12px; margin-bottom: 10px; font-size: 11px; }
+  .contract-a4 p { margin: 5px 0; }
+  .contract-a4 section { margin-top: 12px; }
+  .contract-a4 section h3 { font-size: 12px; line-height: 1.35; }
+  .contract-requisites > div { grid-template-columns: 1fr; gap: 10px; }
+  .contract-requisites > div > div { min-height: 0; padding: 10px; }
   .student-payment-modal .ant-modal { top: 0; max-width: 100vw; padding-bottom: 0; margin: 0; }
   .student-payment-modal .ant-modal-content { min-height: 100vh; min-height: 100dvh; padding: 14px; border-radius: 0; border: 0; }
   .student-payment-modal .ant-modal-header { padding: 0 0 8px; margin-bottom: 10px; }
