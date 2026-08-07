@@ -99,6 +99,10 @@
 .student-submit-btn { color: #fff !important; background: #159988 !important; border-color: #0f766e !important; font-weight: 700; }
 .student-camera-view { display: grid; min-height: 340px; place-items: center; overflow: hidden; background: #12262d; border-radius: 10px; }
 .student-camera-view video { width: 100%; max-height: 440px; object-fit: contain; }
+.student-camera-actions { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; }
+.student-camera-actions .student-capture-btn { margin: 0; }
+.student-switch-camera-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 16px; color: #155e75; background: #e8f7f5; border: 1px solid #bce4df; border-radius: 8px; font-weight: 700; }
+.student-switch-camera-btn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
 .student-capture-btn { display: block; min-height: 40px; padding: 0 18px; margin: 12px auto 0; color: #fff; background: #159988; border: 0; border-radius: 8px; font-weight: 750; }
 .students-filters-modal .ant-modal-content { border: 1px solid #d8e5e8; border-radius: 12px; }
 .students-filters-modal-body { display: grid; gap: 10px; }

@@ -7,6 +7,32 @@ const SOCKET_URL = API_URL.replace(/\/api\/?$/, '')
 let sharedSocket = null
 let socketSubscriptionCount = 0
 const invalidateTimers = new Map()
+const pendingMutationRequests = new Map()
+
+const requestBodyKey = (body) => {
+  if (body instanceof FormData) return JSON.stringify([...body.entries()].map(([key, value]) => [key, value instanceof File ? `${value.name}:${value.size}:${value.lastModified}` : value]))
+  try { return JSON.stringify(body ?? null) } catch { return String(body) }
+}
+
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: API_URL,
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem('hostelAuthToken')
+    if (token) headers.set('authorization', `Bearer ${token}`)
+    return headers
+  },
+})
+
+const guardedBaseQuery = (args, api, extraOptions) => {
+  const request = typeof args === 'string' ? { url: args } : args
+  const method = String(request.method || 'GET').toUpperCase()
+  if (method === 'GET' || method === 'HEAD') return rawBaseQuery(args, api, extraOptions)
+  const key = `${method}:${request.url}:${requestBodyKey(request.body)}`
+  if (pendingMutationRequests.has(key)) return pendingMutationRequests.get(key)
+  const pending = rawBaseQuery(args, api, extraOptions).finally(() => pendingMutationRequests.delete(key))
+  pendingMutationRequests.set(key, pending)
+  return pending
+}
 
 const getSharedSocket = () => {
   if (!sharedSocket) sharedSocket = io(SOCKET_URL)
@@ -37,14 +63,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 
 export const baseApi = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('hostelAuthToken')
-      if (token) headers.set('authorization', `Bearer ${token}`)
-      return headers
-    },
-  }),
+  baseQuery: guardedBaseQuery,
   tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting'],
   endpoints: (builder) => ({
     getDashboard: builder.query({

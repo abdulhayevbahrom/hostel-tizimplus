@@ -4,6 +4,8 @@ import { Modal, Upload } from 'antd'
 export function StudentPhotoField({ currentPhoto, fileList, removed, onChange, onRemoveCurrent }) {
   const [cameraOpen, setCameraOpen] = useState(false)
   const [cameraError, setCameraError] = useState('')
+  const [requestedFacing, setRequestedFacing] = useState('environment')
+  const [activeFacing, setActiveFacing] = useState('environment')
   const videoRef = useRef(null)
   const streamRef = useRef(null)
   const hasPhoto = Boolean(fileList.length || (currentPhoto && !removed))
@@ -11,18 +13,38 @@ export function StudentPhotoField({ currentPhoto, fileList, removed, onChange, o
   useEffect(() => {
     if (!cameraOpen) return undefined
     let cancelled = false
-    navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'user' }, audio: false }).then((stream) => {
-      if (cancelled) return stream.getTracks().forEach((track) => track.stop())
-      streamRef.current = stream
-      if (videoRef.current) videoRef.current.srcObject = stream
-      return undefined
-    }).catch(() => setCameraError('Kameraga ruxsat berilmadi yoki kamera topilmadi'))
+    const startCamera = async () => {
+      const mediaDevices = navigator.mediaDevices
+      if (!mediaDevices?.getUserMedia) return setCameraError('Bu brauzer kameradan foydalanishni qo‘llab-quvvatlamaydi')
+      setCameraError('')
+      const fallbackFacing = requestedFacing === 'environment' ? 'user' : 'environment'
+      const attempts = [
+        { video: { facingMode: { exact: requestedFacing } }, audio: false },
+        { video: { facingMode: { exact: fallbackFacing } }, audio: false },
+        { video: true, audio: false },
+      ]
+      for (let index = 0; index < attempts.length; index += 1) {
+        try {
+          const stream = await mediaDevices.getUserMedia(attempts[index])
+          if (cancelled) return stream.getTracks().forEach((track) => track.stop())
+          streamRef.current = stream
+          const actualFacing = stream.getVideoTracks()[0]?.getSettings?.().facingMode
+          setActiveFacing(actualFacing || (index === 0 ? requestedFacing : fallbackFacing))
+          if (videoRef.current) videoRef.current.srcObject = stream
+          return undefined
+        } catch {
+          // Keyingi mavjud kamerani sinab ko‘ramiz.
+        }
+      }
+      return setCameraError('Kameraga ruxsat berilmadi yoki kamera topilmadi')
+    }
+    startCamera()
     return () => {
       cancelled = true
       streamRef.current?.getTracks().forEach((track) => track.stop())
       streamRef.current = null
     }
-  }, [cameraOpen])
+  }, [cameraOpen, requestedFacing])
 
   const capture = () => {
     const video = videoRef.current
@@ -44,12 +66,15 @@ export function StudentPhotoField({ currentPhoto, fileList, removed, onChange, o
       <div className="student-photo-controls">
         {currentPhoto && !removed && !fileList.length && <div className="student-current-photo"><img src={currentPhoto.displayUrl || currentPhoto.url} alt="Talaba rasmi" /><button type="button" onClick={onRemoveCurrent}>×</button></div>}
         <Upload accept="image/jpeg,image/png,image/webp" listType="picture-card" fileList={fileList} maxCount={1} beforeUpload={() => false} onChange={({ fileList: items }) => onChange(items.slice(-1))}>{!hasPhoto ? <div className="student-upload-label"><b>+</b><span>Rasm tanlash</span></div> : null}</Upload>
-        {!hasPhoto && <button className="student-camera-btn" type="button" onClick={() => { setCameraError(''); setCameraOpen(true) }}><svg viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3v12H4Z"/><circle cx="12" cy="13" r="4"/></svg>Kamera</button>}
+        {!hasPhoto && <button className="student-camera-btn" type="button" onClick={() => { setCameraError(''); setRequestedFacing('environment'); setActiveFacing('environment'); setCameraOpen(true) }}><svg viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3v12H4Z"/><circle cx="12" cy="13" r="4"/></svg>Kamera</button>}
       </div>
       <small>Aniq yuz rasmi, yaxshi yoritish, neytral ifoda · maksimal 5 MB</small>
       <Modal open={cameraOpen} onCancel={() => setCameraOpen(false)} footer={null} width={640} rootClassName="student-camera-modal" title="Kameradan suratga olish">
         <div className="student-camera-view">{cameraError ? <div className="form-error">{cameraError}</div> : <video ref={videoRef} autoPlay playsInline muted />}</div>
-        <button type="button" className="student-capture-btn" onClick={capture}>Suratga olish</button>
+        <div className="student-camera-actions">
+          <button type="button" className="student-switch-camera-btn" onClick={() => setRequestedFacing(activeFacing === 'environment' ? 'user' : 'environment')} aria-label="Kamerani almashtirish"><svg viewBox="0 0 24 24"><path d="M4 8V5h3M20 16v3h-3"/><path d="M5.8 15.5A7 7 0 0 0 18 17M18.2 8.5A7 7 0 0 0 6 7"/></svg>{activeFacing === 'environment' ? 'Old kameraga' : 'Orqa kameraga'}</button>
+          <button type="button" className="student-capture-btn" onClick={capture}>Suratga olish</button>
+        </div>
       </Modal>
     </div>
   )
