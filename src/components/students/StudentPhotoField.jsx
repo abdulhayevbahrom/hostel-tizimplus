@@ -25,11 +25,36 @@ export function StudentPhotoField({ currentPhoto, fileList, removed, onChange, o
       ]
       for (let index = 0; index < attempts.length; index += 1) {
         try {
-          const stream = await mediaDevices.getUserMedia(attempts[index])
+          let stream = await mediaDevices.getUserMedia(attempts[index])
           if (cancelled) return stream.getTracks().forEach((track) => track.stop())
+          let track = stream.getVideoTracks()[0]
+          let actualFacing = track?.getSettings?.().facingMode || (index === 0 ? requestedFacing : fallbackFacing)
+
+          if (actualFacing === 'environment') {
+            try {
+              const devices = await mediaDevices.enumerateDevices()
+              const rearCameras = devices.filter((device) => device.kind === 'videoinput' && /(back|rear|environment)/i.test(device.label) && !/(ultra|0\.5|telephoto)/i.test(device.label))
+              const mainCamera = rearCameras.find((device) => /^(back|rear)( camera)?$/i.test(device.label.trim())) || rearCameras.find((device) => /main/i.test(device.label))
+              if (mainCamera && mainCamera.deviceId !== track?.getSettings?.().deviceId) {
+                const mainStream = await mediaDevices.getUserMedia({ video: { deviceId: { exact: mainCamera.deviceId } }, audio: false })
+                stream.getTracks().forEach((item) => item.stop())
+                stream = mainStream
+                track = stream.getVideoTracks()[0]
+                actualFacing = track?.getSettings?.().facingMode || 'environment'
+              }
+            } catch {
+              // Qurilma asosiy linzani alohida bermasa, standart orqa kamera qoladi.
+            }
+            try {
+              const zoom = track?.getCapabilities?.().zoom
+              if (zoom && zoom.min <= 1 && zoom.max >= 1) await track.applyConstraints({ advanced: [{ zoom: 1 }] })
+            } catch {
+              // Ayrim brauzerlar zoom constraintini qo‘llamaydi.
+            }
+          }
+
           streamRef.current = stream
-          const actualFacing = stream.getVideoTracks()[0]?.getSettings?.().facingMode
-          setActiveFacing(actualFacing || (index === 0 ? requestedFacing : fallbackFacing))
+          setActiveFacing(actualFacing)
           if (videoRef.current) videoRef.current.srcObject = stream
           return undefined
         } catch {
@@ -52,7 +77,12 @@ export function StudentPhotoField({ currentPhoto, fileList, removed, onChange, o
     const canvas = document.createElement('canvas')
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
-    canvas.getContext('2d').drawImage(video, 0, 0)
+    const context = canvas.getContext('2d')
+    if (activeFacing === 'user') {
+      context.translate(canvas.width, 0)
+      context.scale(-1, 1)
+    }
+    context.drawImage(video, 0, 0)
     canvas.toBlob((blob) => {
       if (!blob) return
       const file = new File([blob], `student-${Date.now()}.jpg`, { type: 'image/jpeg' })
@@ -70,7 +100,7 @@ export function StudentPhotoField({ currentPhoto, fileList, removed, onChange, o
       </div>
       <small>Aniq yuz rasmi, yaxshi yoritish, neytral ifoda · maksimal 5 MB</small>
       <Modal open={cameraOpen} onCancel={() => setCameraOpen(false)} footer={null} width={640} rootClassName="student-camera-modal" title="Kameradan suratga olish">
-        <div className="student-camera-view">{cameraError ? <div className="form-error">{cameraError}</div> : <video ref={videoRef} autoPlay playsInline muted />}</div>
+        <div className="student-camera-view">{cameraError ? <div className="form-error">{cameraError}</div> : <video className={activeFacing === 'user' ? 'mirrored' : ''} ref={videoRef} autoPlay playsInline muted />}</div>
         <div className="student-camera-actions">
           <button type="button" className="student-switch-camera-btn" onClick={() => setRequestedFacing(activeFacing === 'environment' ? 'user' : 'environment')} aria-label="Kamerani almashtirish"><svg viewBox="0 0 24 24"><path d="M4 8V5h3M20 16v3h-3"/><path d="M5.8 15.5A7 7 0 0 0 18 17M18.2 8.5A7 7 0 0 0 6 7"/></svg>{activeFacing === 'environment' ? 'Old kameraga' : 'Orqa kameraga'}</button>
           <button type="button" className="student-capture-btn" onClick={capture}>Suratga olish</button>
