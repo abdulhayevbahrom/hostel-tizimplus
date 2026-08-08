@@ -3,7 +3,7 @@ import { Button, Form, Input, InputNumber, Modal, Segmented, Select, Upload } fr
 import { useGetBuildingBlocksQuery } from '../../store/baseApi'
 import { categoryOptions, genderOptions } from './roomConstants'
 
-const initialValues = { roomNumber: '', block: undefined, floor: 1, capacity: 4, category: 'standart', gender: 'male', status: 'available', note: '' }
+const initialValues = { roomNumber: '', block: undefined, floor: 1, capacity: 4, category: undefined, gender: 'male', status: 'available', note: '' }
 
 export function RoomFormModal({ open, room, loading, error, onClose, onSubmit }) {
   const [form] = Form.useForm()
@@ -25,10 +25,10 @@ export function RoomFormModal({ open, room, loading, error, onClose, onSubmit })
       <Form form={form} layout="vertical" initialValues={initialValues} onFinish={(values) => onSubmit({ values, newImages, existingImages })} requiredMark={false}>
         <div className="room-form-grid">
           <Form.Item name="roomNumber" label="Xona raqami" rules={[{ required: true, whitespace: true, message: 'Xona raqami majburiy' }]}><Input placeholder="Masalan: 305" /></Form.Item>
-          <Form.Item name="block" label="Bino yoki blok" rules={[{ required: true, message: 'Bino yoki blokni tanlang' }]}><Select showSearch optionFilterProp="label" placeholder="Bino yoki blokni tanlang" options={blockOptions} notFoundContent="Sozlamalardan bino yoki blok qo‘shing" /></Form.Item>
+          <Form.Item name="block" label="Bino yoki blok (ixtiyoriy)"><Select allowClear showSearch optionFilterProp="label" placeholder="Tanlanmagan" options={blockOptions} notFoundContent="Sozlamalardan bino yoki blok qo‘shing" /></Form.Item>
           <Form.Item name="floor" label="Qavat" rules={[{ required: true, type: 'number', min: 1, message: 'Qavatni kiriting' }]}><InputNumber min={1} precision={0} style={{ width: '100%' }} /></Form.Item>
           <Form.Item name="capacity" label="Xona sig‘imi" rules={[{ required: true, type: 'number', min: 1, message: 'Sig‘imni kiriting' }]}><InputNumber min={1} max={50} precision={0} style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="category" label="Xona toifasi"><Select options={categoryOptions} /></Form.Item>
+          <Form.Item name="category" label="Xona toifasi (ixtiyoriy)"><Select allowClear placeholder="Tanlanmagan" options={categoryOptions} /></Form.Item>
           <Form.Item name="gender" label="Kimlar uchun"><Select options={genderOptions} /></Form.Item>
         </div>
         <Form.Item label="Xona rasmlari">

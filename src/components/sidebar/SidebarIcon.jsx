@@ -23,6 +23,7 @@ export function SidebarIcon({ name }) {
     rooms: ApartmentOutlined,
     attendance: CalendarOutlined,
     payments: CreditCardOutlined,
+    cash: WalletOutlined,
     debtors: UserSwitchOutlined,
     fines: AuditOutlined,
     employees: IdcardOutlined,

@@ -28,7 +28,7 @@ export function RoomCard({ room, deleting, onResidents, onView, onEdit, onDelete
         </div>
         <div><span>Kategoriya:</span><strong>{optionLabel(categoryOptions, room.category)}</strong></div>
         <div><span>Kimlar uchun:</span><strong>{optionLabel(genderOptions, room.gender)}</strong></div>
-        <div><span>Blok:</span><strong>{room.block}</strong></div>
+        <div><span>Blok:</span><strong>{room.block || '—'}</strong></div>
       </div>
       <div className="room-card-actions">
         <button className="room-icon-btn residents" onClick={() => onResidents(room)} aria-label="Xonadagi talabalar" title="Xonadagi talabalar"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20v-2.5A4.5 4.5 0 0 1 7 13h2a4.5 4.5 0 0 1 4.5 4.5V20M14 14.5a4 4 0 0 1 7 2.5V20"/></svg></button>

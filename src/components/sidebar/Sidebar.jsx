@@ -1,8 +1,7 @@
-import { navigationItems } from '../../constants/navigation'
 import { SidebarIcon } from './SidebarIcon'
 import './Sidebar.css'
 
-export function Sidebar({ active, hostelName, logoUrl, onNavigate, onClose }) {
+export function Sidebar({ active, items, hostelName, logoUrl, onNavigate, onClose }) {
   return (
     <aside className="edu-sidebar">
       <div className="edu-brand">
@@ -11,7 +10,7 @@ export function Sidebar({ active, hostelName, logoUrl, onNavigate, onClose }) {
         <button className="sidebar-close" onClick={onClose} aria-label="Menyuni yopish">×</button>
       </div>
       <nav>
-        {navigationItems.map((item) => (
+        {items.map((item) => (
           <button className={active === item.id ? 'active' : ''} onClick={() => onNavigate(item.path)} key={item.id}>
             <span><SidebarIcon name={item.icon} /></span>{item.label}
           </button>

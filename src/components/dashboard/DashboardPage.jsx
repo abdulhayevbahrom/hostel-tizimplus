@@ -443,14 +443,14 @@ export function DashboardPage() {
         <article className="light-panel center-status">
           <h2>Yotoqxona holati</h2>
           <div>
-            <button onClick={() => navigate("/students")}>
+            <button onClick={() => navigate("/contracts")}>
               <i className="pink">
                 <CardIcon type="students" />
               </i>
               <span>
-                <b>Talabalar</b>
+                <b>Faol yashovchilar</b>
                 <strong>{data.students?.active || 0}</strong>
-                <small>Faol yashovchilar</small>
+                <small>Aktiv shartnomali talabalar</small>
               </span>
             </button>
             <button onClick={() => navigate("/rooms")}>

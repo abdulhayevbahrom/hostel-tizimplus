@@ -35,6 +35,7 @@ const sectionOptions = [
   { label: 'Xonalar', value: 'rooms' },
   { label: 'Davomat', value: 'attendance' },
   { label: 'To‘lovlar', value: 'payments' },
+  { label: 'Kassa', value: 'cash' },
   { label: 'Qarzdorlar', value: 'debtors' },
   { label: 'Xodimlar', value: 'employees' },
   { label: 'Oyliklar', value: 'salaries' },
@@ -51,7 +52,7 @@ const EmployeeRow = memo(function EmployeeRow({ employee, isDeleting, canManage,
       <td data-label="F.I.SH">{employee.firstname} {employee.lastname}</td>
       <td data-label="Lavozim">{employee.position}</td>
       <td data-label="Oylik">{Number(employee.salary || 0).toLocaleString('uz-UZ')}</td>
-      <td data-label="Rol"><span className={`employee-role ${employee.role}`}>{employee.role === 'owner' || employee.role === 'admin' ? 'Owner' : employee.role === 'manager' ? 'Menejer' : 'Xodim'}</span></td>
+      <td data-label="Rol"><span className={`employee-role ${employee.role}`}>{employee.role === 'owner' || employee.role === 'admin' ? 'Owner' : employee.role === 'manager' ? 'Menejer' : employee.role === 'cashier' ? 'Kassir' : 'Xodim'}</span></td>
       <td data-label="Login">{employee.login || '-'}</td>
       <td data-label="Ruxsatlar">
         {(employee.sections || []).length ? (
@@ -290,7 +291,7 @@ export function EmployeesPage({ currentEmployee }) {
           </div>
           <Form.Item name="canLogin" valuePropName="checked" className="hotel-checkbox-line"><Checkbox>Dasturga kira oladi</Checkbox></Form.Item>
           {canLogin && <>
-            <Form.Item name="role" label="Xodim roli" rules={[{ required: true }]}><Select options={[{ value: 'employee', label: 'Xodim' }, { value: 'manager', label: 'Menejer' }, { value: 'owner', label: 'Owner' }]} /></Form.Item>
+            <Form.Item name="role" label="Xodim roli" rules={[{ required: true }]}><Select options={[{ value: 'employee', label: 'Xodim' }, { value: 'manager', label: 'Menejer' }, { value: 'cashier', label: 'Kassir' }, { value: 'owner', label: 'Owner' }]} /></Form.Item>
             <div className="employee-form-grid">
               <Form.Item name="login" label="Login" rules={[{ required: true, whitespace: true, min: 3, message: 'Login kamida 3 ta belgi bo‘lsin' }]}><Input placeholder="Login kiriting" /></Form.Item>
               <Form.Item name="password" label={editingId ? 'Yangi parol (ixtiyoriy)' : 'Parol'} rules={[{ required: !editingId, min: 8, message: 'Parol kamida 8 ta belgi bo‘lsin' }]}><Input.Password placeholder="Parol kiriting" /></Form.Item>

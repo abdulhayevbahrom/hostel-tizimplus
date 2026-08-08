@@ -2,6 +2,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Modal, Pagination, Popconfirm, Select } from "antd";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 import {
   apiErrorMessage,
   useCreateStudentMutation,
@@ -22,6 +23,12 @@ const studentStatusLabel = {
   green: "Aktiv",
   warning: "Ogohlantirish",
   red: "Yomon",
+};
+
+const isContractExpiringWithinTwoDays = (endDate) => {
+  if (!endDate) return false;
+  const daysLeft = dayjs(endDate).startOf("day").diff(dayjs().startOf("day"), "day");
+  return daysLeft >= 0 && daysLeft <= 2;
 };
 
 function StudentsListTab() {
@@ -236,11 +243,10 @@ function StudentsListTab() {
                     return (
                       <tr
                         key={student.id}
-                        className={
-                          student.disciplinaryStatus === "blacklisted"
-                            ? "student-row-blacklisted"
-                            : ""
-                        }
+                        className={[
+                          student.disciplinaryStatus === "blacklisted" ? "student-row-blacklisted" : "",
+                          isContractExpiringWithinTwoDays(student.activeContractEndDate) ? "student-row-contract-expiring" : "",
+                        ].filter(Boolean).join(" ")}
                       >
                         <td data-label="Talaba">
                           <div className="student-person">

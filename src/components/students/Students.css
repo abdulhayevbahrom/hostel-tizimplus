@@ -22,6 +22,8 @@
 .students-table tbody tr:hover td { background: #f8fcfb; }
 .students-table tbody .student-row-blacklisted td, .students-table tbody .student-row-blacklisted:hover td { background: #fff0f1; border-bottom-color: #efb3b8; }
 .students-table tbody .student-row-blacklisted td:first-child { border-left: 3px solid #d93645; }
+.students-table tbody .student-row-contract-expiring td, .students-table tbody .student-row-contract-expiring:hover td { background: #ffe5e3; border-bottom-color: #efb3b0; }
+.students-table tbody .student-row-contract-expiring td:first-child { border-left: 3px solid #cf4747; }
 .student-person { display: flex; min-width: 175px; align-items: center; gap: 8px; }
 .student-person img, .student-person > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; object-fit: cover; color: #fff; background: #159988; border-radius: 50%; font-weight: 800; }
 .student-person strong, .student-phone strong, .student-education strong { font-weight: 650; }
@@ -59,18 +61,20 @@
 .student-form-modal .ant-modal-header { padding-bottom: 9px; margin-bottom: 12px; border-bottom: 1px solid #e1eaec; }
 .student-form-modal .ant-modal-title { color: #183f4e; font-weight: 750; }
 .student-form-modal .ant-input, .student-form-modal .ant-input-number, .student-form-modal .ant-select-selector { border-color: #cbdde1 !important; }
+.student-form-modal input.ant-input, .student-form-modal .ant-input-number, .student-form-modal .ant-select-single, .student-form-modal .ant-select-single .ant-select-selector { height: 38px !important; min-height: 38px !important; box-sizing: border-box; }
+.student-form-modal .ant-input-number-input-wrap, .student-form-modal .ant-input-number-input { height: 100%; }
 .student-form-modal .ant-form-vertical .ant-form-item { margin-bottom: 12px; }
 .student-form-modal .ant-form-vertical .ant-form-item-label { padding: 0 0 3px; }
 .student-form-modal .ant-form-item-label > label { min-height: auto; font-size: 12px; line-height: 1.2; }
-.student-gender-segmented { min-height: 32px; padding: 3px; }
+.student-gender-segmented { height: 38px; min-height: 38px; box-sizing: border-box; padding: 3px; }
 .student-gender-segmented .ant-segmented-item { display: grid; min-height: 32px; place-items: center; }
 .student-gender-segmented .ant-segmented-item-selected { color: #fff; background: #155e75; box-shadow: 0 3px 9px rgba(21, 94, 117, .22); }
 .student-gender-segmented .ant-segmented-item-selected:hover { color: #fff; background: #0e4b60; }
-.student-state-segmented { min-height: 32px; padding: 3px; }
+.student-state-segmented { height: 38px; min-height: 38px; box-sizing: border-box; padding: 3px; }
 .student-state-segmented .ant-segmented-item { display: grid; min-height: 32px; place-items: center; }
 .student-state-segmented .ant-segmented-item-selected { color: #fff; background: #155e75; box-shadow: 0 3px 9px rgba(21, 94, 117, .22); }
 .student-state-segmented .ant-segmented-item-selected:hover { color: #fff; background: #0e4b60; }
-.student-status-segmented { min-height: 38px; padding: 3px; }
+.student-status-segmented { height: 38px; min-height: 38px; box-sizing: border-box; padding: 3px; }
 .student-status-segmented .ant-segmented-item { min-height: 32px; }
 .student-status-segmented .ant-segmented-item-label, .student-status-segmented .ant-segmented-item-label > span { display: flex; height: 100%; align-items: center; justify-content: center; gap: 6px; }
 .student-status-segmented .ant-segmented-item-selected { color: #fff; background: #159988; box-shadow: 0 3px 9px rgba(15, 118, 110, .24); }
@@ -80,7 +84,15 @@
 .student-status-segmented i.green { background: #20a35a; }
 .student-status-segmented i.warning { background: #e29a16; }
 .student-status-segmented i.red { background: #d93645; }
-.student-tax-contract-checkbox { display: flex; min-height: 38px; align-items: center; padding: 0 11px; background: #f7fafb; border: 1px solid #cbdde1; border-radius: 7px; }
+.student-tax-contract-checkbox { display: flex; height: 38px; min-height: 38px; box-sizing: border-box; align-items: center; padding: 0 11px; background: #f7fafb; border: 1px solid #cbdde1; border-radius: 7px; }
+.student-inline-dependent-field { margin-bottom: 24px; }
+.student-inline-dependent-field > label { display: block; min-height: 22px; color: #263b45; font-size: 14px; }
+.student-inline-dependent-field > div { display: flex; align-items: flex-start; gap: 8px; }
+.student-inline-dependent-field .student-tax-contract-checkbox { min-width: 0; flex: 1; white-space: nowrap; }
+.student-inline-months { width: 118px; margin: 0 !important; }
+.student-inline-months .ant-input-number { width: 100%; }
+.student-inline-tax-type { width: 190px; margin: 0 !important; }
+.student-inline-tax-type .ant-segmented-item-label { padding-inline: 9px; font-size: 14px; white-space: nowrap; }
 .student-blacklist-alert { margin-bottom: 14px; border-color: #e8a5aa; }
 .student-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
 .student-identity-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -123,6 +135,7 @@
   .students-filter-toggle,.students-mobile-create { display: grid; }
   .students-mobile-create { min-height: 32px; margin-bottom: 8px; font-size: 13px; place-items: center; text-align: center; }
   .student-form-grid, .student-identity-grid { grid-template-columns: 1fr; gap: 0; }
+  .student-inline-tax-type { width: 190px; }
   .students-table-wrap { overflow: visible; }
   .students-table, .students-table tbody { display: block; width: 100%; }
   .students-table thead { display: none; }

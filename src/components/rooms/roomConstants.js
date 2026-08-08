@@ -14,4 +14,4 @@ export const statusOptions = [
   { label: 'Bo‘sh joy bor', value: 'available' },
   { label: 'Ta’mirda', value: 'maintenance' },
 ]
-export const optionLabel = (options, value) => options.find((item) => item.value === value)?.label || value
+export const optionLabel = (options, value) => options.find((item) => item.value === value)?.label || value || '—'

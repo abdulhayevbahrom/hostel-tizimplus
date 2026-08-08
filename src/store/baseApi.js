@@ -64,7 +64,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: guardedBaseQuery,
-  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting'],
+  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession'],
   endpoints: (builder) => ({
     getDashboard: builder.query({
       query: ({ period, date } = {}) => ({ url: '/dashboard', params: { ...(period ? { period } : {}), ...(date ? { date } : {}) } }),
@@ -214,7 +214,7 @@ export const baseApi = createApi({
       providesTags: (result) => [{ type: 'Student', id: 'LIST' }, ...(result?.students || []).map((item) => ({ type: 'Student', id: item.id }))],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Student', id: 'LIST' }], 'Student:LIST')
-        const unsubscribe = subscribeSocket(['students:changed'], refresh)
+        const unsubscribe = subscribeSocket(['students:changed', 'student-contracts:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
@@ -274,15 +274,15 @@ export const baseApi = createApi({
     }),
     createStudentContract: builder.mutation({
       query: (body) => ({ url: '/student-contracts', method: 'POST', body }),
-      invalidatesTags: [{ type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }],
+      invalidatesTags: [{ type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }],
     }),
     updateStudentContract: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/student-contracts/${id}`, method: 'PUT', body }),
-      invalidatesTags: (_result, _error, { id }) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }],
     }),
     deleteStudentContract: builder.mutation({
       query: (id) => ({ url: `/student-contracts/${id}`, method: 'DELETE' }),
-      invalidatesTags: (_result, _error, id) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }],
+      invalidatesTags: (_result, _error, id) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }],
     }),
     getPayments: builder.query({
       query: (params = {}) => ({ url: '/payments', params }),
@@ -513,6 +513,43 @@ export const baseApi = createApi({
       transformResponse: (response) => response.data,
       invalidatesTags: [{ type: 'GeneralSetting', id: 'GENERAL' }],
     }),
+    getNotifications: builder.query({
+      query: () => '/notifications',
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Notification', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Notification', id: 'LIST' }], 'Notification:LIST')
+        const unsubscribe = subscribeSocket(['notifications:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    markNotificationRead: builder.mutation({
+      query: (id) => ({ url: `/notifications/${id}/read`, method: 'PUT' }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: [{ type: 'Notification', id: 'LIST' }],
+    }),
+    getCashSessions: builder.query({
+      query: () => '/cash-sessions',
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'CashSession', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'CashSession', id: 'LIST' }], 'CashSession:LIST')
+        const unsubscribe = subscribeSocket(['cash-sessions:changed', 'payments:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    closeCashSession: builder.mutation({
+      query: (body) => ({ url: '/cash-sessions/close', method: 'POST', body }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: [{ type: 'CashSession', id: 'LIST' }, { type: 'Notification', id: 'LIST' }],
+    }),
+    approveCashSession: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/cash-sessions/${id}/approve`, method: 'PUT', body }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: [{ type: 'CashSession', id: 'LIST' }],
+    }),
   }),
 })
 
@@ -586,6 +623,11 @@ export const {
   useDeleteBuildingBlockMutation,
   useGetGeneralSettingsQuery,
   useUpdateGeneralSettingsMutation,
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useGetCashSessionsQuery,
+  useCloseCashSessionMutation,
+  useApproveCashSessionMutation,
 } = baseApi
 
 export function apiErrorMessage(error) {

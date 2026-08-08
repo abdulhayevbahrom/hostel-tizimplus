@@ -209,6 +209,28 @@ export function StudentProfilePage({ currentEmployee }) {
                         }
                       />
                       <ProfileItem
+                        label="Ta’lim turi / bandligi"
+                        value={
+                          student.educationType === "evening"
+                            ? "Kechki ta’lim"
+                            : student.educationType === "extramural"
+                              ? "Sirtqi ta’lim"
+                              : student.educationType === "employed"
+                                ? "Ishlaydi"
+                                : "Kunduzgi ta’lim"
+                        }
+                      />
+                      <ProfileItem
+                        label="Vaqtinchalik propiska"
+                        value={student.hasTemporaryRegistration ? `Qilingan · ${student.temporaryRegistrationMonths || "—"} oy` : "Qilinmagan"}
+                      />
+                      {student.hasTaxContract && (
+                        <ProfileItem
+                          label="Soliq shartnomasi turi"
+                          value={student.taxContractType === "student_contract" ? "Talaba shartnomasi" : "Oddiy shartnoma"}
+                        />
+                      )}
+                      <ProfileItem
                         label="Intizomiy holati"
                         value={
                           student.disciplinaryStatus === "blacklisted"

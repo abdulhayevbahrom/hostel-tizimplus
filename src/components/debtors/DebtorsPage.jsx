@@ -262,7 +262,7 @@ export function DebtorsPage() {
                         </small>
                       </td>
                       <td data-label="Summa">
-                        <b className="debt-money">{tableMoney(debtor.totalDebt)}</b>
+                        <b className="debt-money">{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</b>
                       </td>
                       <td data-label="O‘tgan">
                         <b
@@ -321,7 +321,7 @@ export function DebtorsPage() {
         onCancel={() => setSelected(null)}
         footer={null}
         width={760}
-        title="Qarzdorlik tafsilotlari"
+        title={data?.isFuturePeriod ? "Kutilayotgan to‘lov tafsilotlari" : "Qarzdorlik tafsilotlari"}
         rootClassName="debtor-modal"
       >
         <>
@@ -346,8 +346,8 @@ export function DebtorsPage() {
               </div>
               <div className="debtor-detail-summary">
                 <div>
-                  <span>Jami qarz</span>
-                  <strong>{money(selected.totalDebt)}</strong>
+                  <span>{data?.isFuturePeriod ? "Kutilayotgan summa" : "Jami qarz"}</span>
+                  <strong>{money(data?.isFuturePeriod ? selected.waitingAmount : selected.totalDebt)}</strong>
                 </div>
                 <div>
                   <span>Muddati o‘tgan</span>
@@ -358,7 +358,7 @@ export function DebtorsPage() {
                   <strong>{money(selected.currentDebt)}</strong>
                 </div>
               </div>
-              <h4>Qarzdorlik davrlari</h4>
+              <h4>{data?.isFuturePeriod ? "Kelgusi to‘lov davrlari" : "Qarzdorlik davrlari"}</h4>
               <div className="debtor-periods">
                 {selected.periods.map((period) => (
                   <article key={period.id}>
