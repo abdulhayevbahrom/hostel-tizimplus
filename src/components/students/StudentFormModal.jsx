@@ -31,7 +31,7 @@ const initialValues = {
   temporaryRegistrationMonths: null,
   studentStatus: "green",
   hasTaxContract: false,
-  taxContractType: undefined,
+  taxContractType: "student_contract",
   disciplinaryStatus: "clear",
   disciplinaryNote: "",
   disabilityStatus: "none",
@@ -86,7 +86,9 @@ export function StudentFormModal({
               student.temporaryRegistrationMonths || null,
             studentStatus: student.studentStatus || "green",
             hasTaxContract: Boolean(student.hasTaxContract),
-            taxContractType: student.taxContractType || undefined,
+            taxContractType: student.hasTaxContract
+              ? student.taxContractType || "student_contract"
+              : undefined,
             disciplinaryStatus: student.disciplinaryStatus || "clear",
             disabilityStatus: student.disabilityStatus || "none",
             university: student.university?.name || "",
@@ -162,6 +164,11 @@ export function StudentFormModal({
             form.setFieldValue("temporaryRegistrationMonths", null);
           if (changed.hasTaxContract === false)
             form.setFieldValue("taxContractType", undefined);
+          if (
+            changed.hasTaxContract === true &&
+            !form.getFieldValue("taxContractType")
+          )
+            form.setFieldValue("taxContractType", "student_contract");
         }}
       >
         <div className="student-form-grid">

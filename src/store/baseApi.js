@@ -300,6 +300,17 @@ export const baseApi = createApi({
       transformResponse: (response) => response.data,
       providesTags: [{ type: 'Payment', id: 'OPTIONS' }],
     }),
+    getAdvancePayments: builder.query({
+      query: () => '/payments/advance',
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Payment', id: 'ADVANCE' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Payment', id: 'ADVANCE' }], 'Payment:ADVANCE')
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
     getStudentPayments: builder.query({
       query: (studentId) => `/payments/student/${studentId}`,
       transformResponse: (response) => response.data,
@@ -421,16 +432,16 @@ export const baseApi = createApi({
     createPayment: builder.mutation({
       query: (body) => ({ url: '/payments', method: 'POST', body }),
       transformResponse: (response) => response.data,
-      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
     }),
     deletePayment: builder.mutation({
       query: (id) => ({ url: `/payments/${id}`, method: 'DELETE' }),
-      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
     }),
     updatePayment: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/payments/${id}`, method: 'PUT', body }),
       transformResponse: (response) => response.data,
-      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
     }),
     getUniversities: builder.query({
       query: () => '/universities',
@@ -598,6 +609,7 @@ export const {
   useDeleteStudentContractMutation,
   useGetPaymentsQuery,
   useGetPaymentOptionsQuery,
+  useGetAdvancePaymentsQuery,
   useGetStudentPaymentsQuery,
   useGetDebtorsQuery,
   useGetAttendanceQuery,

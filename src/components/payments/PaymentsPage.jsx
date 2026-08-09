@@ -22,6 +22,7 @@ import {
 } from "../../store/baseApi";
 import { PaymentPrintIcon } from "./PaymentReceiptModal";
 import { printPaymentReceipt } from "./paymentReceipt";
+import { AdvancePaymentsTab } from "./AdvancePaymentsTab";
 import "./Payments.css";
 
 const methods = { cash: "Naqd", online: "Click", bank: "Bank", card: "Karta" };
@@ -29,6 +30,7 @@ const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
 const statMoney = (value) => money(value).replace(/\sso‘m$/, "");
 
 export function PaymentsPage({ currentEmployee }) {
+  const [activeTab, setActiveTab] = useState("current");
   const [form] = Form.useForm();
   const [filters, setFilters] = useState({
     search: "",
@@ -143,6 +145,12 @@ export function PaymentsPage({ currentEmployee }) {
         </button>
       </section>
 
+      <nav className="payment-tabs" aria-label="To‘lov bo‘limlari">
+        <button className={activeTab === "current" ? "active" : ""} onClick={() => setActiveTab("current")}>Joriy to‘lovlar</button>
+        <button className={activeTab === "advance" ? "active" : ""} onClick={() => setActiveTab("advance")}>Oldindan to‘lovlar</button>
+      </nav>
+
+      {activeTab === "current" ? <>
       <section className="payment-stats">
         {[
           ["total", "Hisoblangan", statMoney(summary.billed)],
@@ -349,6 +357,8 @@ export function PaymentsPage({ currentEmployee }) {
           </div>
         )}
       </section>
+
+      </> : <AdvancePaymentsTab />}
 
       <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" rootClassName="payment-filters-modal" destroyOnHidden>
         <div className="payment-filter-modal-options">

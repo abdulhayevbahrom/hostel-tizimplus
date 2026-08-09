@@ -1,27 +1,33 @@
 import { useRef, useState } from 'react'
 import { ContractDocument } from './ContractPreviewModal'
-import { createContractCanvas } from './contractPdf'
+import { createContractCanvas, createSinglePageContractPdf } from './contractPdf'
 
 export function ContractPrintButton({ contract, student, organization }) {
   const documentRef = useRef(null)
   const [printing, setPrinting] = useState(false)
   const print = async () => {
-    let frame
+    const printWindow = window.open('', '_blank')
     let imageUrl
     try {
       setPrinting(true)
+      if (printWindow) {
+        printWindow.document.open()
+        printWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Shartnoma tayyorlanmoqda</title><style>html,body{height:100%;margin:0;background:#fff;font-family:Arial,sans-serif}body{display:grid;place-items:center;color:#345}p{font-size:16px}</style></head><body><p>Shartnoma tayyorlanmoqda…</p></body></html>')
+        printWindow.document.close()
+      }
       const canvas = await createContractCanvas(documentRef.current)
+      if (!printWindow) {
+        const pdf = await createSinglePageContractPdf(documentRef.current)
+        pdf.save(`Shartnoma-${contract.contractNumber}.pdf`)
+        return
+      }
       const imageBlob = await new Promise((resolve, reject) => {
         canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Shartnoma rasmi yaratilmadi')), 'image/jpeg', 0.98)
       })
       imageUrl = URL.createObjectURL(imageBlob)
-      frame = document.createElement('iframe')
-      frame.setAttribute('title', 'Shartnomani chop etish')
-      frame.style.cssText = 'position:fixed;inset:0;z-index:99999;width:100vw;height:100vh;height:100dvh;border:0;background:#fff'
-      document.body.appendChild(frame)
-      const printDocument = frame.contentDocument
+      const printDocument = printWindow.document
       printDocument.open()
-      printDocument.write(`<!doctype html><html><head><meta charset="utf-8"><title>Shartnoma-${contract.contractNumber}</title><style>@page{size:A4 portrait;margin:0}html,body{width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden}body{display:grid;place-items:center}img{display:block;max-width:210mm;max-height:297mm;width:auto;height:auto;object-fit:contain}</style></head><body></body></html>`)
+      printDocument.write(`<!doctype html><html><head><meta charset="utf-8"><title>Shartnoma-${contract.contractNumber}</title><style>@page{size:A4 portrait;margin:0}html,body{width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden}body{display:grid;place-items:center}img{display:block;max-width:210mm;max-height:297mm;width:auto;height:auto;object-fit:contain}@media screen{html,body{width:100%;min-height:100%;height:auto}body{background:#303438;padding:12px;box-sizing:border-box}img{width:min(210mm,100%);height:auto;background:#fff;box-shadow:0 3px 18px #0004}}</style></head><body></body></html>`)
       printDocument.close()
       const image = printDocument.createElement('img')
       image.alt = 'Shartnoma'
@@ -34,19 +40,18 @@ export function ContractPrintButton({ contract, student, organization }) {
       await imageLoaded
       if (image.decode) await image.decode().catch(() => undefined)
       const cleanup = () => {
-        frame?.remove()
         if (imageUrl) URL.revokeObjectURL(imageUrl)
         imageUrl = undefined
       }
-      frame.contentWindow.addEventListener('afterprint', cleanup, { once: true })
+      printWindow.addEventListener('afterprint', cleanup, { once: true })
       await new Promise((resolve) => setTimeout(resolve, 300))
-      frame.contentWindow.focus()
-      frame.contentWindow.print()
+      printWindow.focus()
+      printWindow.print()
       setTimeout(() => {
-        if (frame?.isConnected) cleanup()
+        if (imageUrl) cleanup()
       }, 60000)
     } catch (error) {
-      frame?.remove()
+      printWindow?.close()
       if (imageUrl) URL.revokeObjectURL(imageUrl)
       throw error
     } finally {
