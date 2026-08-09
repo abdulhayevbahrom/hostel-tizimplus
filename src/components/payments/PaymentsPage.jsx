@@ -56,9 +56,11 @@ export function PaymentsPage({ currentEmployee }) {
     ? contracts
     : contracts.filter((item) => item.balance > 0);
   const selected = contracts.find((item) => item._id === selectedContractId);
-  const installments = (selected?.installments || []).filter(
-    (item) => editingPayment || item.paidAmount < item.amount,
-  );
+  const installments = editingPayment
+    ? selected?.installments || []
+    : (selected?.installments || [])
+        .filter((item) => item.paidAmount < item.amount);
+  const oldestUnpaidInstallmentId = editingPayment ? null : installments[0]?._id;
   const selectedInstallment = installments.find(
     (item) => item._id === selectedInstallmentId,
   );
@@ -408,7 +410,8 @@ export function PaymentsPage({ currentEmployee }) {
               placeholder="Oy yoki davrni tanlang"
               options={installments.map((item) => ({
                 value: item._id,
-                label: `${item.periodKey} — ${money(Math.max(0, item.amount - item.paidAmount))} qoldiq`,
+                label: `${item.periodKey} — ${money(Math.max(0, item.amount - item.paidAmount))} qoldiq${item._id !== oldestUnpaidInstallmentId && !editingPayment ? " — avval eski qarzni yoping" : ""}`,
+                disabled: !editingPayment && item._id !== oldestUnpaidInstallmentId,
               }))}
             />
           </Form.Item>

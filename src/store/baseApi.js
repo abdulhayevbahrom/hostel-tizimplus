@@ -274,15 +274,15 @@ export const baseApi = createApi({
     }),
     createStudentContract: builder.mutation({
       query: (body) => ({ url: '/student-contracts', method: 'POST', body }),
-      invalidatesTags: [{ type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }],
+      invalidatesTags: [{ type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Debtor', id: 'LIST' }],
     }),
     updateStudentContract: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/student-contracts/${id}`, method: 'PUT', body }),
-      invalidatesTags: (_result, _error, { id }) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Debtor', id: 'LIST' }],
     }),
     deleteStudentContract: builder.mutation({
       query: (id) => ({ url: `/student-contracts/${id}`, method: 'DELETE' }),
-      invalidatesTags: (_result, _error, id) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }],
+      invalidatesTags: (_result, _error, id) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Debtor', id: 'LIST' }],
     }),
     getPayments: builder.query({
       query: (params = {}) => ({ url: '/payments', params }),
@@ -303,7 +303,17 @@ export const baseApi = createApi({
     getStudentPayments: builder.query({
       query: (studentId) => `/payments/student/${studentId}`,
       transformResponse: (response) => response.data,
-      providesTags: (result) => [{ type: 'Payment', id: `STUDENT-${result?.contracts?.[0]?.student || 'PROFILE'}` }, { type: 'Payment', id: 'LIST' }],
+      providesTags: (_result, _error, studentId) => [{ type: 'Payment', id: `STUDENT-${studentId}` }, { type: 'Payment', id: 'LIST' }],
+      async onCacheEntryAdded(studentId, { cacheEntryRemoved, dispatch }) {
+        const refresh = (event) => {
+          if (!event?.studentId || event.studentId === studentId) {
+            scheduleInvalidate(dispatch, [{ type: 'Payment', id: `STUDENT-${studentId}` }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Debtor', id: 'LIST' }], `Payment:STUDENT-${studentId}`)
+          }
+        }
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
     }),
     getDebtors: builder.query({
       query: (period) => ({ url: '/debtors', params: period ? { period } : undefined }),
