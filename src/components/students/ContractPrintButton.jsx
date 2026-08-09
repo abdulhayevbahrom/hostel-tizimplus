@@ -7,28 +7,47 @@ export function ContractPrintButton({ contract, student, organization }) {
   const [printing, setPrinting] = useState(false)
   const print = async () => {
     let frame
+    let imageUrl
     try {
       setPrinting(true)
       const canvas = await createContractCanvas(documentRef.current)
+      const imageBlob = await new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Shartnoma rasmi yaratilmadi')), 'image/jpeg', 0.98)
+      })
+      imageUrl = URL.createObjectURL(imageBlob)
       frame = document.createElement('iframe')
       frame.setAttribute('title', 'Shartnomani chop etish')
       frame.style.cssText = 'position:fixed;inset:0;z-index:99999;width:100vw;height:100vh;height:100dvh;border:0;background:#fff'
       document.body.appendChild(frame)
       const printDocument = frame.contentDocument
       printDocument.open()
-      printDocument.write(`<!doctype html><html><head><meta charset="utf-8"><title>Shartnoma-${contract.contractNumber}</title><style>@page{size:A4 portrait;margin:0}html,body{width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden}body{display:grid;place-items:center}img{display:block;max-width:210mm;max-height:297mm;width:auto;height:auto;object-fit:contain}</style></head><body><img src="${canvas.toDataURL('image/jpeg', 0.98)}" alt="Shartnoma"></body></html>`)
+      printDocument.write(`<!doctype html><html><head><meta charset="utf-8"><title>Shartnoma-${contract.contractNumber}</title><style>@page{size:A4 portrait;margin:0}html,body{width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden}body{display:grid;place-items:center}img{display:block;max-width:210mm;max-height:297mm;width:auto;height:auto;object-fit:contain}</style></head><body></body></html>`)
       printDocument.close()
-      const cleanup = () => frame?.remove()
+      const image = printDocument.createElement('img')
+      image.alt = 'Shartnoma'
+      const imageLoaded = new Promise((resolve, reject) => {
+        image.onload = resolve
+        image.onerror = () => reject(new Error('Shartnoma rasmi yuklanmadi'))
+      })
+      image.src = imageUrl
+      printDocument.body.appendChild(image)
+      await imageLoaded
+      if (image.decode) await image.decode().catch(() => undefined)
+      const cleanup = () => {
+        frame?.remove()
+        if (imageUrl) URL.revokeObjectURL(imageUrl)
+        imageUrl = undefined
+      }
       frame.contentWindow.addEventListener('afterprint', cleanup, { once: true })
-      setTimeout(() => {
-        frame.contentWindow.focus()
-        frame.contentWindow.print()
-      }, 500)
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      frame.contentWindow.focus()
+      frame.contentWindow.print()
       setTimeout(() => {
         if (frame?.isConnected) cleanup()
       }, 60000)
     } catch (error) {
       frame?.remove()
+      if (imageUrl) URL.revokeObjectURL(imageUrl)
       throw error
     } finally {
       setPrinting(false)
