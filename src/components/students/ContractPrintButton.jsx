@@ -1,21 +1,34 @@
 import { useRef, useState } from 'react'
 import { ContractDocument } from './ContractPreviewModal'
-import { createSinglePageContractPdf } from './contractPdf'
+import { createContractCanvas } from './contractPdf'
 
 export function ContractPrintButton({ contract, student, organization }) {
   const documentRef = useRef(null)
   const [printing, setPrinting] = useState(false)
   const print = async () => {
-    const printWindow = window.open('', '_blank')
+    let frame
     try {
       setPrinting(true)
-      const pdf = await createSinglePageContractPdf(documentRef.current, { autoPrint: true })
-      const url = URL.createObjectURL(pdf.output('blob'))
-      if (printWindow) printWindow.location.href = url
-      else window.location.href = url
-      setTimeout(() => URL.revokeObjectURL(url), 60000)
+      const canvas = await createContractCanvas(documentRef.current)
+      frame = document.createElement('iframe')
+      frame.setAttribute('title', 'Shartnomani chop etish')
+      frame.style.cssText = 'position:fixed;inset:0;z-index:99999;width:100vw;height:100vh;height:100dvh;border:0;background:#fff'
+      document.body.appendChild(frame)
+      const printDocument = frame.contentDocument
+      printDocument.open()
+      printDocument.write(`<!doctype html><html><head><meta charset="utf-8"><title>Shartnoma-${contract.contractNumber}</title><style>@page{size:A4 portrait;margin:0}html,body{width:210mm;height:297mm;margin:0;padding:0;background:#fff;overflow:hidden}body{display:grid;place-items:center}img{display:block;max-width:210mm;max-height:297mm;width:auto;height:auto;object-fit:contain}</style></head><body><img src="${canvas.toDataURL('image/jpeg', 0.98)}" alt="Shartnoma"></body></html>`)
+      printDocument.close()
+      const cleanup = () => frame?.remove()
+      frame.contentWindow.addEventListener('afterprint', cleanup, { once: true })
+      setTimeout(() => {
+        frame.contentWindow.focus()
+        frame.contentWindow.print()
+      }, 500)
+      setTimeout(() => {
+        if (frame?.isConnected) cleanup()
+      }, 60000)
     } catch (error) {
-      printWindow?.close()
+      frame?.remove()
       throw error
     } finally {
       setPrinting(false)
