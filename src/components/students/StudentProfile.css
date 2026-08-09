@@ -213,3 +213,34 @@
   .payment-modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 10px; }
   .payment-modal-actions .ant-btn { width: 100%; min-height: 32px; }
 }
+
+/* PDF yuklash manbasi ekran o‘lchamidan qat’i nazar bir xil A4 maketda qoladi. */
+.contract-download-source .contract-a4 { width: 210mm; min-height: 297mm; padding: 16mm 18mm; overflow-wrap: normal; font-size: 11.5px; line-height: 1.42; }
+.contract-download-source .contract-document-header { gap: 20px; padding-bottom: 16px; }
+.contract-download-source .contract-document-header img { width: 54px; height: 54px; }
+.contract-download-source .contract-document-header h1 { margin: 0 0 9px; font-size: 18px; }
+.contract-download-source .contract-document-header p { margin: 4px 0; font-size: 10px; }
+.contract-download-source .contract-a4 > h2 { margin: 14px 0 9px; font-size: 15px; line-height: 1.42; }
+.contract-download-source .contract-document-meta { margin-bottom: 11px; font-size: inherit; }
+.contract-download-source .contract-a4 p { margin: 4px 0; }
+.contract-download-source .contract-a4 section { margin-top: 9px; }
+.contract-download-source .contract-a4 section h3 { font-size: 11.5px; line-height: 1.42; }
+.contract-download-source .contract-requisites > div { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.contract-download-source .contract-requisites > div > div { min-height: 105px; padding: 8px; }
+
+/* Mobil chop etishda ham responsive ekran maketi emas, A4 maketi ishlaydi. */
+@media print {
+  .contract-a4, .contract-a4 * { visibility: visible !important; }
+  .contract-a4 { display: block !important; width: 210mm; min-height: 297mm; padding: 16mm 18mm; margin: 0; overflow-wrap: normal; color: #111 !important; background: #fff !important; box-shadow: none; font-size: 11.5px; line-height: 1.42; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .contract-document-header { gap: 20px; padding-bottom: 16px; }
+  .contract-document-header img { width: 54px; height: 54px; }
+  .contract-document-header h1 { margin: 0 0 9px; font-size: 18px; }
+  .contract-document-header p { margin: 4px 0; font-size: 10px; }
+  .contract-a4 > h2 { margin: 14px 0 9px; font-size: 15px; line-height: 1.42; }
+  .contract-document-meta { margin-bottom: 11px; font-size: inherit; }
+  .contract-a4 p { margin: 4px 0; }
+  .contract-a4 section { margin-top: 9px; }
+  .contract-a4 section h3 { font-size: 11.5px; line-height: 1.42; }
+  .contract-requisites > div { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+  .contract-requisites > div > div { min-height: 105px; padding: 8px; }
+}
