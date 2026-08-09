@@ -224,16 +224,10 @@ export function PaymentsPage({ currentEmployee }) {
               setFilters((old) => ({ ...old, period: date.format("YYYY-MM") }))
             }
           />
-          <DatePicker.RangePicker
-            placeholder={["Boshlanish", "Tugash"]}
-            onChange={(dates) =>
-              setFilters((old) => ({
-                ...old,
-                from: dates?.[0]?.format("YYYY-MM-DD") || "",
-                to: dates?.[1]?.format("YYYY-MM-DD") || "",
-              }))
-            }
-          />
+          <div className="payment-date-range">
+            <DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, from: date?.format("YYYY-MM-DD") || "" }))} />
+            <DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, to: date?.format("YYYY-MM-DD") || "" }))} />
+          </div>
           </div>
         </div>
         {error && <div className="form-error">{apiErrorMessage(error)}</div>}
@@ -364,7 +358,7 @@ export function PaymentsPage({ currentEmployee }) {
         <div className="payment-filter-modal-options">
           <Select allowClear placeholder="Barcha usullar" value={filters.method || undefined} onChange={(value) => setFilters((old) => ({ ...old, method: value || "" }))} options={Object.entries(methods).map(([value, label]) => ({ value, label }))} />
           <DatePicker picker="month" allowClear={false} value={dayjs(filters.period)} format="MMMM YYYY" onChange={(date) => setFilters((old) => ({ ...old, period: date.format("YYYY-MM") }))} />
-          <DatePicker.RangePicker placeholder={["Boshlanish", "Tugash"]} onChange={(dates) => setFilters((old) => ({ ...old, from: dates?.[0]?.format("YYYY-MM-DD") || "", to: dates?.[1]?.format("YYYY-MM-DD") || "" }))} />
+          <div className="payment-date-range"><DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, from: date?.format("YYYY-MM-DD") || "" }))} /><DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, to: date?.format("YYYY-MM-DD") || "" }))} /></div>
         </div>
       </Modal>
 

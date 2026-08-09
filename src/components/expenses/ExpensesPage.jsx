@@ -196,14 +196,10 @@ export function ExpensesPage({ currentEmployee }) {
                 setPage(1);
               }}
             />
-            <DatePicker.RangePicker
-              value={range}
-              format="DD.MM.YYYY"
-              onChange={(value) => {
-                setRange(value);
-                setPage(1);
-              }}
-            />
+            <div className="expense-date-range">
+              <DatePicker placeholder="Boshlanish" value={range?.[0] || null} maxDate={range?.[1]} format="DD.MM.YYYY" onChange={(value) => { setRange([value, range?.[1] || null]); setPage(1); }} />
+              <DatePicker placeholder="Tugash" value={range?.[1] || null} minDate={range?.[0]} format="DD.MM.YYYY" onChange={(value) => { setRange([range?.[0] || null, value]); setPage(1); }} />
+            </div>
             <button className="expense-add-button" onClick={openCreate}>
               + Xarajat qo‘shish
             </button>
@@ -309,7 +305,7 @@ export function ExpensesPage({ currentEmployee }) {
           </div>
         )}
       </section>
-      <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" rootClassName="expense-filters-modal"><div className="expense-filter-modal-options"><Select allowClear value={category || undefined} placeholder="Kategoriya" options={(data?.categories || []).map((value) => ({ value, label: value }))} onChange={(value = '') => { setCategory(value); setPage(1) }} /><Select allowClear value={paymentType || undefined} placeholder="To‘lov turi" options={paymentTypes} onChange={(value = '') => { setPaymentType(value); setPage(1) }} /><DatePicker.RangePicker value={range} format="DD.MM.YYYY" onChange={(value) => { setRange(value); setPage(1) }} /></div></Modal>
+      <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" rootClassName="expense-filters-modal"><div className="expense-filter-modal-options"><Select allowClear value={category || undefined} placeholder="Kategoriya" options={(data?.categories || []).map((value) => ({ value, label: value }))} onChange={(value = '') => { setCategory(value); setPage(1) }} /><Select allowClear value={paymentType || undefined} placeholder="To‘lov turi" options={paymentTypes} onChange={(value = '') => { setPaymentType(value); setPage(1) }} /><div className="expense-date-range"><DatePicker placeholder="Boshlanish" value={range?.[0] || null} maxDate={range?.[1]} format="DD.MM.YYYY" onChange={(value) => { setRange([value, range?.[1] || null]); setPage(1) }} /><DatePicker placeholder="Tugash" value={range?.[1] || null} minDate={range?.[0]} format="DD.MM.YYYY" onChange={(value) => { setRange([range?.[0] || null, value]); setPage(1) }} /></div></div></Modal>
       <Modal
         open={modalOpen}
         onCancel={closeModal}

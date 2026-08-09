@@ -11,3 +11,5 @@
 @media(max-width:768px){.expense-search{flex:1;min-width:0}.expense-filter-toggle{flex:0 0 32px}}
 @media(max-width:768px){.expense-filter-toggle:before{width:16px;height:16px;content:"";background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a96539' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6h16M7 12h10M10 18h4'/%3E%3C/svg%3E")}.expense-search input{flex:1;min-width:0;width:auto}}
 @media(max-width:768px){.expense-filters{grid-template-columns:minmax(0,1fr) 32px!important}.expense-search{grid-column:1!important}.expense-filter-toggle{grid-column:2!important}}
+.expense-date-range{display:grid;width:225px;grid-template-columns:1fr 1fr;gap:6px}.expense-date-range .ant-picker{width:100%;min-width:0}.expense-filter-modal-options .expense-date-range{width:100%}
+@media(max-width:768px){.expense-filters>.expense-date-range{display:none}.expense-filter-modal-options .expense-date-range{display:grid;grid-template-columns:1fr;gap:8px}.expense-filter-modal-options .expense-date-range .ant-picker{display:flex;width:100%;height:32px}}
