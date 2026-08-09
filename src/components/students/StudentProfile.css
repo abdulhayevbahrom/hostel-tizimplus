@@ -124,7 +124,8 @@
 .contract-requisites span { display: block; margin-top: 15px; }
 @page { size: A4 portrait; margin: 0; }
 @media print {
-  .contract-a4 { width: 210mm; min-height: 297mm; padding: 16mm 18mm; margin: 0; box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .contract-a4, .contract-a4 * { visibility: visible !important; }
+  .contract-a4 { display: block !important; width: 210mm; min-height: 297mm; padding: 16mm 18mm; margin: 0; color: #111 !important; background: #fff !important; box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
 @media (max-width: 700px) {
   .student-profile-toolbar { align-items: stretch; }
