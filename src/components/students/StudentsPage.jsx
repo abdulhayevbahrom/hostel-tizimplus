@@ -20,9 +20,9 @@ import "./StudentHistory.css";
 import "./StudentsTabsCompact.css";
 
 const studentStatusLabel = {
-  green: "Aktiv",
-  warning: "Ogohlantirish",
-  red: "Yomon",
+  green: "Qoladi",
+  warning: "50/50",
+  red: "Ketadi",
 };
 
 const isContractExpiringWithinTwoDays = (endDate) => {
@@ -38,6 +38,7 @@ function StudentsListTab() {
   const [facultyFilter, setFacultyFilter] = useState(undefined);
   const [courseFilter, setCourseFilter] = useState(undefined);
   const [roomFilter, setRoomFilter] = useState(undefined);
+  const [statusFilter, setStatusFilter] = useState(undefined);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const deferredQuery = useDeferredValue(query.trim());
   const {
@@ -52,6 +53,7 @@ function StudentsListTab() {
     faculty: facultyFilter,
     course: courseFilter,
     room: roomFilter,
+    studentStatus: statusFilter,
   });
   const { data: universityData } = useGetUniversitiesQuery();
   const { data: facultyData } = useGetFacultiesQuery();
@@ -199,6 +201,19 @@ function StudentsListTab() {
                 }))}
                 onChange={(value) => {
                   setRoomFilter(value);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
+                placeholder="Talaba holati"
+                value={statusFilter}
+                options={Object.entries(studentStatusLabel).map(([value, label]) => ({
+                  value,
+                  label,
+                }))}
+                onChange={(value) => {
+                  setStatusFilter(value);
                   setPage(1);
                 }}
               />
@@ -469,6 +484,19 @@ function StudentsListTab() {
             }))}
             onChange={(value) => {
               setRoomFilter(value);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
+            placeholder="Talaba holati"
+            value={statusFilter}
+            options={Object.entries(studentStatusLabel).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+            onChange={(value) => {
+              setStatusFilter(value);
               setPage(1);
             }}
           />

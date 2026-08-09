@@ -315,7 +315,7 @@ export function StudentFormModal({
                   label: (
                     <span>
                       <i className="green" />
-                      Aktiv
+                      Qoladi
                     </span>
                   ),
                 },
@@ -324,7 +324,7 @@ export function StudentFormModal({
                   label: (
                     <span>
                       <i className="warning" />
-                      Ogohlantirish
+                      50/50
                     </span>
                   ),
                 },
@@ -333,7 +333,7 @@ export function StudentFormModal({
                   label: (
                     <span>
                       <i className="red" />
-                      Yomon
+                      Ketadi
                     </span>
                   ),
                 },

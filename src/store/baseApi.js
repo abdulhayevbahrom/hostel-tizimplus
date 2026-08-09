@@ -206,9 +206,9 @@ export const baseApi = createApi({
       invalidatesTags: (_result, _error, id) => [{ type: 'Room', id }, { type: 'Room', id: 'LIST' }],
     }),
     getStudents: builder.query({
-      query: ({ search = '', page = 1, university = '', faculty = '', course = '', room = '' } = {}) => ({
+      query: ({ search = '', page = 1, university = '', faculty = '', course = '', room = '', studentStatus = '' } = {}) => ({
         url: '/students',
-        params: { page, ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(course ? { course } : {}), ...(room ? { room } : {}) },
+        params: { page, ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(course ? { course } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}) },
       }),
       transformResponse: (response) => response.data,
       providesTags: (result) => [{ type: 'Student', id: 'LIST' }, ...(result?.students || []).map((item) => ({ type: 'Student', id: item.id }))],

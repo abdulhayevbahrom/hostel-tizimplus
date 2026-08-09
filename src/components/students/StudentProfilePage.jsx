@@ -196,10 +196,10 @@ export function StudentProfilePage({ currentEmployee }) {
                         label="Talaba holati"
                         value={
                           student.studentStatus === "red"
-                            ? "Yomon"
+                            ? "Ketadi"
                             : student.studentStatus === "warning"
-                              ? "Ogohlantirish"
-                              : "Aktiv"
+                              ? "50/50"
+                              : "Qoladi"
                         }
                       />
                       <ProfileItem
