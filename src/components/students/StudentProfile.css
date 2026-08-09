@@ -227,6 +227,7 @@
 .contract-download-source .contract-a4 section h3 { font-size: 11.5px; line-height: 1.42; }
 .contract-download-source .contract-requisites > div { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
 .contract-download-source .contract-requisites > div > div { min-height: 105px; padding: 8px; }
+.contract-download-source .contract-requisites { break-before: auto; break-inside: auto; page-break-before: auto; page-break-inside: auto; }
 
 /* Mobil chop etishda ham responsive ekran maketi emas, A4 maketi ishlaydi. */
 @media print {
@@ -243,4 +244,5 @@
   .contract-a4 section h3 { font-size: 11.5px; line-height: 1.42; }
   .contract-requisites > div { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
   .contract-requisites > div > div { min-height: 105px; padding: 8px; }
+  .contract-requisites { break-before: auto; break-inside: auto; page-break-before: auto; page-break-inside: auto; }
 }
