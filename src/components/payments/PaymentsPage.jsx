@@ -43,6 +43,7 @@ export function PaymentsPage({ currentEmployee }) {
   const [open, setOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
+  const [historyPayment, setHistoryPayment] = useState(null);
   const { data, isLoading, error } = useGetPaymentsQuery(filters);
   const { data: optionsData, isLoading: optionsLoading } =
     useGetPaymentOptionsQuery(undefined, { skip: !open });
@@ -52,6 +53,7 @@ export function PaymentsPage({ currentEmployee }) {
   const [deletePayment, { isLoading: deleting }] = useDeletePaymentMutation();
   const selectedContractId = Form.useWatch("contract", form);
   const selectedMethod = Form.useWatch("method", form);
+  const selectedFundHolder = Form.useWatch("fundHolder", form);
   const selectedInstallmentId = Form.useWatch("installment", form);
   const contracts = optionsData?.contracts || [];
   const selectableContracts = editingPayment
@@ -82,6 +84,7 @@ export function PaymentsPage({ currentEmployee }) {
       contract: undefined,
       installment: undefined,
       note: "",
+      fundHolder: "cashier",
     });
     setOpen(true);
   };
@@ -129,6 +132,10 @@ export function PaymentsPage({ currentEmployee }) {
       toast.error(apiErrorMessage(requestError));
     }
   };
+  const employeeName = (employee) => employee
+    ? `${employee.firstname || ""} ${employee.lastname || ""}`.trim()
+    : "Noma’lum xodim";
+  const actionNames = { created: "To‘lov qabul qilindi", updated: "To‘lov tahrirlandi", cancelled: "To‘lov bekor qilindi" };
 
   return (
     <div className="payments-page">
@@ -252,7 +259,7 @@ export function PaymentsPage({ currentEmployee }) {
               </thead>
               <tbody>
                 {rows.map((payment) => (
-                  <tr key={payment.id}>
+                  <tr key={payment.id} className={payment.status === "cancelled" ? "payment-cancelled-row" : ""}>
                     <td data-label="Talaba">
                       <strong>{payment.student?.fullName}</strong>
                       <small>{payment.student?.phone}</small>
@@ -281,11 +288,13 @@ export function PaymentsPage({ currentEmployee }) {
                       <span className={`method-badge ${payment.method}`}>
                         {methods[payment.method]}
                       </span>
+                      {payment.method !== "cash" && payment.fundHolder && <small>{payment.fundHolder === "organization" ? "Tashkilot hisobi" : "Kassirning shaxsiy hisobi"}</small>}
                     </td>
                     <td data-label="Summa">
                       <b className="payment-amount">
-                        + {money(payment.amount)}
+                        {payment.status === "cancelled" ? "" : "+ "}{money(payment.amount)}
                       </b>
+                      {payment.status === "cancelled" && <small className="payment-cancelled-badge">Bekor qilingan</small>}
                     </td>
                     <td data-label="Izoh">{payment.note || "—"}</td>
                     <td>
@@ -300,7 +309,10 @@ export function PaymentsPage({ currentEmployee }) {
                         >
                           <PaymentPrintIcon />
                         </button>
-                        {isOwner && (
+                        <button className="payment-history" title="Amallar tarixi" aria-label="To‘lov amallari tarixini ko‘rish" onClick={() => setHistoryPayment(payment)}>
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5l3 2M4.5 9A8 8 0 1 1 4 12M4 5v4h4" /></svg>
+                        </button>
+                        {isOwner && payment.status !== "cancelled" && (
                           <>
                             <button
                               className="payment-edit"
@@ -359,6 +371,26 @@ export function PaymentsPage({ currentEmployee }) {
           <Select allowClear placeholder="Barcha usullar" value={filters.method || undefined} onChange={(value) => setFilters((old) => ({ ...old, method: value || "" }))} options={Object.entries(methods).map(([value, label]) => ({ value, label }))} />
           <DatePicker picker="month" allowClear={false} value={dayjs(filters.period)} format="MMMM YYYY" onChange={(date) => setFilters((old) => ({ ...old, period: date.format("YYYY-MM") }))} />
           <div className="payment-date-range"><DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, from: date?.format("YYYY-MM-DD") || "" }))} /><DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, to: date?.format("YYYY-MM-DD") || "" }))} /></div>
+        </div>
+      </Modal>
+
+      <Modal open={Boolean(historyPayment)} onCancel={() => setHistoryPayment(null)} footer={null} title="To‘lov amallari tarixi" width={560}>
+        <div className="payment-audit-list">
+          {(historyPayment?.auditHistory?.length
+            ? [...historyPayment.auditHistory].reverse()
+            : [{ action: "created", performedBy: historyPayment?.receivedBy, performedAt: historyPayment?.createdAt, after: historyPayment }]
+          ).map((entry, index) => (
+            <article key={entry._id || `${entry.action}-${index}`}>
+              <span className={`payment-audit-dot ${entry.action}`} />
+              <div>
+                <strong>{actionNames[entry.action] || entry.action}</strong>
+                <p>{employeeName(entry.performedBy)}</p>
+                {entry.action === "updated" && <small>{money(entry.before?.amount)} → {money(entry.after?.amount)} · {methods[entry.before?.method]} → {methods[entry.after?.method]}</small>}
+                {entry.action === "cancelled" && <small>Bekor qilingan summa: {money(entry.before?.amount)}</small>}
+                <time>{dayjs(entry.performedAt || historyPayment?.createdAt).format("DD.MM.YYYY HH:mm")}</time>
+              </div>
+            </article>
+          ))}
         </div>
       </Modal>
 
@@ -474,6 +506,16 @@ export function PaymentsPage({ currentEmployee }) {
               ))}
             </div>
           </div>
+          {!editingPayment && currentEmployee?.role === "cashier" && !["cash", "bank"].includes(selectedMethod) && (
+            <div className="fund-holder-field">
+              <label>Pul qaysi hisobga tushdi?</label>
+              <Form.Item name="fundHolder" hidden rules={[{ required: true, message: "Hisobni tanlang" }]}><Input /></Form.Item>
+              <div className="fund-holder-options">
+                <button type="button" className={selectedFundHolder === "cashier" ? "active" : ""} onClick={() => form.setFieldValue("fundHolder", "cashier")}>O‘zimga</button>
+                <button type="button" className={selectedFundHolder === "organization" ? "active" : ""} onClick={() => form.setFieldValue("fundHolder", "organization")}>Tashkilotga</button>
+              </div>
+            </div>
+          )}
           <Form.Item name="note" label="Izoh">
             <Input placeholder="Ixtiyoriy" />
           </Form.Item>
