@@ -330,6 +330,17 @@ export const baseApi = createApi({
       query: (period) => ({ url: '/debtors', params: period ? { period } : undefined }),
       transformResponse: (response) => response.data,
       providesTags: [{ type: 'Debtor', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Debtor', id: 'LIST' }], 'Debtor:LIST')
+        const unsubscribe = subscribeSocket(['debtors:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    setDebtorDeadline: builder.mutation({
+      query: ({ studentId, ...body }) => ({ url: `/debtors/${studentId}/deadline`, method: 'PUT', body }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: [{ type: 'Debtor', id: 'LIST' }],
     }),
     getAttendance: builder.query({
       query: (params = {}) => ({ url: '/attendance', params }),
@@ -612,6 +623,7 @@ export const {
   useGetAdvancePaymentsQuery,
   useGetStudentPaymentsQuery,
   useGetDebtorsQuery,
+  useSetDebtorDeadlineMutation,
   useGetAttendanceQuery,
   useGetAttendanceHistoryQuery,
   useGetAttendanceHistoryListQuery,

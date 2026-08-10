@@ -15,6 +15,7 @@ import {
   apiErrorMessage,
   useCreatePaymentMutation,
   useGetDebtorsQuery,
+  useSetDebtorDeadlineMutation,
 } from "../../store/baseApi";
 import "./Debtors.css";
 
@@ -22,7 +23,7 @@ const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
 const tableMoney = (value) => Number(value || 0).toLocaleString("uz-UZ");
 const methods = { cash: "Naqd", online: "Click", bank: "Bank", card: "Karta" };
 
-export function DebtorsPage() {
+export function DebtorsPage({ currentEmployee }) {
   const navigate = useNavigate();
   const [paymentForm] = Form.useForm();
   const [period, setPeriod] = useState(dayjs().format("YYYY-MM"));
@@ -33,8 +34,12 @@ export function DebtorsPage() {
   const [paymentDebtor, setPaymentDebtor] = useState(null);
   const [historyDebtor, setHistoryDebtor] = useState(null);
   const [actionDebtor, setActionDebtor] = useState(null);
+  const [deadlineDebtor, setDeadlineDebtor] = useState(null);
+  const [deadlineForm] = Form.useForm();
   const [createPayment, { isLoading: creatingPayment }] =
     useCreatePaymentMutation();
+  const [setDebtorDeadline, { isLoading: savingDeadline }] = useSetDebtorDeadlineMutation();
+  const isOwner = ["owner", "admin"].includes(currentEmployee?.role);
   const paymentMethod = Form.useWatch("method", paymentForm);
   const selectedInstallmentId = Form.useWatch("installment", paymentForm);
   const selectedPeriod = paymentDebtor?.periods.find(
@@ -82,6 +87,18 @@ export function DebtorsPage() {
     } catch (requestError) {
       toast.error(apiErrorMessage(requestError));
     }
+  };
+  const openDeadline = (debtor) => {
+    setDeadlineDebtor(debtor);
+    deadlineForm.setFieldsValue({ deadline: debtor.paymentDeadline ? dayjs(debtor.paymentDeadline) : null });
+  };
+  const saveDeadline = async (values) => {
+    try {
+      await setDebtorDeadline({ studentId: deadlineDebtor.student.id, periodKey: period, deadline: values.deadline.format("YYYY-MM-DD") }).unwrap();
+      toast.success("To‘lov deadline’i saqlandi");
+      setDeadlineDebtor(null);
+      deadlineForm.resetFields();
+    } catch (requestError) { toast.error(apiErrorMessage(requestError)); }
   };
 
   return (
@@ -205,7 +222,7 @@ export function DebtorsPage() {
                 {debtors.map((debtor) => {
                   const room = debtor.contracts?.[0]?.room;
                   return (
-                    <tr key={debtor.student.id}>
+                    <tr key={debtor.student.id} className={debtor.isDeadlineReached ? "debtor-deadline-reached" : ""}>
                       <td data-label="Talaba">
                         <button
                           className="debtor-student"
@@ -260,6 +277,7 @@ export function DebtorsPage() {
                             .map((paymentPeriod) => paymentPeriod.periodKey)
                             .join(", ")}
                         </small>
+                        {debtor.paymentDeadline && <small className="debtor-deadline-date">Deadline: {dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</small>}
                       </td>
                       <td data-label="Summa">
                         <b className="debt-money">{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</b>
@@ -296,8 +314,9 @@ export function DebtorsPage() {
                           >
                             Batafsil
                           </button>
+                          {isOwner && <button className="debtor-deadline-btn" onClick={() => openDeadline(debtor)}>Deadline</button>}
                           <button className="debtor-more-btn" aria-label="Amallar" onClick={() => setActionDebtor(actionDebtor?.student?.id === debtor.student.id ? null : debtor)}>⋯</button>
-                          {actionDebtor?.student?.id === debtor.student.id && <div className="debtor-inline-actions"><button onClick={() => { openPayment(debtor); setActionDebtor(null) }}>To‘lov</button><button onClick={() => { setHistoryDebtor(debtor); setActionDebtor(null) }}>Tarix</button><button onClick={() => { setSelected(debtor); setActionDebtor(null) }}>Batafsil</button></div>}
+                          {actionDebtor?.student?.id === debtor.student.id && <div className="debtor-inline-actions"><button onClick={() => { openPayment(debtor); setActionDebtor(null) }}>To‘lov</button><button onClick={() => { setHistoryDebtor(debtor); setActionDebtor(null) }}>Tarix</button><button onClick={() => { setSelected(debtor); setActionDebtor(null) }}>Batafsil</button>{isOwner && <button onClick={() => { openDeadline(debtor); setActionDebtor(null) }}>Deadline</button>}</div>}
                         </div>
                       </td>
                     </tr>
@@ -395,6 +414,12 @@ export function DebtorsPage() {
             </div>
           )}
         </>
+      </Modal>
+      <Modal open={Boolean(deadlineDebtor)} onCancel={() => setDeadlineDebtor(null)} footer={null} title={deadlineDebtor ? `${deadlineDebtor.student.fullName} — to‘lov deadline’i` : "To‘lov deadline’i"} destroyOnHidden>
+        <Form form={deadlineForm} layout="vertical" onFinish={saveDeadline} requiredMark={false}>
+          <Form.Item name="deadline" label="To‘lov qilishi kerak bo‘lgan sana" rules={[{ required: true, message: "Sanani tanlang" }]}><DatePicker format="DD.MM.YYYY" style={{ width: "100%" }} /></Form.Item>
+          <div className="debtor-payment-actions"><Button onClick={() => setDeadlineDebtor(null)}>Bekor qilish</Button><Button type="primary" htmlType="submit" loading={savingDeadline}>Saqlash</Button></div>
+        </Form>
       </Modal>
       <Modal
         open={Boolean(paymentDebtor)}

@@ -79,7 +79,7 @@ function App() {
               <Route path="/attendance" element={guard('attendance', <AttendancePage />)} />
               <Route path="/payments" element={guard('payments', <PaymentsPage currentEmployee={meData.employee} />)} />
               <Route path="/cash" element={guard('cash', <CashPage currentEmployee={meData.employee} />)} />
-              <Route path="/debtors" element={guard('debtors', <DebtorsPage />)} />
+              <Route path="/debtors" element={guard('debtors', <DebtorsPage currentEmployee={meData.employee} />)} />
               <Route path="/fines" element={guard('fines', <FinesPage currentEmployee={meData.employee} />)} />
               <Route path="/employees" element={guard('employees', <EmployeesPage currentEmployee={meData.employee} />)} />
               <Route path="/salaries" element={guard('salaries', <SalariesPage currentEmployee={meData.employee} />)} />
