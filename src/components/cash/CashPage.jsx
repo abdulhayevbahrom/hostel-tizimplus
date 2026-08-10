@@ -91,7 +91,8 @@ export function CashPage({ currentEmployee }) {
 }
 
 function Breakdown({ breakdown }) {
-  return <div className="cash-breakdown">{methodKeys.map((key) => <span key={key}><b>{methodLabels[key]}</b> {money(breakdown?.[key])}</span>)}</div>
+  const visibleMethods = methodKeys.filter((key) => Number(breakdown?.[key] || 0) > 0)
+  return <div className={`cash-breakdown ${visibleMethods.length === 1 ? 'single' : ''}`}>{visibleMethods.map((key) => <span key={key}><b>{methodLabels[key]}</b> {money(breakdown?.[key])}</span>)}</div>
 }
 
 function CashierBalances({ rows }) {
