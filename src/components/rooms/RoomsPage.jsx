@@ -28,7 +28,7 @@ export function RoomsPage() {
   const [residentsRoom, setResidentsRoom] = useState(null)
   const { data: residentsData, isLoading: residentsLoading, error: residentsError } = useGetRoomStudentsQuery(residentsRoom?.id, { skip: !residentsRoom })
   const rooms = useMemo(() => data?.rooms || [], [data?.rooms])
-  const floors = useMemo(() => [...new Set(rooms.map((room) => room.floor))].sort((a, b) => a - b).map((value) => ({ value, label: `${value}-qavat` })), [rooms])
+  const floors = useMemo(() => [...new Set(rooms.map((room) => String(room.floor)))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((value) => ({ value, label: `${value}-qavat` })), [rooms])
   const filtered = useMemo(() => rooms.filter((room) => {
     const text = query.trim().toLowerCase()
     return (!text || [room.roomNumber, room.block, room.category].some((value) => String(value).toLowerCase().includes(text))) && (!floor || room.floor === floor) && (!category || room.category === category) && (!gender || room.gender === gender) && (!status || room.status === status)

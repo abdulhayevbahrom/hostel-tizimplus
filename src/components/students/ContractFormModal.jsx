@@ -21,7 +21,7 @@ export function ContractFormModal({ open, contract, rooms, loading, error, onClo
   const endDate = Form.useWatch('endDate', form)
   const paymentAmount = Form.useWatch('paymentAmount', form)
   const calculation = calculateContractPayment(startDate, endDate, paymentType, paymentAmount)
-  const floors = [...new Set(rooms.map((room) => room.floor))].sort((first, second) => first - second)
+  const floors = [...new Set(rooms.map((room) => String(room.floor)))].sort((first, second) => first.localeCompare(second, undefined, { numeric: true }))
   const visibleRooms = floor ? rooms.filter((room) => room.floor === floor) : rooms
   const prepare = (visible) => {
     if (visible) { setFloor(undefined); form.setFieldsValue(contract ? { ...contract, room: contract.room?.id || contract.room, paymentType: contract.paymentType || 'monthly', paymentAmount: contract.paymentAmount ?? contract.monthlyAmount ?? 0, startDate: dayjs(contract.startDate), endDate: dayjs(contract.endDate) } : createInitialValues()) }

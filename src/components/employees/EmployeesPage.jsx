@@ -117,7 +117,7 @@ export function EmployeesPage({ currentEmployee }) {
   const employees = useMemo(() => data?.employees || [], [data?.employees])
   const rooms = useMemo(() => roomsData?.rooms || [], [roomsData?.rooms])
   const roomBlocks = useMemo(() => [...new Set(rooms.map((room) => room.block).filter(Boolean))].sort((a, b) => a.localeCompare(b)), [rooms])
-  const roomFloors = useMemo(() => [...new Set(rooms.filter((room) => !roomBlock || room.block === roomBlock).map((room) => room.floor))].sort((a, b) => a - b), [roomBlock, rooms])
+  const roomFloors = useMemo(() => [...new Set(rooms.filter((room) => !roomBlock || room.block === roomBlock).map((room) => String(room.floor)))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), [roomBlock, rooms])
   const filteredRooms = useMemo(() => {
     const search = roomQuery.trim().toLowerCase()
     return rooms.filter((room) => (
