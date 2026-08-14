@@ -175,7 +175,7 @@ export const baseApi = createApi({
       invalidatesTags: [{ type: 'Salary', id: 'SUMMARY' }, { type: 'Salary', id: 'HISTORY' }],
     }),
     getRooms: builder.query({
-      query: () => '/rooms',
+      query: (period) => ({ url: '/rooms', params: period ? { period } : undefined }),
       transformResponse: (response) => response.data,
       providesTags: (result) => [{ type: 'Room', id: 'LIST' }, ...(result?.rooms || []).map((room) => ({ type: 'Room', id: room.id }))],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
@@ -186,9 +186,9 @@ export const baseApi = createApi({
       },
     }),
     getRoomStudents: builder.query({
-      query: (roomId) => `/rooms/${roomId}/students`,
+      query: ({ roomId, period }) => ({ url: `/rooms/${roomId}/students`, params: period ? { period } : undefined }),
       transformResponse: (response) => response.data,
-      providesTags: (_result, _error, roomId) => [{ type: 'Room', id: roomId }, { type: 'StudentContract', id: 'LIST' }],
+      providesTags: (_result, _error, { roomId }) => [{ type: 'Room', id: roomId }, { type: 'StudentContract', id: 'LIST' }],
     }),
     createRoom: builder.mutation({
       query: (body) => ({ url: '/rooms', method: 'POST', body }),

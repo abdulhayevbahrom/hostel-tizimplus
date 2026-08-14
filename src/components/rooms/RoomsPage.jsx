@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Image, Modal, Select } from 'antd'
+import { DatePicker, Image, Modal, Select } from 'antd'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -11,7 +11,9 @@ import './Rooms.css'
 
 export function RoomsPage() {
   const navigate = useNavigate()
-  const { data, isLoading, error: listError } = useGetRoomsQuery()
+  const [selectedMonth, setSelectedMonth] = useState(() => dayjs().startOf('month'))
+  const period = selectedMonth.format('YYYY-MM')
+  const { data, isLoading, error: listError } = useGetRoomsQuery(period)
   const [createRoom, { isLoading: creating }] = useCreateRoomMutation()
   const [updateRoom, { isLoading: updating }] = useUpdateRoomMutation()
   const [deleteRoom, { isLoading: deleting }] = useDeleteRoomMutation()
@@ -26,7 +28,7 @@ export function RoomsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [galleryRoom, setGalleryRoom] = useState(null)
   const [residentsRoom, setResidentsRoom] = useState(null)
-  const { data: residentsData, isLoading: residentsLoading, error: residentsError } = useGetRoomStudentsQuery(residentsRoom?.id, { skip: !residentsRoom })
+  const { data: residentsData, isLoading: residentsLoading, error: residentsError } = useGetRoomStudentsQuery({ roomId: residentsRoom?.id, period }, { skip: !residentsRoom })
   const rooms = useMemo(() => data?.rooms || [], [data?.rooms])
   const floors = useMemo(() => [...new Set(rooms.map((room) => String(room.floor)))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((value) => ({ value, label: `${value}-qavat` })), [rooms])
   const filtered = useMemo(() => rooms.filter((room) => {
@@ -64,6 +66,7 @@ export function RoomsPage() {
               </button>
             </div>
             <div className="room-filters-desktop">
+              <DatePicker picker="month" allowClear={false} value={selectedMonth} onChange={(value) => value && setSelectedMonth(value.startOf('month'))} format="MM.YYYY" placeholder="Oy" />
               <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Qavat" options={floors} value={floor} onChange={setFloor} />
               <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kategoriya" options={categoryOptions} value={category} onChange={setCategory} />
               <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kimlar uchun" options={genderOptions} value={gender} onChange={setGender} />
@@ -78,6 +81,7 @@ export function RoomsPage() {
       <RoomFormModal open={modalOpen} room={editingRoom} loading={creating || updating} error={error} onClose={closeModal} onSubmit={submit} />
       <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" destroyOnHidden rootClassName="room-filters-modal">
         <div className="room-filters-mobile">
+          <DatePicker picker="month" allowClear={false} value={selectedMonth} onChange={(value) => value && setSelectedMonth(value.startOf('month'))} format="MM.YYYY" placeholder="Oy" />
           <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Qavat" options={floors} value={floor} onChange={setFloor} />
           <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kategoriya" options={categoryOptions} value={category} onChange={setCategory} />
           <Select size="large" allowClear classNames={{ popup: { root: 'room-filter-dropdown' } }} placeholder="Kimlar uchun" options={genderOptions} value={gender} onChange={setGender} />

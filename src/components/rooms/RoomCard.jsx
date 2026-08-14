@@ -6,12 +6,14 @@ export function RoomCard({ room, deleting, onResidents, onView, onEdit, onDelete
   const recordedOccupiedCount = room.occupiedCount ?? room.residents?.length
   const occupiedCount = Math.min(capacity, Math.max(0, Number(recordedOccupiedCount) || 0))
   const availableCount = capacity - occupiedCount
+  const displayedStatus = room.status === 'maintenance' ? optionLabel(statusOptions, room.status) : occupiedCount ? `${occupiedCount} ta band` : 'Bo‘sh'
+  const displayedStatusClass = room.status === 'maintenance' ? room.status : occupiedCount ? 'occupied' : 'available'
 
   return (
     <article className={`room-card room-card-${room.status}`}>
       <div className="room-card-top">
         <div><h3>Xona {room.roomNumber}</h3></div>
-        <span className={`room-status room-status-${room.status}`}>{optionLabel(statusOptions, room.status)}</span>
+        <span className={`room-status room-status-${displayedStatusClass}`}>{displayedStatus}</span>
       </div>
       <div className="room-meta">
         <div><span>Qavat:</span><strong>{room.floor}</strong></div>

@@ -1,9 +1,12 @@
 import { useState } from 'react'
-import { Button, Form, Input, InputNumber, Modal, Segmented, Select, Upload } from 'antd'
+import { Button, Form, Input, InputNumber, message, Modal, Segmented, Select, Upload } from 'antd'
 import { useGetBuildingBlocksQuery } from '../../store/baseApi'
 import { categoryOptions, genderOptions } from './roomConstants'
 
 const initialValues = { roomNumber: '', block: undefined, floor: '1', capacity: 4, category: undefined, gender: 'male', status: 'available', note: '' }
+const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const maxImageSize = 8 * 1024 * 1024
+const maxImageCount = 8
 
 export function RoomFormModal({ open, room, loading, error, onClose, onSubmit }) {
   const [form] = Form.useForm()
@@ -20,6 +23,28 @@ export function RoomFormModal({ open, room, loading, error, onClose, onSubmit })
     setNewImages([])
   }
 
+  const validateImage = (file) => {
+    if (!allowedImageTypes.has(file.type)) {
+      message.error(`${file.name}: faqat JPG, PNG yoki WEBP formatidagi rasmni yuklash mumkin`)
+      return Upload.LIST_IGNORE
+    }
+    if (file.size > maxImageSize) {
+      message.error(`${file.name}: rasm hajmi 8 MB dan oshmasligi kerak`)
+      return Upload.LIST_IGNORE
+    }
+    if (existingImages.length + newImages.length >= maxImageCount) {
+      message.error('Bitta xona uchun eng ko‘pi 8 ta rasm yuklash mumkin')
+      return Upload.LIST_IGNORE
+    }
+    return false
+  }
+
+  const changeImages = ({ fileList }) => {
+    const availableSlots = maxImageCount - existingImages.length
+    if (fileList.length > availableSlots) message.error('Bitta xona uchun eng ko‘pi 8 ta rasm yuklash mumkin')
+    setNewImages(fileList.slice(0, availableSlots))
+  }
+
   return (
     <Modal open={open} onCancel={onClose} afterOpenChange={prepareModal} footer={null} destroyOnHidden width={760} rootClassName="hostel-room-modal" title={editing ? 'Xonani tahrirlash' : 'Yangi xona qo‘shish'}>
       <Form form={form} layout="vertical" initialValues={initialValues} onFinish={(values) => onSubmit({ values, newImages, existingImages })} requiredMark={false}>
@@ -34,9 +59,9 @@ export function RoomFormModal({ open, room, loading, error, onClose, onSubmit })
         <Form.Item label="Xona rasmlari">
           <div className="room-image-editor">
             {existingImages.map((image, index) => <div className="room-image-item" key={image.url}><img src={image.thumbnailUrl || image.url} alt={`Xona rasmi ${index + 1}`} /><button type="button" onClick={() => setExistingImages((items) => items.filter((_, itemIndex) => itemIndex !== index))}>×</button></div>)}
-            {existingImages.length + newImages.length < 8 && <Upload accept="image/jpeg,image/png,image/webp" listType="picture-card" fileList={newImages} multiple beforeUpload={() => false} onChange={({ fileList }) => setNewImages(fileList.slice(0, 8 - existingImages.length))}><div className="room-upload-button"><b>+</b><span>Rasm qo‘shish</span></div></Upload>}
+            {existingImages.length + newImages.length < maxImageCount && <Upload accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" listType="picture-card" fileList={newImages} multiple beforeUpload={validateImage} onChange={changeImages}><div className="room-upload-button"><b>+</b><span>Rasm qo‘shish</span></div></Upload>}
           </div>
-          <div className="room-image-help">JPG, PNG yoki WEBP · har biri 8 MB gacha · maksimal 8 ta</div>
+          <div className="room-image-help">Qoidalar: faqat JPG, PNG yoki WEBP · har bir rasm 8 MB gacha · jami ko‘pi bilan 8 ta</div>
         </Form.Item>
         {editing && <Form.Item name="status" label="Xona holati"><Segmented className="room-status-segmented" block options={[{ label: 'Aktiv', value: 'available' }, { label: 'Ta’mirda', value: 'maintenance' }]} /></Form.Item>}
         <Form.Item name="note" label="Izoh"><Input.TextArea rows={3} placeholder="Xona haqida qo‘shimcha ma’lumot" /></Form.Item>
