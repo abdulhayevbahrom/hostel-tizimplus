@@ -18,6 +18,7 @@ import {
   useSetDebtorDeadlineMutation,
 } from "../../store/baseApi";
 import "./Debtors.css";
+import { printDebtorList } from "./debtorPrint";
 
 const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
 const tableMoney = (value) => Number(value || 0).toLocaleString("uz-UZ");
@@ -100,6 +101,13 @@ export function DebtorsPage({ currentEmployee }) {
       deadlineForm.resetFields();
     } catch (requestError) { toast.error(apiErrorMessage(requestError)); }
   };
+  const printDebtors = () => printDebtorList({
+    debtors,
+    periodLabel: dayjs(period).format("MMMM YYYY"),
+    printedAt: dayjs().format("DD.MM.YYYY HH:mm"),
+    isFuturePeriod: data?.isFuturePeriod,
+    summary,
+  });
 
   return (
     <div className="debtors-page">
@@ -195,6 +203,10 @@ export function DebtorsPage({ currentEmployee }) {
                 { value: "unpaid", label: "Umuman to‘lamagan" },
               ]}
             />
+            <button className="debtor-print-btn" onClick={printDebtors} disabled={isLoading} title="A4 formatda chop etish">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z" /></svg>
+              Chop etish
+            </button>
           </div>
         </div>
         {error && <div className="form-error">{apiErrorMessage(error)}</div>}
@@ -333,6 +345,37 @@ export function DebtorsPage({ currentEmployee }) {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="debtor-print-sheet" aria-hidden="true">
+        <header>
+          <div>
+            <h1>{data?.isFuturePeriod ? "Kutilayotgan to‘lovlar ro‘yxati" : "Qarzdor talabalar ro‘yxati"}</h1>
+            <p>Hisobot davri: {dayjs(period).format("MMMM YYYY")}</p>
+          </div>
+          <small>Chop etilgan sana: {dayjs().format("DD.MM.YYYY HH:mm")}</small>
+        </header>
+        <div className="debtor-print-summary">
+          <span>Talabalar soni: <b>{debtors.length}</b></span>
+          <span>{data?.isFuturePeriod ? "Kutilayotgan summa" : "Jami qarzdorlik"}: <b>{money(data?.isFuturePeriod ? summary.waitingAmount : summary.totalDebt)}</b></span>
+          {!data?.isFuturePeriod && <span>Muddati o‘tgan: <b>{money(summary.overdueDebt)}</b></span>}
+        </div>
+        <table>
+          <thead><tr><th>№</th><th>Talaba</th><th>Telefon</th><th>Universitet</th><th>Xona</th><th>Qarzdor davr</th><th>{data?.isFuturePeriod ? "Kutilayotgan" : "Jami qarz"}</th><th>Muddati o‘tgan</th></tr></thead>
+          <tbody>
+            {debtors.map((debtor, index) => {
+              const room = debtor.contracts?.[0]?.room;
+              return <tr key={debtor.student.id}>
+                <td>{index + 1}</td><td>{debtor.student.fullName}</td><td>{debtor.student.phone || "—"}</td>
+                <td>{debtor.student.university?.name || "—"}{debtor.student.faculty?.name ? `, ${debtor.student.faculty.name}` : ""}</td>
+                <td>{room ? `${room.block} · ${room.roomNumber}-xona` : "—"}</td>
+                <td>{debtor.periods.map((item) => item.periodKey).join(", ")}</td>
+                <td>{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</td><td>{tableMoney(debtor.overdueDebt)}</td>
+              </tr>;
+            })}
+            {!debtors.length && <tr><td colSpan="8">Ma’lumot topilmadi</td></tr>}
+          </tbody>
+        </table>
       </section>
 
       <Modal
