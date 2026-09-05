@@ -29,9 +29,11 @@
 .student-person strong, .student-phone strong, .student-education strong { font-weight: 650; }
 .student-person a { color: #155e75; font-weight: 700; text-decoration: none; }
 .student-person a:hover { color: #0f766e; text-decoration: underline; }
-.student-phone, .student-education { display: grid; gap: 2px; min-width: 130px; }
-.student-phone small, .student-education small { overflow: hidden; max-width: 210px; color: #81949b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.student-phone, .student-education, .student-room { display: grid; gap: 2px; min-width: 130px; }
+.student-phone small, .student-education small, .student-room small { overflow: hidden; max-width: 210px; color: #81949b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .student-course { display: inline-flex; padding: 3px 7px; color: #0f766e; background: #e8f7f5; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
+.student-room strong { color: #155e75; font-weight: 750; white-space: nowrap; }
+.student-room-empty { color: #9aa9ad; font-weight: 750; }
 .student-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .student-status-badge i { width: 8px; height: 8px; border-radius: 50%; }
 .student-status-badge.green { color: #17613c; background: #e7f8ec; }
@@ -149,9 +151,9 @@
   .student-person { min-width: 0; gap: 9px; }
   .student-person img, .student-person > span { width: 36px; height: 36px; flex-basis: 36px; }
   .student-person a { font-size: 14px; line-height: 1.25; }
-  .student-phone, .student-education { min-width: 0; justify-items: end; text-align: right; }
-  .student-phone strong, .student-education strong { font-size: 13px; line-height: 1.2; }
-  .student-phone small, .student-education small { max-width: 170px; font-size: 10px; white-space: normal; line-height: 1.25; }
+  .student-phone, .student-education, .student-room { min-width: 0; justify-items: end; text-align: right; }
+  .student-phone strong, .student-education strong, .student-room strong { font-size: 13px; line-height: 1.2; }
+  .student-phone small, .student-education small, .student-room small { max-width: 170px; font-size: 10px; white-space: normal; line-height: 1.25; }
   .student-status-badge,
   .student-course,
   .student-disability,

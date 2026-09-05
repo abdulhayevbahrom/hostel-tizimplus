@@ -242,6 +242,7 @@ function StudentsListTab() {
                 <thead>
                   <tr>
                     <th>Talaba</th>
+                    <th>Xona</th>
                     <th>Holati</th>
                     <th>Soliq hujjat</th>
                     <th>Telefon</th>
@@ -282,6 +283,18 @@ function StudentsListTab() {
                               {student.fullName}
                             </Link>
                           </div>
+                        </td>
+                        <td data-label="Xona">
+                          {student.activeRoom ? (
+                            <div className="student-room">
+                              <strong>{student.activeRoom.roomNumber}-xona</strong>
+                              {student.activeRoom.block && (
+                                <small>{student.activeRoom.block} blok</small>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="student-room-empty">—</span>
+                          )}
                         </td>
                         <td data-label="Holati">
                           <span className={`student-status-badge ${status}`}>
@@ -390,7 +403,7 @@ function StudentsListTab() {
                   })}
                   {!students.length && (
                     <tr>
-                      <td className="students-empty" colSpan={9}>
+                      <td className="students-empty" colSpan={10}>
                         Talabalar topilmadi
                       </td>
                     </tr>
