@@ -291,6 +291,9 @@ function StudentsListTab() {
                               {student.activeRoom.block && (
                                 <small>{student.activeRoom.block} blok</small>
                               )}
+                              {student.activeRoom.floor && (
+                                <small>{student.activeRoom.floor}-qavat</small>
+                              )}
                             </div>
                           ) : (
                             <span className="student-room-empty">—</span>
