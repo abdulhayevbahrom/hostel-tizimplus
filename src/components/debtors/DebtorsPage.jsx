@@ -284,11 +284,6 @@ export function DebtorsPage({ currentEmployee }) {
                         <span className="debt-period-count">
                           {debtor.periodCount} ta davr
                         </span>
-                        <small>
-                          {debtor.periods
-                            .map((paymentPeriod) => paymentPeriod.periodKey)
-                            .join(", ")}
-                        </small>
                         {debtor.paymentDeadline && <small className="debtor-deadline-date">Deadline: {dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</small>}
                       </td>
                       <td data-label="Summa">
@@ -369,7 +364,7 @@ export function DebtorsPage({ currentEmployee }) {
                 <td>{index + 1}</td><td>{debtor.student.fullName}</td><td>{debtor.student.phone || "—"}</td>
                 <td>{debtor.student.university?.name || "—"}{debtor.student.faculty?.name ? `, ${debtor.student.faculty.name}` : ""}</td>
                 <td>{room ? `${room.block} · ${room.roomNumber}-xona` : "—"}</td>
-                <td>{debtor.periods.map((item) => item.periodKey).join(", ")}</td>
+                <td>{debtor.periodCount} ta davr</td>
                 <td>{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</td><td>{tableMoney(debtor.overdueDebt)}</td>
               </tr>;
             })}
@@ -492,7 +487,8 @@ export function DebtorsPage({ currentEmployee }) {
               onChange={() => paymentForm.setFieldValue("amount", null)}
               options={(paymentDebtor?.periods || []).map((paymentPeriod) => ({
                 value: paymentPeriod.id,
-                label: `${paymentPeriod.periodKey} — ${money(paymentPeriod.debt)} qoldiq`,
+                disabled: paymentPeriod.debt <= 0,
+                label: `${paymentPeriod.periodKey} — ${paymentPeriod.debt <= 0 ? "to‘liq to‘langan" : `${money(paymentPeriod.debt)} qoldiq`}`,
               }))}
             />
           </Form.Item>

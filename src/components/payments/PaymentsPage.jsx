@@ -62,8 +62,7 @@ export function PaymentsPage({ currentEmployee }) {
   const selected = contracts.find((item) => item._id === selectedContractId);
   const installments = editingPayment
     ? selected?.installments || []
-    : (selected?.installments || [])
-        .filter((item) => item.paidAmount < item.amount);
+    : selected?.installments || [];
   const selectedInstallment = installments.find(
     (item) => item._id === selectedInstallmentId,
   );
@@ -443,10 +442,14 @@ export function PaymentsPage({ currentEmployee }) {
             <Select
               disabled={!selected || Boolean(editingPayment)}
               placeholder="Oy yoki davrni tanlang"
-              options={installments.map((item) => ({
-                value: item._id,
-                label: `${item.periodKey} — ${money(Math.max(0, item.amount - item.paidAmount))} qoldiq`,
-              }))}
+              options={installments.map((item) => {
+                const balance = Math.max(0, item.amount - item.paidAmount);
+                return {
+                  value: item._id,
+                  disabled: !editingPayment && balance <= 0,
+                  label: `${item.periodKey} — ${balance <= 0 ? "to‘liq to‘langan" : `${money(balance)} qoldiq`}`,
+                };
+              })}
             />
           </Form.Item>
           {selected && (
