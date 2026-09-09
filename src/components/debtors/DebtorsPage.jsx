@@ -6,6 +6,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Pagination,
   Select,
 } from "antd";
 import dayjs from "dayjs";
@@ -15,6 +16,7 @@ import {
   apiErrorMessage,
   useCreatePaymentMutation,
   useGetDebtorsQuery,
+  useGetRoomsQuery,
   useSetDebtorDeadlineMutation,
 } from "../../store/baseApi";
 import "./Debtors.css";
@@ -28,9 +30,18 @@ export function DebtorsPage({ currentEmployee }) {
   const navigate = useNavigate();
   const [paymentForm] = Form.useForm();
   const [period, setPeriod] = useState(dayjs().format("YYYY-MM"));
-  const { data, isLoading, error } = useGetDebtorsQuery(period);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
+  const [roomFilter, setRoomFilter] = useState();
+  const [page, setPage] = useState(1);
+  const debtorParams = useMemo(() => ({
+    period,
+    page,
+    ...(query.trim() ? { search: query.trim() } : {}),
+    ...(status !== "all" ? { status } : {}),
+    ...(roomFilter ? { room: roomFilter } : {}),
+  }), [page, period, query, roomFilter, status]);
+  const { data, isLoading, isFetching, error } = useGetDebtorsQuery(debtorParams);
   const [selected, setSelected] = useState(null);
   const [paymentDebtor, setPaymentDebtor] = useState(null);
   const [historyDebtor, setHistoryDebtor] = useState(null);
@@ -40,25 +51,36 @@ export function DebtorsPage({ currentEmployee }) {
   const [createPayment, { isLoading: creatingPayment }] =
     useCreatePaymentMutation();
   const [setDebtorDeadline, { isLoading: savingDeadline }] = useSetDebtorDeadlineMutation();
+  const { data: roomsData } = useGetRoomsQuery();
   const isOwner = ["owner", "admin"].includes(currentEmployee?.role);
   const paymentMethod = Form.useWatch("method", paymentForm);
   const selectedInstallmentId = Form.useWatch("installment", paymentForm);
   const selectedPeriod = paymentDebtor?.periods.find(
     (item) => item.id === selectedInstallmentId,
   );
-  const debtors = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return (data?.debtors || []).filter((item) => {
-      const searchable =
-        `${item.student?.fullName || ""} ${item.student?.phone || ""} ${item.student?.parentPhone || ""} ${item.contracts?.map((contract) => contract.contractNumber).join(" ") || ""} ${item.contracts?.map((contract) => `${contract.room?.block || ""} ${contract.room?.roomNumber || ""}`).join(" ") || ""}`.toLowerCase();
-      const statusMatch =
-        status === "all" ||
-        (status === "overdue"
-          ? item.overdueDebt > 0
-          : item.debtStatus === status);
-      return statusMatch && (!needle || searchable.includes(needle));
-    });
-  }, [data?.debtors, query, status]);
+  const rooms = useMemo(() => roomsData?.rooms || [], [roomsData?.rooms]);
+  const roomOptions = useMemo(() => rooms.map((room) => ({
+    value: room.id,
+    label: `${room.block ? `${room.block} blok · ` : ""}${room.roomNumber}-xona · ${room.floor}-qavat`,
+  })), [rooms]);
+  const debtors = data?.debtors || [];
+  const pagination = data?.pagination || { page: 1, limit: 30, total: 0, totalPages: 1 };
+  const updatePeriod = (date) => {
+    setPeriod(date.format("YYYY-MM"));
+    setPage(1);
+  };
+  const updateQuery = (value) => {
+    setQuery(value);
+    setPage(1);
+  };
+  const updateRoomFilter = (value) => {
+    setRoomFilter(value);
+    setPage(1);
+  };
+  const updateStatus = (value) => {
+    setStatus(value);
+    setPage(1);
+  };
   const summary = data?.summary || {};
   const openPayment = (debtor) => {
     const first = debtor.periods[0];
@@ -136,7 +158,7 @@ export function DebtorsPage({ currentEmployee }) {
               <path d="M8 3v4M16 3v4M3 10h18" />
             </svg>
           }
-          onChange={(date) => setPeriod(date.format("YYYY-MM"))}
+          onChange={updatePeriod}
         />
       </section>
       <section className="debtor-stats">
@@ -189,13 +211,22 @@ export function DebtorsPage({ currentEmployee }) {
               </svg>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => updateQuery(event.target.value)}
                 placeholder="Talaba, telefon, xona yoki shartnoma"
               />
             </div>
             <Select
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              value={roomFilter}
+              placeholder="Xona bo‘yicha"
+              options={roomOptions}
+              onChange={updateRoomFilter}
+            />
+            <Select
               value={status}
-              onChange={setStatus}
+              onChange={updateStatus}
               options={[
                 { value: "all", label: "Barcha talabalar" },
                 { value: "overdue", label: "Muddati o‘tgan" },
@@ -213,7 +244,8 @@ export function DebtorsPage({ currentEmployee }) {
         {isLoading ? (
           <div className="debtor-state">Ma’lumotlar yuklanmoqda…</div>
         ) : (
-          <div className="debtor-table-wrap">
+          <div className={`debtor-table-wrap ${isFetching && !isLoading ? "refreshing" : ""}`}>
+            {isFetching && !isLoading && <div className="debtor-refreshing"><span />Ma’lumotlar yangilanmoqda…</div>}
             <table className="debtor-table">
               <thead>
                 <tr>
@@ -338,6 +370,18 @@ export function DebtorsPage({ currentEmployee }) {
                 )}
               </tbody>
             </table>
+            {pagination.total > pagination.limit && (
+              <div className="debtor-pagination">
+                <Pagination
+                  current={pagination.page}
+                  pageSize={pagination.limit}
+                  total={pagination.total}
+                  showSizeChanger={false}
+                  disabled={isFetching}
+                  onChange={setPage}
+                />
+              </div>
+            )}
           </div>
         )}
       </section>

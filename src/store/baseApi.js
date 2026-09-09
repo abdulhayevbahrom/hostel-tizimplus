@@ -327,7 +327,10 @@ export const baseApi = createApi({
       },
     }),
     getDebtors: builder.query({
-      query: (period) => ({ url: '/debtors', params: period ? { period } : undefined }),
+      query: (params = {}) => {
+        const options = typeof params === 'string' ? { period: params } : params
+        return { url: '/debtors', params: options }
+      },
       transformResponse: (response) => response.data,
       providesTags: [{ type: 'Debtor', id: 'LIST' }],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
