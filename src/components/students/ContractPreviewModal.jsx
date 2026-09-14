@@ -4,6 +4,17 @@ import { createPortal } from "react-dom";
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString("uz-UZ") : "—";
 
+const formatRoomInfo = (room) => {
+  if (!room) return "—";
+
+  const parts = [];
+  if (room.block) parts.push(`${room.block} blok`);
+  if (room.floor) parts.push(`${room.floor}-qavat`);
+  parts.push(`${room.roomNumber || "—"}-xona`);
+
+  return parts.join(", ");
+};
+
 export const ContractDocument = forwardRef(function ContractDocument(
   { contract, student, organization },
   ref,
@@ -131,10 +142,7 @@ export const ContractDocument = forwardRef(function ContractDocument(
             <b>Yashovchi</b>
             <p>F.I.Sh.: {student.fullName}</p>
             <p>Tel: {student.phone}</p>
-            <p>
-              Xona: {contract.room?.block || "—"} blok,{" "}
-              {contract.room?.roomNumber || "—"}-xona
-            </p>
+            <p>Xona: {formatRoomInfo(contract.room)}</p>
             <p>
               Muddat: {formatDate(contract.startDate)} —{" "}
               {formatDate(contract.endDate)}
