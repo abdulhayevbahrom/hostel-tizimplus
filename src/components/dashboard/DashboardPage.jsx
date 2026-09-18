@@ -426,7 +426,7 @@ export function DashboardPage() {
           tone="slate"
           icon="balance"
           label="Oylik hisob"
-          value={money(f.income + d.amount)}
+          value={money(d.billedAmount)}
           detail={`Talabalardan olinishi kerak bo‘lgan jami summa`}
         />
         <StatCard
