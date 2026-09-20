@@ -24,6 +24,13 @@ const studentStatusLabel = {
   warning: "50/50",
   red: "Ketadi",
 };
+const educationTypeLabel = {
+  daytime: "Kunduzgi",
+  evening: "Kechki",
+  extramural: "Sirtqi",
+  employed: "Ishlaydi",
+};
+const educationTypeOptions = Object.entries(educationTypeLabel).map(([value, label]) => ({ value, label }));
 
 const isContractExpiringWithinTwoDays = (endDate) => {
   if (!endDate) return false;
@@ -37,6 +44,7 @@ function StudentsListTab() {
   const [universityFilter, setUniversityFilter] = useState(undefined);
   const [facultyFilter, setFacultyFilter] = useState(undefined);
   const [courseFilter, setCourseFilter] = useState(undefined);
+  const [educationTypeFilter, setEducationTypeFilter] = useState(undefined);
   const [roomFilter, setRoomFilter] = useState(undefined);
   const [statusFilter, setStatusFilter] = useState(undefined);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
@@ -52,6 +60,7 @@ function StudentsListTab() {
     university: universityFilter,
     faculty: facultyFilter,
     course: courseFilter,
+    educationType: educationTypeFilter,
     room: roomFilter,
     studentStatus: statusFilter,
   });
@@ -191,6 +200,16 @@ function StudentsListTab() {
               />
               <Select
                 allowClear
+                placeholder="Ta’lim turi"
+                value={educationTypeFilter}
+                options={educationTypeOptions}
+                onChange={(value) => {
+                  setEducationTypeFilter(value);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
                 showSearch
                 optionFilterProp="label"
                 placeholder="Xona"
@@ -244,10 +263,12 @@ function StudentsListTab() {
                     <th>Talaba</th>
                     <th>Xona</th>
                     <th>Holati</th>
+                    <th>Shartnoma</th>
                     <th>Soliq hujjat</th>
                     <th>Telefon</th>
                     <th>Universitet</th>
                     <th>Kurs</th>
+                    <th>Ta’lim turi</th>
                     <th>Nogironlik</th>
                     <th>Intizom</th>
                     <th>Amal</th>
@@ -305,6 +326,11 @@ function StudentsListTab() {
                             {studentStatusLabel[status]}
                           </span>
                         </td>
+                        <td data-label="Shartnoma">
+                          <span className={`student-contract-badge ${student.hasContract ? "exists" : "missing"}`}>
+                            {student.hasContract ? "Mavjud" : "Yo‘q"}
+                          </span>
+                        </td>
                         <td data-label="Soliq shartnomasi">
                           <span
                             className={`student-tax-contract ${student.hasTaxContract ? "checked" : "unchecked"}`}
@@ -339,6 +365,11 @@ function StudentsListTab() {
                         <td data-label="Kurs">
                           <span className="student-course">
                             {student.course}-kurs
+                          </span>
+                        </td>
+                        <td data-label="Ta’lim turi">
+                          <span className="student-education-type">
+                            {educationTypeLabel[student.educationType] || "—"}
                           </span>
                         </td>
                         <td data-label="Nogironlik">
@@ -406,7 +437,7 @@ function StudentsListTab() {
                   })}
                   {!students.length && (
                     <tr>
-                      <td className="students-empty" colSpan={10}>
+                      <td className="students-empty" colSpan={12}>
                         Talabalar topilmadi
                       </td>
                     </tr>
@@ -485,6 +516,16 @@ function StudentsListTab() {
             }))}
             onChange={(value) => {
               setCourseFilter(value);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
+            placeholder="Ta’lim turi"
+            value={educationTypeFilter}
+            options={educationTypeOptions}
+            onChange={(value) => {
+              setEducationTypeFilter(value);
               setPage(1);
             }}
           />

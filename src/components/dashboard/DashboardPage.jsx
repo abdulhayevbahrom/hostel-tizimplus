@@ -396,7 +396,7 @@ export function DashboardPage() {
           icon="income"
           label="Oylik kirim"
           value={money(f.income)}
-          detail={`${monthLabel} bo‘yicha ${f.incomeCount || 0} ta kirim`}
+          detail={`${monthLabel}da qabul qilingan ${f.incomeCount || 0} ta to‘lov; boshqa oylar uchun to‘lovlar ham kiradi`}
           onClick={() => navigate("/payments")}
         />
         <StatCard
@@ -427,7 +427,9 @@ export function DashboardPage() {
           icon="balance"
           label="Oylik hisob"
           value={money(d.billedAmount)}
-          detail={`Talabalardan olinishi kerak bo‘lgan jami summa`}
+          detail={period.isAfter(dayjs(), "month")
+            ? `Shu oy hisobi uchun to‘langan: ${money(d.paidAmount)}; qolgan qismi kutilmoqda`
+            : `Shu oy hisobi uchun to‘langan ${money(d.paidAmount)} + qarz ${money(d.amount)}`}
         />
         <StatCard
           tone="pink"
