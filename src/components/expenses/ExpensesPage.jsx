@@ -209,9 +209,13 @@ export function ExpensesPage({ currentEmployee }) {
         {isLoading ? (
           <div className="expense-state">Xarajatlar yuklanmoqda…</div>
         ) : (
-          <div
-            className={`expense-table-wrap ${isFetching ? "refreshing" : ""}`}
-          >
+          <>
+            <div className="expense-result-count" aria-live="polite">
+              Jami: <strong>{data?.pagination?.total || 0}</strong> ta xarajat
+            </div>
+            <div
+              className={`expense-table-wrap ${isFetching ? "refreshing" : ""}`}
+            >
             <table className="expense-table">
               <thead>
                 <tr>
@@ -290,7 +294,8 @@ export function ExpensesPage({ currentEmployee }) {
                 )}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
         {(data?.pagination?.total || 0) > 25 && (
           <div className="expense-pagination">

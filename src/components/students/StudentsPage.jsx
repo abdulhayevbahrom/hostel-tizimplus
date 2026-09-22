@@ -254,6 +254,9 @@ function StudentsListTab() {
           <div className="students-loading">Talabalar yuklanmoqda…</div>
         ) : (
           <>
+            <div className="students-result-count" aria-live="polite">
+              Jami: <strong>{pagination.total}</strong> ta talaba
+            </div>
             <div
               className={`students-table-wrap ${isFetching ? "is-fetching" : ""}`}
             >

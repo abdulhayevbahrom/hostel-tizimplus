@@ -9,6 +9,8 @@
   font-weight: 800;
   white-space: nowrap;
 }
+.expense-result-count { padding: 9px 18px; color: #76685d; background: #fff8f1; border-top: 1px solid #eee2d7; border-bottom: 1px solid #eadfd5; font-size: 12px; }
+.expense-result-count strong { color: #a45d32; font-size: 14px; }
 
 .expense-add-button:hover { background: #0f8274; }
 

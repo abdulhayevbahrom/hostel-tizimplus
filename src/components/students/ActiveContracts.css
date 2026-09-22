@@ -4,6 +4,8 @@
   gap: 10px;
   padding: 0 20px 18px;
 }
+.student-history-result-count { padding: 9px 20px; color: #60777e; background: #f4f9f9; border-top: 1px solid #e1ebeb; border-bottom: 1px solid #dce9e9; font-size: 12px; }
+.student-history-result-count strong { color: #0f766e; font-size: 14px; }
 .active-contracts-summary article { display: flex; min-width: 0; min-height: 116px; flex-direction: column; justify-content: center; gap: 10px; padding: 16px 18px; background: #eaf7f5; border: 1px solid #c5e5e0; border-radius: 10px; }
 .active-contracts-summary article.active { background: #e6f6eb; border-color: #c5e5ce; }
 .active-contracts-summary article.completed { background: #e8f3f8; border-color: #c9dfe8; }
