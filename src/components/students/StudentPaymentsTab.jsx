@@ -43,7 +43,7 @@ export function StudentPaymentsTab({ student, currentEmployee }) {
   }
   const openPayment = () => { const contract = contractOptions[0]; const installment = (data?.installments || []).find((item) => String(item.contract) === contract?._id && item.paidAmount < item.amount); paymentForm.setFieldsValue({ contract: contract?._id, installment: installment?._id, amount: null, method: 'cash', fundHolder: 'cashier', note: '' }); setPaymentOpen(true) }
   const acceptPayment = async (values) => {
-    try { const result = await createPayment({ contract: values.contract, installment: values.installment, amount: Number(values.amount), method: values.method, note: values.note || '' }).unwrap(); printPaymentReceipt(result.payment, settingsData?.settings); toast.success('To‘lov muvaffaqiyatli qabul qilindi'); setPaymentOpen(false); paymentForm.resetFields() }
+    try { const result = await createPayment({ contract: values.contract, installment: values.installment, amount: Number(values.amount), method: values.method, fundHolder: values.fundHolder, note: values.note || '' }).unwrap(); printPaymentReceipt(result.payment, settingsData?.settings); toast.success('To‘lov muvaffaqiyatli qabul qilindi'); setPaymentOpen(false); paymentForm.resetFields() }
     catch (requestError) { toast.error(apiErrorMessage(requestError)) }
   }
 
