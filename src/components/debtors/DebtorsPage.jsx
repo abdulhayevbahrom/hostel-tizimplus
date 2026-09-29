@@ -52,7 +52,7 @@ export function DebtorsPage({ currentEmployee }) {
     useCreatePaymentMutation();
   const [setDebtorDeadline, { isLoading: savingDeadline }] = useSetDebtorDeadlineMutation();
   const { data: roomsData } = useGetRoomsQuery();
-  const isOwner = ["owner", "admin"].includes(currentEmployee?.role);
+  const canManageDeadline = ["owner", "admin", "cashier"].includes(currentEmployee?.role);
   const paymentMethod = Form.useWatch("method", paymentForm);
   const selectedInstallmentId = Form.useWatch("installment", paymentForm);
   const selectedPeriod = paymentDebtor?.periods.find(
@@ -255,6 +255,7 @@ export function DebtorsPage({ currentEmployee }) {
                   <th>
                     {data?.isFuturePeriod ? "To‘lov davri" : "Qarzdor davr"}
                   </th>
+                  <th>To‘lov muddati</th>
                   <th>
                     {data?.isFuturePeriod ? "Kutilayotgan summa" : "Jami qarz"}
                   </th>
@@ -316,7 +317,16 @@ export function DebtorsPage({ currentEmployee }) {
                         <span className="debt-period-count">
                           {debtor.periodCount} ta davr
                         </span>
-                        {debtor.paymentDeadline && <small className="debtor-deadline-date">Deadline: {dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</small>}
+                      </td>
+                      <td data-label="To‘lov muddati">
+                        {debtor.paymentDeadline ? (
+                          <>
+                            <strong className="debtor-deadline-date">{dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</strong>
+                            {debtor.isDeadlineReached && <small className="debtor-deadline-reached-label">Muddati yetgan</small>}
+                          </>
+                        ) : (
+                          <span className="debtor-deadline-empty">Belgilanmagan</span>
+                        )}
                       </td>
                       <td data-label="Summa">
                         <b className="debt-money">{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</b>
@@ -353,9 +363,9 @@ export function DebtorsPage({ currentEmployee }) {
                           >
                             Batafsil
                           </button>
-                          {isOwner && <button className="debtor-deadline-btn" onClick={() => openDeadline(debtor)}>Deadline</button>}
+                          {canManageDeadline && <button className="debtor-deadline-btn" onClick={() => openDeadline(debtor)}>{debtor.paymentDeadline ? "Muddatni o‘zgartirish" : "Muddat belgilash"}</button>}
                           <button className="debtor-more-btn" aria-label="Amallar" onClick={() => setActionDebtor(actionDebtor?.student?.id === debtor.student.id ? null : debtor)}>⋯</button>
-                          {actionDebtor?.student?.id === debtor.student.id && <div className="debtor-inline-actions"><button onClick={() => { openPayment(debtor); setActionDebtor(null) }}>To‘lov</button><button onClick={() => { setHistoryDebtor(debtor); setActionDebtor(null) }}>Tarix</button><button onClick={() => { setSelected(debtor); setActionDebtor(null) }}>Batafsil</button>{isOwner && <button onClick={() => { openDeadline(debtor); setActionDebtor(null) }}>Deadline</button>}</div>}
+                          {actionDebtor?.student?.id === debtor.student.id && <div className="debtor-inline-actions"><button onClick={() => { openPayment(debtor); setActionDebtor(null) }}>To‘lov</button><button onClick={() => { setHistoryDebtor(debtor); setActionDebtor(null) }}>Tarix</button><button onClick={() => { setSelected(debtor); setActionDebtor(null) }}>Batafsil</button>{canManageDeadline && <button onClick={() => { openDeadline(debtor); setActionDebtor(null) }}>{debtor.paymentDeadline ? "Muddatni o‘zgartirish" : "Muddat belgilash"}</button>}</div>}
                         </div>
                       </td>
                     </tr>
@@ -363,7 +373,7 @@ export function DebtorsPage({ currentEmployee }) {
                 })}
                 {!debtors.length && (
                   <tr>
-                    <td colSpan="8" className="debtor-state">
+                    <td colSpan="9" className="debtor-state">
                       Tanlangan oy uchun ma’lumot topilmadi
                     </td>
                   </tr>
@@ -400,7 +410,7 @@ export function DebtorsPage({ currentEmployee }) {
           {!data?.isFuturePeriod && <span>Muddati o‘tgan: <b>{money(summary.overdueDebt)}</b></span>}
         </div>
         <table>
-          <thead><tr><th>№</th><th>Talaba</th><th>Telefon</th><th>Universitet</th><th>Xona</th><th>Qarzdor davr</th><th>{data?.isFuturePeriod ? "Kutilayotgan" : "Jami qarz"}</th><th>Muddati o‘tgan</th></tr></thead>
+          <thead><tr><th>№</th><th>Talaba</th><th>Telefon</th><th>Universitet</th><th>Xona</th><th>Qarzdor davr</th><th>To‘lov muddati</th><th>{data?.isFuturePeriod ? "Kutilayotgan" : "Jami qarz"}</th><th>Muddati o‘tgan</th></tr></thead>
           <tbody>
             {debtors.map((debtor, index) => {
               const room = debtor.contracts?.[0]?.room;
@@ -408,11 +418,11 @@ export function DebtorsPage({ currentEmployee }) {
                 <td>{index + 1}</td><td>{debtor.student.fullName}</td><td>{debtor.student.phone || "—"}</td>
                 <td>{debtor.student.university?.name || "—"}{debtor.student.faculty?.name ? `, ${debtor.student.faculty.name}` : ""}</td>
                 <td>{room ? `${room.block} · ${room.roomNumber}-xona` : "—"}</td>
-                <td>{debtor.periodCount} ta davr</td>
+                <td>{debtor.periodCount} ta davr</td><td>{debtor.paymentDeadline ? dayjs(debtor.paymentDeadline).format("DD.MM.YYYY") : "Belgilanmagan"}</td>
                 <td>{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</td><td>{tableMoney(debtor.overdueDebt)}</td>
               </tr>;
             })}
-            {!debtors.length && <tr><td colSpan="8">Ma’lumot topilmadi</td></tr>}
+            {!debtors.length && <tr><td colSpan="9">Ma’lumot topilmadi</td></tr>}
           </tbody>
         </table>
       </section>

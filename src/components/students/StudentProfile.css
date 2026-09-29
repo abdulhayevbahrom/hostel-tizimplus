@@ -53,6 +53,7 @@
 .contract-table-wrap { overflow-x: auto; }
 .contract-table { width: 100%; border-collapse: collapse; }
 .contract-table th, .contract-table td { padding: 8px; color: #3b4e56; border-bottom: 1px solid #e3ecee; font-size: 13px; text-align: left; }
+.contract-table td small { display: block; margin-top: 3px; color: #81949b; font-size: 10px; }
 .contract-table th { color: #365b67; background: #f4f9f9; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .contract-status { display: inline-flex; padding: 3px 7px; color: #17613c; background: #e7f8ec; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
 .contract-status.completed { color: #155e75; background: #e5f3f7; }
