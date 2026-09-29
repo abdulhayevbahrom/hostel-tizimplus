@@ -6,6 +6,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Pagination,
   Popconfirm,
   Select,
 } from "antd";
@@ -40,11 +41,12 @@ export function PaymentsPage({ currentEmployee }) {
     period: dayjs().format("YYYY-MM"),
   });
   const [draftSearch, setDraftSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
   const [historyPayment, setHistoryPayment] = useState(null);
-  const { data, isLoading, error } = useGetPaymentsQuery(filters);
+  const { data, isLoading, isFetching, error } = useGetPaymentsQuery({ ...filters, page });
   const { data: optionsData, isLoading: optionsLoading } =
     useGetPaymentOptionsQuery(undefined, { skip: !open });
   const { data: settingsData } = useGetGeneralSettingsQuery();
@@ -68,11 +70,16 @@ export function PaymentsPage({ currentEmployee }) {
   );
   const rows = useMemo(() => data?.payments || [], [data?.payments]);
   const summary = data?.summary || {};
+  const pagination = data?.pagination || { page: 1, limit: 30, total: 0, totalPages: 1 };
   const isOwner = ["owner", "admin"].includes(currentEmployee?.role);
   const availableBalance = selectedInstallment
     ? Math.max(0, selectedInstallment.amount - selectedInstallment.paidAmount) +
       (editingPayment?.amount || 0)
     : 0;
+  const updateFilters = (changes) => {
+    setFilters((old) => ({ ...old, ...changes }));
+    setPage(1);
+  };
 
   const openForm = () => {
     setEditingPayment(null);
@@ -200,7 +207,7 @@ export function PaymentsPage({ currentEmployee }) {
               onChange={(e) => {
                 const value = e.target.value
                 setDraftSearch(value)
-                setFilters((old) => ({ ...old, search: value }))
+                updateFilters({ search: value })
               }}
             />
             <button className="payment-filter-toggle" type="button" aria-label="Filterlarni ochish" onClick={() => setFiltersOpen(true)}>
@@ -213,7 +220,7 @@ export function PaymentsPage({ currentEmployee }) {
             placeholder="Barcha usullar"
             value={filters.method || undefined}
             onChange={(value) =>
-              setFilters((old) => ({ ...old, method: value || "" }))
+              updateFilters({ method: value || "" })
             }
             options={Object.entries(methods).map(([value, label]) => ({
               value,
@@ -226,12 +233,12 @@ export function PaymentsPage({ currentEmployee }) {
             value={dayjs(filters.period)}
             format="MMMM YYYY"
             onChange={(date) =>
-              setFilters((old) => ({ ...old, period: date.format("YYYY-MM") }))
+              updateFilters({ period: date.format("YYYY-MM") })
             }
           />
           <div className="payment-date-range">
-            <DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, from: date?.format("YYYY-MM-DD") || "" }))} />
-            <DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, to: date?.format("YYYY-MM-DD") || "" }))} />
+            <DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => updateFilters({ from: date?.format("YYYY-MM-DD") || "" })} />
+            <DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => updateFilters({ to: date?.format("YYYY-MM-DD") || "" })} />
           </div>
           </div>
         </div>
@@ -241,7 +248,7 @@ export function PaymentsPage({ currentEmployee }) {
             <span /> To‘lovlar yuklanmoqda...
           </div>
         ) : (
-          <div className="payment-table-wrap">
+          <div className={`payment-table-wrap ${isFetching ? "refreshing" : ""}`}>
             <table className="payment-table">
               <thead>
                 <tr>
@@ -358,6 +365,11 @@ export function PaymentsPage({ currentEmployee }) {
                 )}
               </tbody>
             </table>
+            {pagination.total > pagination.limit && (
+              <div className="payment-pagination">
+                <Pagination current={pagination.page} pageSize={pagination.limit} total={pagination.total} showSizeChanger={false} disabled={isFetching} onChange={setPage} />
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -366,9 +378,9 @@ export function PaymentsPage({ currentEmployee }) {
 
       <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" rootClassName="payment-filters-modal" destroyOnHidden>
         <div className="payment-filter-modal-options">
-          <Select allowClear placeholder="Barcha usullar" value={filters.method || undefined} onChange={(value) => setFilters((old) => ({ ...old, method: value || "" }))} options={Object.entries(methods).map(([value, label]) => ({ value, label }))} />
-          <DatePicker picker="month" allowClear={false} value={dayjs(filters.period)} format="MMMM YYYY" onChange={(date) => setFilters((old) => ({ ...old, period: date.format("YYYY-MM") }))} />
-          <div className="payment-date-range"><DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, from: date?.format("YYYY-MM-DD") || "" }))} /><DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => setFilters((old) => ({ ...old, to: date?.format("YYYY-MM-DD") || "" }))} /></div>
+          <Select allowClear placeholder="Barcha usullar" value={filters.method || undefined} onChange={(value) => updateFilters({ method: value || "" })} options={Object.entries(methods).map(([value, label]) => ({ value, label }))} />
+          <DatePicker picker="month" allowClear={false} value={dayjs(filters.period)} format="MMMM YYYY" onChange={(date) => updateFilters({ period: date.format("YYYY-MM") })} />
+          <div className="payment-date-range"><DatePicker placeholder="Boshlanish" value={filters.from ? dayjs(filters.from) : null} maxDate={filters.to ? dayjs(filters.to) : undefined} format="DD.MM.YYYY" onChange={(date) => updateFilters({ from: date?.format("YYYY-MM-DD") || "" })} /><DatePicker placeholder="Tugash" value={filters.to ? dayjs(filters.to) : null} minDate={filters.from ? dayjs(filters.from) : undefined} format="DD.MM.YYYY" onChange={(date) => updateFilters({ to: date?.format("YYYY-MM-DD") || "" })} /></div>
         </div>
       </Modal>
 
