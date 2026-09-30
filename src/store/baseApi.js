@@ -19,6 +19,11 @@ const rawBaseQuery = fetchBaseQuery({
   prepareHeaders: (headers) => {
     const token = localStorage.getItem('hostelAuthToken')
     if (token) headers.set('authorization', `Bearer ${token}`)
+    try {
+      const location = JSON.parse(localStorage.getItem('hostelAuditLocation') || 'null')
+      if (Number.isFinite(location?.latitude)) headers.set('x-client-latitude', String(location.latitude))
+      if (Number.isFinite(location?.longitude)) headers.set('x-client-longitude', String(location.longitude))
+    } catch { /* Location is optional. */ }
     return headers
   },
 })
@@ -64,7 +69,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: guardedBaseQuery,
-  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession'],
+  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog'],
   endpoints: (builder) => ({
     getDashboard: builder.query({
       query: ({ period, date } = {}) => ({ url: '/dashboard', params: { ...(period ? { period } : {}), ...(date ? { date } : {}) } }),
@@ -335,7 +340,29 @@ export const baseApi = createApi({
       providesTags: [{ type: 'Debtor', id: 'LIST' }],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Debtor', id: 'LIST' }], 'Debtor:LIST')
-        const unsubscribe = subscribeSocket(['debtors:changed'], refresh)
+        const unsubscribe = subscribeSocket(['debtors:changed', 'settings:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getAuditLogs: builder.query({
+      query: (params = {}) => ({ url: '/audit-logs', params }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'AuditLog', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'AuditLog', id: 'LIST' }], 'AuditLog:LIST')
+        const unsubscribe = subscribeSocket(['audit-logs:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getStudentAuditLogs: builder.query({
+      query: (studentId) => `/audit-logs/student/${studentId}`,
+      transformResponse: (response) => response.data,
+      providesTags: (_result, _error, studentId) => [{ type: 'AuditLog', id: `STUDENT-${studentId}` }],
+      async onCacheEntryAdded(studentId, { cacheEntryRemoved, dispatch }) {
+        const refresh = (event) => { if (event?.studentIds?.includes(studentId)) scheduleInvalidate(dispatch, [{ type: 'AuditLog', id: `STUDENT-${studentId}` }], `AuditLog:STUDENT-${studentId}`) }
+        const unsubscribe = subscribeSocket(['audit-logs:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
@@ -626,6 +653,8 @@ export const {
   useGetAdvancePaymentsQuery,
   useGetStudentPaymentsQuery,
   useGetDebtorsQuery,
+  useGetAuditLogsQuery,
+  useGetStudentAuditLogsQuery,
   useSetDebtorDeadlineMutation,
   useGetAttendanceQuery,
   useGetAttendanceHistoryQuery,

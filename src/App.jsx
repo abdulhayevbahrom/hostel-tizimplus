@@ -22,6 +22,7 @@ import { SalariesPage } from './components/salaries/SalariesPage'
 import { DashboardPage } from './components/dashboard/DashboardPage'
 import { ReportsPage } from './components/reports/ReportsPage'
 import { CashPage } from './components/cash/CashPage'
+import { AuditLogsPage } from './components/audit/AuditLogsPage'
 import { baseApi, useGetGeneralSettingsQuery, useGetMeQuery } from './store/baseApi'
 import { LoginPage } from './components/auth/LoginPage'
 import './App.css'
@@ -55,6 +56,16 @@ function App() {
     else if (isAuthenticated && location.pathname === '/login') navigate('/', { replace: true })
   }, [authError, authToken, location.pathname, meData?.employee, navigate])
 
+  useEffect(() => {
+    if (!meData?.employee || !navigator.geolocation || localStorage.getItem('hostelAuditLocationRequested')) return
+    localStorage.setItem('hostelAuditLocationRequested', '1')
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => localStorage.setItem('hostelAuditLocation', JSON.stringify({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, capturedAt: new Date().toISOString() })),
+      () => {},
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 3600000 },
+    )
+  }, [meData?.employee])
+
   if (!authToken || authError) {
     if (authError && authToken) localStorage.removeItem('hostelAuthToken')
     return <LoginPage onLogin={handleLogin} />
@@ -85,6 +96,7 @@ function App() {
               <Route path="/salaries" element={guard('salaries', <SalariesPage currentEmployee={meData.employee} />)} />
               <Route path="/expenses" element={guard('expenses', <ExpensesPage currentEmployee={meData.employee} />)} />
               <Route path="/reports" element={guard('reports', <ReportsPage />)} />
+              <Route path="/audit-logs" element={isOwner ? <AuditLogsPage /> : firstAllowedPath ? <Navigate to={firstAllowedPath} replace /> : null} />
               <Route path="/settings" element={guard('settings', <Navigate to="/settings/general" replace />)} />
               <Route path="/settings/general" element={guard('settings', <GeneralSettingsPage />)} />
               <Route path="/settings/universities" element={guard('settings', <UniversitiesPage />)} />

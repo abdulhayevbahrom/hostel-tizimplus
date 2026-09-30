@@ -13,6 +13,7 @@ import { StudentFormModal } from "./StudentFormModal";
 import { StudentContractsTab } from "./StudentContractsTab";
 import { StudentPaymentsTab } from "./StudentPaymentsTab";
 import { StudentFinesTab } from "./StudentFinesTab";
+import { StudentAuditTab } from "../audit/StudentAuditTab";
 import "./StudentProfile.css";
 import "./StudentFines.css";
 import "./StudentFinesLayout.css";
@@ -278,6 +279,11 @@ export function StudentProfilePage({ currentEmployee }) {
               key: "fines",
               label: "Jarimalar",
               children: <StudentFinesTab student={student} />,
+            },
+            {
+              key: "audit",
+              label: "Amallar tarixi",
+              children: <StudentAuditTab student={student} />,
             },
           ]}
         />

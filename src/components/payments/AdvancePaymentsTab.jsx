@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Modal } from 'antd'
 import dayjs from 'dayjs'
 import { apiErrorMessage, useGetAdvancePaymentsQuery } from '../../store/baseApi'
+import { paymentMethodsText } from '../../utils/paymentParts'
 
-const methods = { cash: 'Naqd', online: 'Click', bank: 'Bank', card: 'Karta' }
 const money = (value) => `${Number(value || 0).toLocaleString('uz-UZ')} so‘m`
 
 export function AdvancePaymentsTab() {
@@ -32,7 +32,7 @@ export function AdvancePaymentsTab() {
     <Modal open={Boolean(selectedPeriod)} onCancel={() => setSelectedPeriod(null)} footer={null} width={760} title={selectedPeriod ? `${selectedPeriod.periodKey} uchun oldindan to‘lovlar` : 'Oldindan to‘lovlar'} rootClassName="advance-payment-modal" destroyOnHidden>
       <div className="advance-modal-summary"><span>Jami</span><strong>{money(selectedPeriod?.totalAmount)}</strong><small>{selectedPeriod?.studentCount || 0} ta talaba</small></div>
       <div className="payment-table-wrap"><table className="payment-table advance-detail-table"><thead><tr><th>Talaba</th><th>Shartnoma</th><th>To‘lov sanasi</th><th>Usuli</th><th>Summa</th></tr></thead><tbody>
-        {(selectedPeriod?.payments || []).map((payment) => <tr key={payment.id}><td data-label="Talaba"><strong>{payment.student?.fullName || '—'}</strong><small>{payment.student?.phone || '—'}</small></td><td data-label="Shartnoma">{payment.contract?.contractNumber || '—'}</td><td data-label="To‘lov sanasi">{dayjs(payment.createdAt).format('DD.MM.YYYY HH:mm')}</td><td data-label="Usuli"><span className={`method-badge ${payment.method}`}>{methods[payment.method] || payment.method}</span></td><td data-label="Summa"><b className="payment-amount">{money(payment.amount)}</b></td></tr>)}
+        {(selectedPeriod?.payments || []).map((payment) => <tr key={payment.id}><td data-label="Talaba"><strong>{payment.student?.fullName || '—'}</strong><small>{payment.student?.phone || '—'}</small></td><td data-label="Shartnoma">{payment.contract?.contractNumber || '—'}</td><td data-label="To‘lov sanasi">{dayjs(payment.createdAt).format('DD.MM.YYYY HH:mm')}</td><td data-label="Usuli">{paymentMethodsText(payment)}</td><td data-label="Summa"><b className="payment-amount">{money(payment.amount)}</b></td></tr>)}
       </tbody></table></div>
     </Modal>
   </>

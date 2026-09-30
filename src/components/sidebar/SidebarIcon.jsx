@@ -30,6 +30,7 @@ export function SidebarIcon({ name }) {
     salaries: WalletOutlined,
     expenses: ShoppingCartOutlined,
     reports: BarChartOutlined,
+    audit: FileDoneOutlined,
     settings: SettingOutlined,
   }
   const Icon = icons[name] || FileDoneOutlined

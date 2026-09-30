@@ -12,5 +12,6 @@ export const navigationItems = [
   { id: 'salaries', path: '/salaries', icon: 'salaries', label: 'Oyliklar' },
   { id: 'expenses', path: '/expenses', icon: 'expenses', label: 'Xarajatlar' },
   { id: 'reports', path: '/reports', icon: 'reports', label: 'Hisobot' },
+  { id: 'audit', path: '/audit-logs', icon: 'audit', label: 'Amallar tarixi' },
   { id: 'settings', path: '/settings', icon: 'settings', label: 'Sozlamalar' },
 ]

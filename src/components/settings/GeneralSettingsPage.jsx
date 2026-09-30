@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, Input, Upload } from 'antd'
+import { Button, Form, Input, InputNumber, Upload } from 'antd'
 import { toast } from 'react-toastify'
 import { apiErrorMessage, useGetGeneralSettingsQuery, useUpdateGeneralSettingsMutation } from '../../store/baseApi'
 import './SettingsPages.css'
@@ -16,14 +16,14 @@ export function GeneralSettingsPage() {
 
   useEffect(() => {
     if (!settings) return
-    form.setFieldsValue({ hostelName: settings.hostelName, organizationPhone: settings.organizationPhone, organizationAddress: settings.organizationAddress, receiptThankYou: settings.receiptThankYou })
+    form.setFieldsValue({ hostelName: settings.hostelName, organizationPhone: settings.organizationPhone, organizationAddress: settings.organizationAddress, receiptThankYou: settings.receiptThankYou, depositAmount: settings.depositAmount || 0 })
   }, [form, settings])
 
   const submit = async (values) => {
     try {
       setError('')
       const body = new FormData()
-      body.append('payload', JSON.stringify({ hostelName: values.hostelName.trim(), organizationPhone: values.organizationPhone.trim(), organizationAddress: values.organizationAddress.trim(), receiptThankYou: values.receiptThankYou.trim(), removeLogo }))
+      body.append('payload', JSON.stringify({ hostelName: values.hostelName.trim(), organizationPhone: values.organizationPhone.trim(), organizationAddress: values.organizationAddress.trim(), receiptThankYou: values.receiptThankYou.trim(), depositAmount: Number(values.depositAmount || 0), removeLogo }))
       if (logoFiles[0]?.originFileObj) body.append('logo', logoFiles[0].originFileObj)
       await updateSettings(body).unwrap()
       setLogoFiles([])
@@ -41,6 +41,7 @@ export function GeneralSettingsPage() {
           <Form form={form} layout="vertical" requiredMark={false} onFinish={submit} className="general-settings-form">
             <Form.Item name="hostelName" label="Hostel nomi" rules={[{ required: true, whitespace: true, message: 'Hostel nomini kiriting' }]}><Input maxLength={120} placeholder="Masalan: TizimPlus Hostel" /></Form.Item>
             <div className="general-setting-grid"><Form.Item name="organizationPhone" label="Tashkilot telefoni" rules={[{ required: true, message: 'Tashkilot telefonini kiriting' }, { pattern: /^\d{9}$/, message: 'Masalan: 939119572' }]}><Input maxLength={9} inputMode="numeric" placeholder="939119572" /></Form.Item><Form.Item name="organizationAddress" label="Tashkilot manzili" rules={[{ required: true, whitespace: true, message: 'Tashkilot manzilini kiriting' }]}><Input maxLength={300} placeholder="Viloyat, tuman, ko‘cha va uy" /></Form.Item></div>
+            <Form.Item name="depositAmount" label="Har bir talaba uchun deposit summasi" rules={[{ required: true, type: 'number', min: 0, message: 'Deposit summasini kiriting' }]}><InputNumber min={0} precision={0} addonAfter="so‘m" style={{ width: '100%' }} formatter={(value) => String(value || '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} parser={(value) => String(value || '').replace(/\D/g, '')} /></Form.Item>
             <Form.Item label="Hostel logosi">
               <div className="setting-logo-row">
                 {settings?.logo && !removeLogo && !logoFiles.length && <div className="setting-current-logo"><img src={settings.logo.displayUrl || settings.logo.url} alt="Hostel logosi" /><button type="button" onClick={() => setRemoveLogo(true)}>×</button></div>}
