@@ -25,6 +25,7 @@ export function SidebarIcon({ name }) {
     payments: CreditCardOutlined,
     cash: WalletOutlined,
     debtors: UserSwitchOutlined,
+    deposits: WalletOutlined,
     fines: AuditOutlined,
     employees: IdcardOutlined,
     salaries: WalletOutlined,

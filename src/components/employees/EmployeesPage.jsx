@@ -37,6 +37,7 @@ const sectionOptions = [
   { label: 'To‘lovlar', value: 'payments' },
   { label: 'Kassa', value: 'cash' },
   { label: 'Qarzdorlar', value: 'debtors' },
+  { label: 'Depositlar', value: 'deposits' },
   { label: 'Xodimlar', value: 'employees' },
   { label: 'Oyliklar', value: 'salaries' },
   { label: 'Xarajatlar', value: 'expenses' },

@@ -7,6 +7,7 @@ export const navigationItems = [
   { id: 'payments', path: '/payments', icon: 'payments', label: 'To‘lovlar' },
   { id: 'cash', path: '/cash', icon: 'cash', label: 'Kassa' },
   { id: 'debtors', path: '/debtors', icon: 'debtors', label: 'Qarzdorlar' },
+  { id: 'deposits', path: '/deposits', icon: 'deposits', label: 'Depositlar' },
   { id: 'fines', path: '/fines', icon: 'fines', label: 'Jarimalar' },
   { id: 'employees', path: '/employees', icon: 'employees', label: 'Xodimlar' },
   { id: 'salaries', path: '/salaries', icon: 'salaries', label: 'Oyliklar' },

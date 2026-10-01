@@ -29,27 +29,53 @@ function Location({ log }) {
     : <span>{label}</span>
 }
 
-const ignoredFields = new Set(['_id', 'id', '__v', 'createdAt', 'updatedAt', 'spentAt', 'createdBy', 'updatedBy', 'deletedAt', 'deletedBy', 'isDeleted', 'studentId', 'expenseId', 'paymentId', 'fineId', 'employeeId', 'roomId', 'universityId', 'facultyId', 'blockId'])
+const ignoredFields = new Set(['_id', 'id', '__v', 'createdAt', 'updatedAt', 'spentAt', 'createdBy', 'updatedBy', 'deletedAt', 'deletedBy', 'isDeleted', 'studentId', 'expenseId', 'paymentId', 'fineId', 'employeeId', 'roomId', 'universityId', 'facultyId', 'blockId', 'auditHistory', 'cashSession'])
 const fieldLabels = {
   title: 'Nomi', category: 'Kategoriya', amount: 'Summa', paymentType: 'To‘lov turi', note: 'Izoh',
   fullName: 'F.I.Sh.', firstname: 'Ism', lastname: 'Familiya', phone: 'Telefon', parentPhone: 'Ota-ona telefoni',
   address: 'Manzil', course: 'Kurs', status: 'Holati', studentStatus: 'Talaba holati', room: 'Xona',
   university: 'Universitet', faculty: 'Fakultet', student: 'Talaba', contract: 'Shartnoma',
-  paymentPurpose: 'To‘lov maqsadi', paymentMethod: 'To‘lov usuli', contractAmount: 'Shartnoma summasi',
+  paymentPurpose: 'To‘lov maqsadi', paymentMethod: 'To‘lov usuli', method: 'To‘lov usuli', contractAmount: 'Shartnoma summasi',
   depositAmount: 'Depozit summasi', hostelName: 'Yotoqxona nomi', login: 'Login', role: 'Lavozim turi',
   position: 'Lavozim', isActive: 'Faol holati', canLogin: 'Kirish huquqi', date: 'Sana', deadline: 'Muddat',
+  contractNumber: 'Shartnoma raqami', roomNumber: 'Xona raqami', block: 'Blok', floor: 'Qavat',
+  totalAmount: 'Jami summa', paymentAmount: 'Tarif summasi', fundHolder: 'Mablag‘ saqlovchi',
+  paymentParts: 'To‘lov tarkibi', allocations: 'To‘lov taqsimoti', installment: 'To‘lov davri',
+  periodKey: 'Davr', dueDate: 'To‘lov muddati', paidAmount: 'To‘langan summa',
+  receivedBy: 'Qabul qilgan xodim', startDate: 'Boshlanish sanasi', endDate: 'Tugash sanasi',
+  durationDays: 'Davomiyligi (kun)', billingQuantity: 'Hisoblash miqdori', action: 'Amal',
+  performedBy: 'Bajargan xodim', performedAt: 'Bajarilgan vaqt', before: 'Oldingi holat', after: 'Yangi holat',
 }
 
-const valueText = (value) => {
+const valueLabels = {
+  cash: 'Naqd', card: 'Karta', online: 'Onlayn', bank: 'Bank', mixed: 'Aralash',
+  organization: 'Tashkilot hisobida', contract: 'Shartnoma to‘lovi', deposit: 'Depozit',
+  monthly: 'Oylik', daily: 'Kunlik', active: 'Faol', completed: 'Yakunlangan', cancelled: 'Bekor qilingan',
+  paid: 'To‘langan', partial: 'Qisman to‘langan', unpaid: 'To‘lanmagan', created: 'Yaratilgan',
+  updated: 'O‘zgartirilgan', owner: 'Rahbar', manager: 'Menejer',
+}
+
+const contextualValueLabels = {
+  fundHolder: { cashier: 'Kassir hisobida', organization: 'Tashkilot hisobida', mixed: 'Aralash' },
+  role: { owner: 'Rahbar', manager: 'Menejer', cashier: 'Kassir' },
+}
+
+const valueText = (value, key = '') => {
   if (value == null || value === '') return '—'
   if (typeof value === 'boolean') return value ? 'Ha' : 'Yo‘q'
   if (typeof value === 'object') {
     if (value.fullName) return value.fullName
     if (value.firstname || value.lastname) return `${value.firstname || ''} ${value.lastname || ''}`.trim()
+    if (value.contractNumber) return value.contractNumber
+    if (value.roomNumber) return `${value.block ? `${value.block} · ` : ''}${value.roomNumber}-xona`
     if (value.name) return value.name
-    if (Array.isArray(value)) return value.map(valueText).join(', ')
-    return Object.entries(value).filter(([key]) => !ignoredFields.has(key)).map(([key, item]) => `${fieldLabels[key] || key}: ${valueText(item)}`).join(', ') || '—'
+    if (Array.isArray(value)) return value.map((item) => valueText(item, key)).join('; ')
+    return Object.entries(value).filter(([childKey]) => !ignoredFields.has(childKey)).map(([childKey, item]) => `${fieldLabels[childKey] || 'Ma’lumot'}: ${valueText(item, childKey)}`).join(', ') || '—'
   }
+  if (contextualValueLabels[key]?.[value]) return contextualValueLabels[key][value]
+  if (valueLabels[value]) return valueLabels[value]
+  if (/Date$|At$/.test(key) && !Number.isNaN(new Date(value).getTime())) return dateTime(value)
+  if (['amount', 'totalAmount', 'paymentAmount', 'contractAmount', 'depositAmount', 'paidAmount'].includes(key) && Number.isFinite(Number(value))) return `${Number(value).toLocaleString('uz-UZ')} so‘m`
   return String(value)
 }
 
@@ -79,7 +105,7 @@ const auditChanges = (log) => {
   return [...new Set([...Object.keys(oldData), ...Object.keys(newData)])]
     .filter((key) => !ignoredFields.has(key))
     .filter((key) => !valuesEqual(oldData[key], newData[key]))
-    .map((key) => ({ key, before: valueText(oldData[key]), after: valueText(newData[key]) }))
+    .map((key) => ({ key, before: valueText(oldData[key], key), after: valueText(newData[key], key) }))
 }
 const auditSummary = (log) => {
   if (log.action === 'login') return 'Xodim tizimga muvaffaqiyatli kirdi'
@@ -98,7 +124,7 @@ const auditSummary = (log) => {
 function Changes({ log }) {
   const oldData = unwrapAuditValue(log, log.oldValue)
   if (log.action === 'delete') {
-    const deletedFields = Object.keys(oldData).filter((key) => !ignoredFields.has(key)).map((key) => ({ key, value: valueText(oldData[key]) })).filter(({ value }) => value !== '—')
+    const deletedFields = Object.keys(oldData).filter((key) => !ignoredFields.has(key)).map((key) => ({ key, value: valueText(oldData[key], key) })).filter(({ value }) => value !== '—')
     if (!deletedFields.length) return <div className="audit-no-changes">O‘chirilgan ma’lumot tafsiloti mavjud emas</div>
     return <section className="audit-deleted"><h4>O‘chirilgan ma’lumot</h4><div>{deletedFields.map(({ key, value }) => <div className="audit-deleted-row" key={key}><span>{fieldLabels[key] || key}</span><strong>{value}</strong></div>)}</div></section>
   }

@@ -12,21 +12,14 @@ import './Rooms.css'
 const money = (value) => Number(value || 0).toLocaleString('uz-UZ')
 const educationTypeLabel = { daytime: 'Kunduzgi', evening: 'Kechki', extramural: 'Sirtqi', employed: 'Ishlaydi' }
 
-const AdvancePaymentCell = ({ advancePayments }) => {
-  const periods = advancePayments?.periods || []
-  if (!advancePayments?.totalAmount || !periods.length) return <span className="room-no-advance">Yo‘q</span>
-
-  return (
-    <div className="room-advance-list">
-      <strong className="room-advance-payment">Jami: {money(advancePayments.totalAmount)}</strong>
-      {periods.map((item) => (
-        <span key={item.periodKey}>
-          <b>{item.periodKey}</b>
-          <small>{money(item.amount)}</small>
-        </span>
-      ))}
-    </div>
-  )
+const ContractInstallmentsCell = ({ installments = [] }) => {
+  if (!installments.length) return <span className="room-no-advance">To‘lov rejasi mavjud emas</span>
+  return <div className="room-installment-list">
+    {installments.map((item) => <div className="room-installment" key={item.id}>
+      <strong>{item.periodKey}</strong>
+      <b>{money(item.paidAmount)}</b>
+    </div>)}
+  </div>
 }
 
 export function RoomsPage() {
@@ -113,7 +106,7 @@ export function RoomsPage() {
       </Modal>
       <Modal open={Boolean(residentsRoom)} onCancel={() => setResidentsRoom(null)} footer={null} width="min(1440px, 96vw)" title={residentsRoom ? `Xona ${residentsRoom.roomNumber} — biriktirilgan talabalar` : ''} rootClassName="room-residents-modal">
         {residentsError && <div className="form-error">{apiErrorMessage(residentsError)}</div>}
-        {residentsLoading ? <div className="room-residents-state">Talabalar yuklanmoqda…</div> : <div className="room-residents-table-wrap"><table className="room-residents-table"><thead><tr><th>Talaba</th><th>Ta’lim turi / bandligi</th><th>Shartnoma mavjudligi</th><th>Shartnoma</th><th>Muddati</th><th>Oldindan to‘lov</th></tr></thead><tbody>{(residentsData?.students || []).map(({ student, contract, advancePayments }) => <tr key={contract.id}><td data-label="Talaba"><button className="room-resident-person" onClick={() => navigate(`/student/${student.id}`)} title="Talaba profilini ochish">{student.photo ? <img src={student.photo.thumbnailUrl || student.photo.url} alt="" /> : <span>{student.fullName?.[0]}</span>}<div><strong>{student.fullName}</strong><small>{student.phone}</small></div></button></td><td data-label="Ta’lim turi / bandligi">{educationTypeLabel[student.educationType] || "—"}</td><td data-label="Shartnoma mavjudligi"><span className="room-contract-exists">Mavjud</span></td><td data-label="Shartnoma"><strong>{contract.contractNumber}</strong></td><td data-label="Muddati">{dayjs(contract.startDate).format('DD.MM.YYYY')}<small>{dayjs(contract.endDate).format('DD.MM.YYYY')} gacha</small></td><td data-label="Oldindan to‘lov"><AdvancePaymentCell advancePayments={advancePayments} /></td></tr>)}{!residentsData?.students?.length && <tr><td colSpan="6" className="room-residents-state">Bu xonaga hali talaba biriktirilmagan</td></tr>}</tbody></table></div>}
+        {residentsLoading ? <div className="room-residents-state">Talabalar yuklanmoqda…</div> : <div className="room-residents-table-wrap"><table className="room-residents-table"><thead><tr><th>Talaba</th><th>Ta’lim turi / bandligi</th><th>Shartnoma mavjudligi</th><th>Shartnoma</th><th>Muddati</th><th>Shartnoma oylari va to‘lovlar</th></tr></thead><tbody>{(residentsData?.students || []).map(({ student, contract, installments }) => <tr key={contract.id}><td data-label="Talaba"><button className="room-resident-person" onClick={() => navigate(`/student/${student.id}`)} title="Talaba profilini ochish">{student.photo ? <img src={student.photo.thumbnailUrl || student.photo.url} alt="" /> : <span>{student.fullName?.[0]}</span>}<div><strong>{student.fullName}</strong><small>{student.phone}</small></div></button></td><td data-label="Ta’lim turi / bandligi">{educationTypeLabel[student.educationType] || "—"}</td><td data-label="Shartnoma mavjudligi"><span className="room-contract-exists">Mavjud</span></td><td data-label="Shartnoma"><strong>{contract.contractNumber}</strong></td><td data-label="Muddati">{dayjs(contract.startDate).format('DD.MM.YYYY')}<small>{dayjs(contract.endDate).format('DD.MM.YYYY')} gacha</small></td><td data-label="Oylar va to‘lovlar"><ContractInstallmentsCell installments={installments} /></td></tr>)}{!residentsData?.students?.length && <tr><td colSpan="6" className="room-residents-state">Bu xonaga hali talaba biriktirilmagan</td></tr>}</tbody></table></div>}
       </Modal>
     </div>
   )

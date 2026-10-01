@@ -15,6 +15,7 @@ import { SettingsSidebar } from './components/settings/SettingsSidebar'
 import { UniversitiesPage } from './components/settings/UniversitiesPage'
 import { PaymentsPage } from './components/payments/PaymentsPage'
 import { DebtorsPage } from './components/debtors/DebtorsPage'
+import { DepositsPage } from './components/deposits/DepositsPage'
 import { AttendancePage } from './components/attendance/AttendancePage'
 import { ExpensesPage } from './components/expenses/ExpensesPage'
 import { FinesPage } from './components/fines/FinesPage'
@@ -91,6 +92,7 @@ function App() {
               <Route path="/payments" element={guard('payments', <PaymentsPage currentEmployee={meData.employee} />)} />
               <Route path="/cash" element={guard('cash', <CashPage currentEmployee={meData.employee} />)} />
               <Route path="/debtors" element={guard('debtors', <DebtorsPage currentEmployee={meData.employee} />)} />
+              <Route path="/deposits" element={guard('deposits', <DepositsPage />)} />
               <Route path="/fines" element={guard('fines', <FinesPage currentEmployee={meData.employee} />)} />
               <Route path="/employees" element={guard('employees', <EmployeesPage currentEmployee={meData.employee} />)} />
               <Route path="/salaries" element={guard('salaries', <SalariesPage currentEmployee={meData.employee} />)} />

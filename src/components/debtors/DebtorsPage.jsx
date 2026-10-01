@@ -7,7 +7,6 @@ import {
   InputNumber,
   Modal,
   Pagination,
-  Segmented,
   Select,
 } from "antd";
 import dayjs from "dayjs";
@@ -34,7 +33,6 @@ export function DebtorsPage({ currentEmployee }) {
   const [period, setPeriod] = useState(dayjs().format("YYYY-MM"));
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
-  const [debtType, setDebtType] = useState("all");
   const [roomFilter, setRoomFilter] = useState();
   const [page, setPage] = useState(1);
   const debtorParams = useMemo(() => ({
@@ -42,9 +40,8 @@ export function DebtorsPage({ currentEmployee }) {
     page,
     ...(query.trim() ? { search: query.trim() } : {}),
     ...(status !== "all" ? { status } : {}),
-    ...(debtType !== "all" ? { debtType } : {}),
     ...(roomFilter ? { room: roomFilter } : {}),
-  }), [debtType, page, period, query, roomFilter, status]);
+  }), [page, period, query, roomFilter, status]);
   const { data, isLoading, isFetching, error } = useGetDebtorsQuery(debtorParams);
   const [selected, setSelected] = useState(null);
   const [paymentDebtor, setPaymentDebtor] = useState(null);
@@ -61,7 +58,6 @@ export function DebtorsPage({ currentEmployee }) {
   const paymentTotal = breakdownTotal(watchedBreakdown);
   const needsFundHolder = Number(watchedBreakdown.card || 0) > 0 || Number(watchedBreakdown.online || 0) > 0;
   const selectedInstallmentId = Form.useWatch("installment", paymentForm);
-  const paymentPurpose = Form.useWatch("paymentPurpose", paymentForm) || "contract";
   const selectedPeriod = paymentDebtor?.periods.find(
     (item) => item.id === selectedInstallmentId,
   );
@@ -93,7 +89,6 @@ export function DebtorsPage({ currentEmployee }) {
     const first = debtor.periods[0];
     setPaymentDebtor(debtor);
     paymentForm.setFieldsValue({
-      paymentPurpose: debtor.contractDebt > 0 ? "contract" : "deposit",
       installment: first?.id,
       breakdown: { cash: null, card: null, online: null, bank: null },
       fundHolder: "organization",
@@ -106,10 +101,10 @@ export function DebtorsPage({ currentEmployee }) {
         (item) => item.id === values.installment,
       );
       await createPayment({
-        paymentPurpose: values.paymentPurpose,
+        paymentPurpose: "contract",
         student: paymentDebtor.student.id,
-        contract: values.paymentPurpose === "contract" ? paymentPeriod?.contractId : paymentDebtor.contracts?.[0]?.id,
-        installment: values.paymentPurpose === "contract" ? paymentPeriod?.id : undefined,
+        contract: paymentPeriod?.contractId,
+        installment: paymentPeriod?.id,
         breakdown: values.breakdown,
         fundHolder: values.fundHolder,
         note: values.note || "",
@@ -235,11 +230,6 @@ export function DebtorsPage({ currentEmployee }) {
               onChange={updateRoomFilter}
             />
             <Select
-              value={debtType}
-              onChange={(value) => { setDebtType(value); setPage(1); }}
-              options={[{ value: "all", label: "Barcha qarzlar" }, { value: "contract", label: "Shartnoma qarzi" }, { value: "deposit", label: "Deposit qarzi" }]}
-            />
-            <Select
               value={status}
               onChange={updateStatus}
               options={[
@@ -345,7 +335,7 @@ export function DebtorsPage({ currentEmployee }) {
                       </td>
                       <td data-label="Summa">
                         <b className="debt-money">{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</b>
-                        {!data?.isFuturePeriod && <small>Shartnoma: {tableMoney(debtor.contractDebt)} · Deposit: {tableMoney(debtor.depositDebt)}</small>}
+                        {!data?.isFuturePeriod && <small>Faqat shartnoma qarzdorligi</small>}
                       </td>
                       <td data-label="O‘tgan">
                         <b
@@ -548,8 +538,6 @@ export function DebtorsPage({ currentEmployee }) {
           requiredMark={false}
           onFinish={acceptPayment}
         >
-          <Form.Item name="paymentPurpose" label="To‘lov maqsadi"><Segmented block options={[{ value: "contract", label: "Shartnoma to‘lovi", disabled: !paymentDebtor?.contractDebt }, { value: "deposit", label: "Deposit", disabled: !paymentDebtor?.depositDebt }]} onChange={() => paymentForm.setFieldsValue({ installment: paymentDebtor?.periods?.[0]?.id, breakdown: { cash: null, card: null, online: null, bank: null } })} /></Form.Item>
-          {paymentPurpose === "contract" ? <>
           <Form.Item
             name="installment"
             label="Qaysi oy uchun"
@@ -570,15 +558,14 @@ export function DebtorsPage({ currentEmployee }) {
               <strong>{money(selectedPeriod.debt)}</strong>
             </div>
           )}
-          </> : <div className="debtor-payment-balance"><span>Deposit qarzdorligi</span><strong>{money(paymentDebtor?.depositDebt)}</strong></div>}
-          <div className="payment-split-field"><label>To‘lov usullari bo‘yicha summa</label><div className="payment-split-grid">{Object.entries(methods).map(([value, label]) => <Form.Item className={`payment-split-method ${value}`} name={["breakdown", value]} label={label} key={value}><InputNumber min={0} precision={0} placeholder="0" addonAfter="so‘m" formatter={(v) => String(v || "").replace(/\B(?=(\d{3})+(?!\d))/g, " ")} parser={(v) => String(v || "").replace(/[^\d]/g, "")} /></Form.Item>)}</div><div className={`payment-split-total ${paymentTotal > Number(paymentPurpose === "deposit" ? paymentDebtor?.depositDebt : selectedPeriod?.debt || 0) ? "invalid" : ""}`}><span>Jami to‘lov</span><strong>{money(paymentTotal)}</strong></div>{paymentTotal > Number(paymentPurpose === "deposit" ? paymentDebtor?.depositDebt : selectedPeriod?.debt || 0) && <div className="form-error">Jami summa qarzdorlikdan oshmasligi kerak</div>}</div>
+          <div className="payment-split-field"><label>To‘lov usullari bo‘yicha summa</label><div className="payment-split-grid">{Object.entries(methods).map(([value, label]) => <Form.Item className={`payment-split-method ${value}`} name={["breakdown", value]} label={label} key={value}><InputNumber min={0} precision={0} placeholder="0" addonAfter="so‘m" formatter={(v) => String(v || "").replace(/\B(?=(\d{3})+(?!\d))/g, " ")} parser={(v) => String(v || "").replace(/[^\d]/g, "")} /></Form.Item>)}</div><div className={`payment-split-total ${paymentTotal > Number(selectedPeriod?.debt || 0) ? "invalid" : ""}`}><span>Jami to‘lov</span><strong>{money(paymentTotal)}</strong></div>{paymentTotal > Number(selectedPeriod?.debt || 0) && <div className="form-error">Jami summa qarzdorlikdan oshmasligi kerak</div>}</div>
           {currentEmployee?.role === "cashier" && needsFundHolder && <Form.Item name="fundHolder" label="Karta / Click puli qaysi hisobga tushdi?" rules={[{ required: true, message: "Hisobni tanlang" }]}><Select options={[{ value: "organization", label: "Tashkilot hisobiga" }, { value: "cashier", label: "Shaxsiy hisobimga (keyin topshiraman)" }]} /></Form.Item>}
           <Form.Item name="note" label="Izoh">
             <Input placeholder="Ixtiyoriy" />
           </Form.Item>
           <div className="debtor-payment-actions">
             <Button onClick={() => setPaymentDebtor(null)}>Bekor qilish</Button>
-            <Button type="primary" htmlType="submit" loading={creatingPayment} disabled={paymentTotal <= 0 || paymentTotal > Number(paymentPurpose === "deposit" ? paymentDebtor?.depositDebt : selectedPeriod?.debt || 0)}>
+            <Button type="primary" htmlType="submit" loading={creatingPayment} disabled={paymentTotal <= 0 || paymentTotal > Number(selectedPeriod?.debt || 0)}>
               To‘lovni tasdiqlash
             </Button>
           </div>

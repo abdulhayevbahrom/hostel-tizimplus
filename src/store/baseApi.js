@@ -69,7 +69,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: guardedBaseQuery,
-  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog'],
+  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog'],
   endpoints: (builder) => ({
     getDashboard: builder.query({
       query: ({ period, date } = {}) => ({ url: '/dashboard', params: { ...(period ? { period } : {}), ...(date ? { date } : {}) } }),
@@ -194,6 +194,12 @@ export const baseApi = createApi({
       query: ({ roomId, period }) => ({ url: `/rooms/${roomId}/students`, params: period ? { period } : undefined }),
       transformResponse: (response) => response.data,
       providesTags: (_result, _error, { roomId }) => [{ type: 'Room', id: roomId }, { type: 'StudentContract', id: 'LIST' }],
+      async onCacheEntryAdded({ roomId }, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Room', id: roomId }], `Room:${roomId}:students`)
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
     }),
     createRoom: builder.mutation({
       query: (body) => ({ url: '/rooms', method: 'POST', body }),
@@ -341,6 +347,17 @@ export const baseApi = createApi({
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Debtor', id: 'LIST' }], 'Debtor:LIST')
         const unsubscribe = subscribeSocket(['debtors:changed', 'settings:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getDeposits: builder.query({
+      query: (params = {}) => ({ url: '/deposits', params }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Deposit', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Deposit', id: 'LIST' }], 'Deposit:LIST')
+        const unsubscribe = subscribeSocket(['payments:changed', 'settings:changed', 'student-contracts:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
@@ -653,6 +670,7 @@ export const {
   useGetAdvancePaymentsQuery,
   useGetStudentPaymentsQuery,
   useGetDebtorsQuery,
+  useGetDepositsQuery,
   useGetAuditLogsQuery,
   useGetStudentAuditLogsQuery,
   useSetDebtorDeadlineMutation,
