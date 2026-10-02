@@ -31,6 +31,7 @@ import "./Payments.css";
 const methods = paymentMethods;
 const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
 const statMoney = (value) => money(value).replace(/\sso‘m$/, "");
+const employeeRoles = { owner: "Owner", admin: "Owner", cashier: "Kassir", manager: "Menejer", employee: "Xodim" };
 
 export function PaymentsPage({ currentEmployee }) {
   const [activeTab, setActiveTab] = useState("current");
@@ -279,6 +280,7 @@ export function PaymentsPage({ currentEmployee }) {
                   <th>Sana</th>
                   <th>To‘lov usuli</th>
                   <th>Summa</th>
+                  <th>Qabul qilgan</th>
                   <th>Izoh</th>
                   <th />
                 </tr>
@@ -296,7 +298,7 @@ export function PaymentsPage({ currentEmployee }) {
                       </span>
                       <small>
                         {payment.contract?.room
-                          ? `${payment.contract.room.block || ""} ${payment.contract.room.roomNumber || ""}-xona`
+                          ? `${payment.contract.room.block || ""} ${payment.contract.room.roomNumber || ""}-xona${payment.contract.room.floor != null ? ` · ${payment.contract.room.floor}-qavat` : ""}`
                           : ""}
                       </small>
                     </td>
@@ -319,6 +321,10 @@ export function PaymentsPage({ currentEmployee }) {
                         {payment.status === "cancelled" ? "" : "+ "}{money(payment.amount)}
                       </b>
                       {payment.status === "cancelled" && <small className="payment-cancelled-badge">Bekor qilingan</small>}
+                    </td>
+                    <td data-label="Qabul qilgan">
+                      <strong>{employeeName(payment.receivedBy)}</strong>
+                      <small>{employeeRoles[payment.receivedBy?.role] || "Xodim"}</small>
                     </td>
                     <td data-label="Izoh">{payment.note || "—"}</td>
                     <td>
@@ -375,7 +381,7 @@ export function PaymentsPage({ currentEmployee }) {
                 ))}
                 {!rows.length && (
                   <tr>
-                    <td className="payment-empty" colSpan="9">
+                    <td className="payment-empty" colSpan="10">
                       <span>₸</span>
                       <strong>To‘lov topilmadi</strong>
                       <p>Tanlangan oy uchun to‘lov mavjud emas.</p>
