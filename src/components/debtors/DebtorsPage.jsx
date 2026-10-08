@@ -91,7 +91,7 @@ export function DebtorsPage({ currentEmployee }) {
     paymentForm.setFieldsValue({
       installment: first?.id,
       breakdown: { cash: null, card: null, online: null, bank: null },
-      fundHolder: "organization",
+      fundHolder: currentEmployee?.role === "cashier" ? "cashier" : "organization",
       note: "",
     });
   };
