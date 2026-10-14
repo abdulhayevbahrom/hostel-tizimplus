@@ -78,9 +78,10 @@
   .payment-statistics-page .ps-students-table.timing td:nth-child(8)::before { content: 'Muddat holati'; }
   .payment-statistics-page .ps-students-table.behavior td:nth-child(4)::before { content: 'Davrlar'; }
   .payment-statistics-page .ps-students-table.behavior td:nth-child(5)::before { content: 'Vaqtida'; }
-  .payment-statistics-page .ps-students-table.behavior td:nth-child(6)::before { content: 'Kechikkan'; }
-  .payment-statistics-page .ps-students-table.behavior td:nth-child(7)::before { content: 'Foiz'; }
-  .payment-statistics-page .ps-students-table.behavior td:nth-child(8)::before { content: 'To‘lov odati'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(6)::before { content: 'Deyarli vaqtida'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(7)::before { content: 'Kechikkan'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(8)::before { content: 'Foiz'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(9)::before { content: 'To‘lov odati'; }
 
   .payment-statistics-page .ps-students-table .ps-status {
     width: max-content;

@@ -4,6 +4,13 @@ import { createPortal } from "react-dom";
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString("uz-UZ") : "—";
 
+const formatPassport = (student) => {
+  const passport = [student?.passportSeries, student?.passportNumber]
+    .filter(Boolean)
+    .join(" ");
+  return passport || "—";
+};
+
 const formatRoomInfo = (room) => {
   if (!room) return "—";
 
@@ -142,6 +149,8 @@ export const ContractDocument = forwardRef(function ContractDocument(
             <b>Yashovchi</b>
             <p>F.I.Sh.: {student.fullName}</p>
             <p>Tel: {student.phone}</p>
+            <p>Pasport: {formatPassport(student)}</p>
+            <p>JSHSHIR: {student.jshr || "—"}</p>
             <p>Xona: {formatRoomInfo(contract.room)}</p>
             <p>
               Muddat: {formatDate(contract.startDate)} —{" "}

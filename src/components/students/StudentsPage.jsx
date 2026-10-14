@@ -45,6 +45,7 @@ function StudentsListTab() {
   const [facultyFilter, setFacultyFilter] = useState(undefined);
   const [courseFilter, setCourseFilter] = useState(undefined);
   const [educationTypeFilter, setEducationTypeFilter] = useState(undefined);
+  const [floorFilter, setFloorFilter] = useState(undefined);
   const [roomFilter, setRoomFilter] = useState(undefined);
   const [statusFilter, setStatusFilter] = useState(undefined);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
@@ -61,6 +62,7 @@ function StudentsListTab() {
     faculty: facultyFilter,
     course: courseFilter,
     educationType: educationTypeFilter,
+    floor: floorFilter,
     room: roomFilter,
     studentStatus: statusFilter,
   });
@@ -89,6 +91,21 @@ function StudentsListTab() {
     [facultyData?.faculties, universityFilter],
   );
   const rooms = useMemo(() => roomData?.rooms || [], [roomData?.rooms]);
+  const floorOptions = useMemo(
+    () =>
+      [...new Set(rooms.map((room) => String(room.floor)))]
+        .sort((first, second) => first.localeCompare(second, undefined, { numeric: true }))
+        .map((floor) => ({ value: floor, label: `${floor}-qavat` })),
+    [rooms],
+  );
+  const roomOptions = useMemo(
+    () =>
+      rooms.filter((room) => !floorFilter || room.floor === floorFilter).map((room) => ({
+        value: room.id,
+        label: `${room.block ? `${room.block} blok · ` : ""}${room.roomNumber}-xona · ${room.floor}-qavat`,
+      })),
+    [floorFilter, rooms],
+  );
   const close = () => {
     setModalOpen(false);
     setEditing(null);
@@ -210,14 +227,22 @@ function StudentsListTab() {
               />
               <Select
                 allowClear
+                placeholder="Qavat"
+                value={floorFilter}
+                options={floorOptions}
+                onChange={(value) => {
+                  setFloorFilter(value);
+                  setRoomFilter(undefined);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
                 showSearch
                 optionFilterProp="label"
                 placeholder="Xona"
                 value={roomFilter}
-                options={rooms.map((room) => ({
-                  value: room.id,
-                  label: `${room.block} blok · ${room.roomNumber}-xona`,
-                }))}
+                options={roomOptions}
                 onChange={(value) => {
                   setRoomFilter(value);
                   setPage(1);
@@ -534,14 +559,22 @@ function StudentsListTab() {
           />
           <Select
             allowClear
+            placeholder="Qavat"
+            value={floorFilter}
+            options={floorOptions}
+            onChange={(value) => {
+              setFloorFilter(value);
+              setRoomFilter(undefined);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
             showSearch
             optionFilterProp="label"
             placeholder="Xona"
             value={roomFilter}
-            options={rooms.map((room) => ({
-              value: room.id,
-              label: `${room.block} blok · ${room.roomNumber}-xona`,
-            }))}
+            options={roomOptions}
             onChange={(value) => {
               setRoomFilter(value);
               setPage(1);
