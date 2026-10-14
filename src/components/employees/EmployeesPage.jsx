@@ -35,6 +35,7 @@ const sectionOptions = [
   { label: 'Xonalar', value: 'rooms' },
   { label: 'Davomat', value: 'attendance' },
   { label: 'To‘lovlar', value: 'payments' },
+  { label: 'To‘lov statistikasi', value: 'payment-statistics' },
   { label: 'Kassa', value: 'cash' },
   { label: 'Qarzdorlar', value: 'debtors' },
   { label: 'Depositlar', value: 'deposits' },

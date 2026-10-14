@@ -69,7 +69,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: guardedBaseQuery,
-  tagTypes: ['Dashboard', 'Report', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog'],
+  tagTypes: ['Dashboard', 'Report', 'PaymentStatistics', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog'],
   endpoints: (builder) => ({
     getDashboard: builder.query({
       query: ({ period, date } = {}) => ({ url: '/dashboard', params: { ...(period ? { period } : {}), ...(date ? { date } : {}) } }),
@@ -103,6 +103,39 @@ export const baseApi = createApi({
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Report', id: 'YEARLY' }], 'Report:YEARLY')
         const events = ['students:changed', 'student-contracts:changed', 'rooms:changed', 'payments:changed', 'expenses:changed', 'fines:changed', 'salaries:changed', 'employees:changed']
         const unsubscribe = subscribeSocket(events, refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getPaymentStatistics: builder.query({
+      query: (params = {}) => ({ url: '/payment-statistics', params: typeof params === 'string' ? { period: params } : params }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'PaymentStatistics', id: 'MAIN' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'PaymentStatistics', id: 'MAIN' }], 'PaymentStatistics:MAIN')
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed', 'rooms:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getPaymentStatisticsRoom: builder.query({
+      query: ({ roomId, period }) => ({ url: `/payment-statistics/room/${roomId}`, params: period ? { period } : undefined }),
+      transformResponse: (response) => response.data,
+      providesTags: (_result, _error, { roomId }) => [{ type: 'PaymentStatistics', id: `ROOM-${roomId}` }],
+      async onCacheEntryAdded({ roomId }, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'PaymentStatistics', id: `ROOM-${roomId}` }], `PaymentStatistics:ROOM-${roomId}`)
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getPaymentBehavior: builder.query({
+      query: (params = {}) => ({ url: '/payment-statistics/behavior', params }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'PaymentStatistics', id: 'BEHAVIOR' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'PaymentStatistics', id: 'BEHAVIOR' }], 'PaymentStatistics:BEHAVIOR')
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed', 'rooms:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
@@ -636,6 +669,9 @@ export const {
   useGetDashboardQuery,
   useGetMonthlyReportQuery,
   useGetYearlyReportQuery,
+  useGetPaymentStatisticsQuery,
+  useGetPaymentStatisticsRoomQuery,
+  useGetPaymentBehaviorQuery,
   useLoginMutation,
   useGetMeQuery,
   useGetEmployeesQuery,

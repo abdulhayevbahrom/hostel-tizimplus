@@ -1,0 +1,1 @@
+.payment-statistics-page .ps-filters{grid-template-columns:minmax(240px,1fr) 150px 150px 190px}.payment-statistics-page .ps-filters .ant-select{width:100%}@media(max-width:900px){.payment-statistics-page .ps-filters{grid-template-columns:1fr 1fr}}@media(max-width:550px){.payment-statistics-page .ps-filters{grid-template-columns:1fr}}

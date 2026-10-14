@@ -10,7 +10,7 @@ export function printDebtorList({ debtors, periodLabel, printedAt, isFuturePerio
   const debtLabel = isFuturePeriod ? 'Kutilayotgan summa' : 'Jami qarz'
   const rows = debtors.map((debtor, index) => {
     const rooms = [...new Set((debtor.contracts || []).map((contract) => contract.room ? `${contract.room.roomNumber}-xona, ${contract.room.floor}-qavat` : '').filter(Boolean))].join('; ') || '—'
-    return `<tr><td>${index + 1}</td><td>${safe(debtor.student?.fullName || '—')}</td><td>${safe(debtor.student?.phone || '—')}</td><td>${safe(rooms)}</td><td>${safe((debtor.periods || []).map((item) => item.periodKey).join(', '))}</td><td>${safe(date(debtor.paymentDeadline))}</td><td>${amount(isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</td><td>${amount(debtor.overdueDebt)}</td></tr>`
+    return `<tr><td>${index + 1}</td><td>${safe(debtor.student?.fullName || '—')}</td><td>${safe(debtor.student?.phone || '—')}</td><td>${safe(rooms)}</td><td>${safe((debtor.debtPeriods || debtor.periods || []).map((item) => item.periodKey).join(', '))}</td><td>${safe(date(isFuturePeriod ? debtor.oldestDueDate : debtor.paymentDeadline))}</td><td>${amount(isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</td><td>${amount(debtor.overdueDebt)}</td></tr>`
   }).join('') || '<tr><td colspan="8">Ma’lumot topilmadi</td></tr>'
   const total = isFuturePeriod ? summary.waitingAmount : summary.totalDebt
   const printDocument = frame.contentDocument

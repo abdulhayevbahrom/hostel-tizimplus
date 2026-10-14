@@ -22,6 +22,7 @@ import { FinesPage } from './components/fines/FinesPage'
 import { SalariesPage } from './components/salaries/SalariesPage'
 import { DashboardPage } from './components/dashboard/DashboardPage'
 import { ReportsPage } from './components/reports/ReportsPage'
+import { PaymentStatisticsPage } from './components/payment-statistics/PaymentStatisticsPage'
 import { CashPage } from './components/cash/CashPage'
 import { AuditLogsPage } from './components/audit/AuditLogsPage'
 import { baseApi, useGetGeneralSettingsQuery, useGetMeQuery } from './store/baseApi'
@@ -90,6 +91,7 @@ function App() {
               <Route path="/rooms" element={guard('rooms', <RoomsPage />)} />
               <Route path="/attendance" element={guard('attendance', <AttendancePage />)} />
               <Route path="/payments" element={guard('payments', <PaymentsPage currentEmployee={meData.employee} />)} />
+              <Route path="/payment-statistics" element={guard('payment-statistics', <PaymentStatisticsPage />)} />
               <Route path="/cash" element={guard('cash', <CashPage currentEmployee={meData.employee} />)} />
               <Route path="/debtors" element={guard('debtors', <DebtorsPage currentEmployee={meData.employee} />)} />
               <Route path="/deposits" element={guard('deposits', <DepositsPage />)} />

@@ -5,6 +5,7 @@ export const navigationItems = [
   { id: 'rooms', path: '/rooms', icon: 'rooms', label: 'Xonalar' },
   { id: 'attendance', path: '/attendance', icon: 'attendance', label: 'Davomat' },
   { id: 'payments', path: '/payments', icon: 'payments', label: 'To‘lovlar' },
+  { id: 'payment-statistics', path: '/payment-statistics', icon: 'payment-statistics', label: 'To‘lov statistikasi' },
   { id: 'cash', path: '/cash', icon: 'cash', label: 'Kassa' },
   { id: 'debtors', path: '/debtors', icon: 'debtors', label: 'Qarzdorlar' },
   { id: 'deposits', path: '/deposits', icon: 'deposits', label: 'Depositlar' },

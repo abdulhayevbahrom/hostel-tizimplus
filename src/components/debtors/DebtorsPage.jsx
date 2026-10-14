@@ -31,17 +31,19 @@ export function DebtorsPage({ currentEmployee }) {
   const navigate = useNavigate();
   const [paymentForm] = Form.useForm();
   const [period, setPeriod] = useState(dayjs().format("YYYY-MM"));
+  const [activeTab, setActiveTab] = useState("debtors");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [roomFilter, setRoomFilter] = useState();
   const [page, setPage] = useState(1);
   const debtorParams = useMemo(() => ({
     period,
+    view: activeTab,
     page,
     ...(query.trim() ? { search: query.trim() } : {}),
     ...(status !== "all" ? { status } : {}),
     ...(roomFilter ? { room: roomFilter } : {}),
-  }), [page, period, query, roomFilter, status]);
+  }), [activeTab, page, period, query, roomFilter, status]);
   const { data, isLoading, isFetching, error } = useGetDebtorsQuery(debtorParams);
   const [selected, setSelected] = useState(null);
   const [paymentDebtor, setPaymentDebtor] = useState(null);
@@ -85,6 +87,13 @@ export function DebtorsPage({ currentEmployee }) {
     setPage(1);
   };
   const summary = data?.summary || {};
+  const isUpcomingView = data?.isUpcomingView ?? activeTab === "upcoming";
+  const changeTab = (nextTab) => {
+    setActiveTab(nextTab);
+    setPage(1);
+    setStatus("all");
+    setSelected(null);
+  };
   const openPayment = (debtor) => {
     const first = debtor.periods[0];
     setPaymentDebtor(debtor);
@@ -132,7 +141,7 @@ export function DebtorsPage({ currentEmployee }) {
     debtors,
     periodLabel: dayjs(period).format("MMMM YYYY"),
     printedAt: dayjs().format("DD.MM.YYYY HH:mm"),
-    isFuturePeriod: data?.isFuturePeriod,
+    isFuturePeriod: isUpcomingView,
     summary,
   });
 
@@ -142,7 +151,7 @@ export function DebtorsPage({ currentEmployee }) {
         <div>
           <span>TO‘LOV NAZORATI</span>
           <h2>
-            {data?.isFuturePeriod
+            {isUpcomingView
               ? "Kutilayotgan to‘lovlar"
               : "Qarzdor talabalar"}
           </h2>
@@ -166,6 +175,10 @@ export function DebtorsPage({ currentEmployee }) {
           onChange={updatePeriod}
         />
       </section>
+      <div className="debtor-tabs" role="tablist" aria-label="To‘lov holati">
+        <button type="button" role="tab" aria-selected={activeTab === "debtors"} className={activeTab === "debtors" ? "active" : ""} onClick={() => changeTab("debtors")}>Qarzdor talabalar</button>
+        <button type="button" role="tab" aria-selected={activeTab === "upcoming"} className={activeTab === "upcoming" ? "active" : ""} onClick={() => changeTab("upcoming")}>Kutilayotgan to‘lovlar</button>
+      </div>
       <section className="debtor-stats">
         <article className="count">
           <small>Oy uchun hisoblangan</small>
@@ -177,11 +190,11 @@ export function DebtorsPage({ currentEmployee }) {
         </article>
         <article className="total">
           <small>
-            {data?.isFuturePeriod ? "Kutilayotgan summa" : "Qarzdorlik"}
+            {isUpcomingView ? "Kutilayotgan summa" : "Qarzdorlik"}
           </small>
           <strong>
             {money(
-              data?.isFuturePeriod ? summary.waitingAmount : summary.totalDebt,
+              isUpcomingView ? summary.waitingAmount : summary.totalDebt,
             )}
           </strong>
         </article>
@@ -191,21 +204,21 @@ export function DebtorsPage({ currentEmployee }) {
         </article>
         <article className="unpaid">
           <small>
-            {data?.isFuturePeriod ? "To‘lov kutilmoqda" : "To‘lov qilmagan"}
+            {isUpcomingView ? "To‘lov kutilmoqda" : "To‘lov qilmagan"}
           </small>
-          <strong>{summary.noPaymentStudentCount || 0} ta</strong>
+          <strong>{isUpcomingView ? summary.waitingCount || 0 : summary.unpaidCount || 0} ta</strong>
         </article>
       </section>
       <section className="debtors-card">
         <div className="debtors-card-head">
           <div>
             <h3>
-              {data?.isFuturePeriod
+              {isUpcomingView
                 ? "To‘lov kutilayotgan talabalar"
                 : "Qarzdorlar ro‘yxati"}
             </h3>
             <p>
-              {debtors.length} ta natija · {period}
+              {pagination.total} ta natija · {period}
             </p>
           </div>
           <div className="debtor-filters">
@@ -232,7 +245,11 @@ export function DebtorsPage({ currentEmployee }) {
             <Select
               value={status}
               onChange={updateStatus}
-              options={[
+              options={isUpcomingView ? [
+                { value: "all", label: "Barcha talabalar" },
+                { value: "partial", label: "Qisman to‘lagan" },
+                { value: "unpaid", label: "Umuman to‘lamagan" },
+              ] : [
                 { value: "all", label: "Barcha talabalar" },
                 { value: "overdue", label: "Muddati o‘tgan" },
                 { value: "partial", label: "Qisman to‘lagan" },
@@ -258,11 +275,11 @@ export function DebtorsPage({ currentEmployee }) {
                   <th>Universitet</th>
                   <th>Xona</th>
                   <th>
-                    {data?.isFuturePeriod ? "To‘lov davri" : "Qarzdor davr"}
+                    {isUpcomingView ? "To‘lov davri" : "Qarzdor davr"}
                   </th>
                   <th>To‘lov muddati</th>
                   <th>
-                    {data?.isFuturePeriod ? "Kutilayotgan summa" : "Jami qarz"}
+                    {isUpcomingView ? "Kutilayotgan summa" : "Jami qarz"}
                   </th>
                   <th>Muddati o‘tgan</th>
                   <th>Amal</th>
@@ -324,7 +341,9 @@ export function DebtorsPage({ currentEmployee }) {
                         </span>
                       </td>
                       <td data-label="To‘lov muddati">
-                        {debtor.paymentDeadline ? (
+                        {isUpcomingView ? (
+                          <strong className="debtor-upcoming-date">{dayjs(debtor.oldestDueDate).format("DD.MM.YYYY")}</strong>
+                        ) : debtor.paymentDeadline ? (
                           <>
                             <strong className="debtor-deadline-date">{dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</strong>
                             {debtor.isDeadlineReached && <small className="debtor-deadline-reached-label">Muddati yetgan</small>}
@@ -334,8 +353,8 @@ export function DebtorsPage({ currentEmployee }) {
                         )}
                       </td>
                       <td data-label="Summa">
-                        <b className="debt-money">{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</b>
-                        {!data?.isFuturePeriod && <small>Faqat shartnoma qarzdorligi</small>}
+                        <b className="debt-money">{tableMoney(isUpcomingView ? debtor.waitingAmount : debtor.totalDebt)}</b>
+                        {!isUpcomingView && <small>Faqat shartnoma qarzdorligi</small>}
                       </td>
                       <td data-label="O‘tgan">
                         <b
@@ -369,9 +388,9 @@ export function DebtorsPage({ currentEmployee }) {
                           >
                             Batafsil
                           </button>
-                          {canManageDeadline && <button className="debtor-deadline-btn" onClick={() => openDeadline(debtor)}>{debtor.paymentDeadline ? "Muddatni o‘zgartirish" : "Muddat belgilash"}</button>}
+                          {canManageDeadline && !isUpcomingView && <button className="debtor-deadline-btn" onClick={() => openDeadline(debtor)}>{debtor.paymentDeadline ? "Muddatni o‘zgartirish" : "Muddat belgilash"}</button>}
                           <button className="debtor-more-btn" aria-label="Amallar" onClick={() => setActionDebtor(actionDebtor?.student?.id === debtor.student.id ? null : debtor)}>⋯</button>
-                          {actionDebtor?.student?.id === debtor.student.id && <div className="debtor-inline-actions"><button onClick={() => { openPayment(debtor); setActionDebtor(null) }}>To‘lov</button><button onClick={() => { setHistoryDebtor(debtor); setActionDebtor(null) }}>Tarix</button><button onClick={() => { setSelected(debtor); setActionDebtor(null) }}>Batafsil</button>{canManageDeadline && <button onClick={() => { openDeadline(debtor); setActionDebtor(null) }}>{debtor.paymentDeadline ? "Muddatni o‘zgartirish" : "Muddat belgilash"}</button>}</div>}
+                          {actionDebtor?.student?.id === debtor.student.id && <div className="debtor-inline-actions"><button onClick={() => { openPayment(debtor); setActionDebtor(null) }}>To‘lov</button><button onClick={() => { setHistoryDebtor(debtor); setActionDebtor(null) }}>Tarix</button><button onClick={() => { setSelected(debtor); setActionDebtor(null) }}>Batafsil</button>{canManageDeadline && !isUpcomingView && <button onClick={() => { openDeadline(debtor); setActionDebtor(null) }}>{debtor.paymentDeadline ? "Muddatni o‘zgartirish" : "Muddat belgilash"}</button>}</div>}
                         </div>
                       </td>
                     </tr>
@@ -405,18 +424,18 @@ export function DebtorsPage({ currentEmployee }) {
       <section className="debtor-print-sheet" aria-hidden="true">
         <header>
           <div>
-            <h1>{data?.isFuturePeriod ? "Kutilayotgan to‘lovlar ro‘yxati" : "Qarzdor talabalar ro‘yxati"}</h1>
+            <h1>{isUpcomingView ? "Kutilayotgan to‘lovlar ro‘yxati" : "Qarzdor talabalar ro‘yxati"}</h1>
             <p>Hisobot davri: {dayjs(period).format("MMMM YYYY")}</p>
           </div>
           <small>Chop etilgan sana: {dayjs().format("DD.MM.YYYY HH:mm")}</small>
         </header>
         <div className="debtor-print-summary">
           <span>Talabalar soni: <b>{debtors.length}</b></span>
-          <span>{data?.isFuturePeriod ? "Kutilayotgan summa" : "Jami qarzdorlik"}: <b>{money(data?.isFuturePeriod ? summary.waitingAmount : summary.totalDebt)}</b></span>
-          {!data?.isFuturePeriod && <span>Muddati o‘tgan: <b>{money(summary.overdueDebt)}</b></span>}
+          <span>{isUpcomingView ? "Kutilayotgan summa" : "Jami qarzdorlik"}: <b>{money(isUpcomingView ? summary.waitingAmount : summary.totalDebt)}</b></span>
+          {!isUpcomingView && <span>Muddati o‘tgan: <b>{money(summary.overdueDebt)}</b></span>}
         </div>
         <table>
-          <thead><tr><th>№</th><th>Talaba</th><th>Telefon</th><th>Universitet</th><th>Xona</th><th>Qarzdor davr</th><th>To‘lov muddati</th><th>{data?.isFuturePeriod ? "Kutilayotgan" : "Jami qarz"}</th><th>Muddati o‘tgan</th></tr></thead>
+          <thead><tr><th>№</th><th>Talaba</th><th>Telefon</th><th>Universitet</th><th>Xona</th><th>Qarzdor davr</th><th>To‘lov muddati</th><th>{isUpcomingView ? "Kutilayotgan" : "Jami qarz"}</th><th>Muddati o‘tgan</th></tr></thead>
           <tbody>
             {debtors.map((debtor, index) => {
               const room = debtor.contracts?.[0]?.room;
@@ -424,8 +443,8 @@ export function DebtorsPage({ currentEmployee }) {
                 <td>{index + 1}</td><td>{debtor.student.fullName}</td><td>{debtor.student.phone || "—"}</td>
                 <td>{debtor.student.university?.name || "—"}{debtor.student.faculty?.name ? `, ${debtor.student.faculty.name}` : ""}</td>
                 <td>{room ? `${room.block} · ${room.roomNumber}-xona` : "—"}</td>
-                <td>{debtor.periodCount} ta davr</td><td>{debtor.paymentDeadline ? dayjs(debtor.paymentDeadline).format("DD.MM.YYYY") : "Belgilanmagan"}</td>
-                <td>{tableMoney(data?.isFuturePeriod ? debtor.waitingAmount : debtor.totalDebt)}</td><td>{tableMoney(debtor.overdueDebt)}</td>
+                <td>{debtor.periodCount} ta davr</td><td>{isUpcomingView ? dayjs(debtor.oldestDueDate).format("DD.MM.YYYY") : debtor.paymentDeadline ? dayjs(debtor.paymentDeadline).format("DD.MM.YYYY") : "Belgilanmagan"}</td>
+                <td>{tableMoney(isUpcomingView ? debtor.waitingAmount : debtor.totalDebt)}</td><td>{tableMoney(debtor.overdueDebt)}</td>
               </tr>;
             })}
             {!debtors.length && <tr><td colSpan="9">Ma’lumot topilmadi</td></tr>}
@@ -438,7 +457,7 @@ export function DebtorsPage({ currentEmployee }) {
         onCancel={() => setSelected(null)}
         footer={null}
         width={760}
-        title={data?.isFuturePeriod ? "Kutilayotgan to‘lov tafsilotlari" : "Qarzdorlik tafsilotlari"}
+        title={isUpcomingView ? "Kutilayotgan to‘lov tafsilotlari" : "Qarzdorlik tafsilotlari"}
         rootClassName="debtor-modal"
       >
         <>
@@ -463,8 +482,8 @@ export function DebtorsPage({ currentEmployee }) {
               </div>
               <div className="debtor-detail-summary">
                 <div>
-                  <span>{data?.isFuturePeriod ? "Kutilayotgan summa" : "Jami qarz"}</span>
-                  <strong>{money(data?.isFuturePeriod ? selected.waitingAmount : selected.totalDebt)}</strong>
+                  <span>{isUpcomingView ? "Kutilayotgan summa" : "Jami qarz"}</span>
+                  <strong>{money(isUpcomingView ? selected.waitingAmount : selected.totalDebt)}</strong>
                 </div>
                 <div>
                   <span>Muddati o‘tgan</span>
@@ -475,9 +494,9 @@ export function DebtorsPage({ currentEmployee }) {
                   <strong>{money(selected.currentDebt)}</strong>
                 </div>
               </div>
-              <h4>{data?.isFuturePeriod ? "Kelgusi to‘lov davrlari" : "Qarzdorlik davrlari"}</h4>
+              <h4>{isUpcomingView ? "Kelgusi to‘lov davrlari" : "Qarzdorlik davrlari"}</h4>
               <div className="debtor-periods">
-                {selected.periods.map((period) => (
+                {(isUpcomingView ? selected.debtPeriods : selected.periods).map((period) => (
                   <article key={period.id}>
                     <div>
                       <strong>{period.periodKey}</strong>

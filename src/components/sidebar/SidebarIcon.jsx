@@ -23,6 +23,7 @@ export function SidebarIcon({ name }) {
     rooms: ApartmentOutlined,
     attendance: CalendarOutlined,
     payments: CreditCardOutlined,
+    'payment-statistics': BarChartOutlined,
     cash: WalletOutlined,
     debtors: UserSwitchOutlined,
     deposits: WalletOutlined,

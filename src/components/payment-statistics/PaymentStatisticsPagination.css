@@ -1,0 +1,1 @@
+.ps-pagination{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;background:#f8f2e8;border-top:1px solid #e2d4bc}.ps-pagination>span{color:#81796e;font-size:10px}.ps-pagination .ant-pagination{margin:0}@media(max-width:550px){.ps-pagination{align-items:flex-start;flex-direction:column}}
