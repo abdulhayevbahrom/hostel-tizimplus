@@ -18,6 +18,7 @@ import './PaymentStatisticsLocationFilters.css'
 import './PaymentStatisticsFetching.css'
 import './PaymentStatisticsThreeMetrics.css'
 import './PaymentStatisticsControls.css'
+import './PaymentStatisticsStudentsMobile.css'
 
 const amount = (value) => Number(value || 0).toLocaleString('uz-UZ')
 const money = (value) => `${amount(value)} so‘m`
@@ -193,7 +194,7 @@ export function PaymentStatisticsPage() {
             <div className="ps-results-wrap">
               {query.isFetching && <div className="ps-fetching-overlay"><span />Ma’lumotlar yuklanmoqda...</div>}
             {view !== 'students' ? <GroupChart rows={rows} view={view} metric={metric} behaviorScope={behaviorScope} onSelect={view === 'floors' ? setSelectedFloor : setSelectedRoom} /> : <section className="ps-table-card">
-              <div className="ps-table-scroll"><table><thead><tr>
+              <div className="ps-table-scroll"><table className={`ps-students-table ${metric}`}><thead><tr>
                 <th>#</th><th>{view === 'floors' ? 'Qavat' : view === 'rooms' ? 'Xona' : 'Talaba'}</th>
                 {view === 'students' ? metric === 'behavior' ? <><th>Joylashuv</th><th>Davrlar</th><th>Vaqtida</th><th>Kechikkan</th><th>Foiz</th><th>To‘lov odati</th></> : <><th>Joylashuv</th><th>Reja</th><th>To‘langan</th><th>Qarz</th><th>Muddat</th><th>{metric === 'payment' ? 'To‘lov holati' : 'Muddat holati'}</th></> : <><th>Talabalar</th><th>Vaqtida</th><th>Kechikkan</th><th>Kutilmoqda</th><th>Ko‘rsatkich</th><th>Natija</th></>}
               </tr></thead><tbody>

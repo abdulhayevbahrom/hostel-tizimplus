@@ -1,0 +1,108 @@
+@media (max-width: 700px) {
+  .payment-statistics-page .ps-table-card {
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .payment-statistics-page .ps-table-scroll {
+    overflow: visible;
+  }
+
+  .payment-statistics-page .ps-students-table,
+  .payment-statistics-page .ps-students-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .payment-statistics-page .ps-students-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .payment-statistics-page .ps-students-table tr {
+    display: grid;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: #fffaf1;
+    border: 1px solid #e2d4bc;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(74, 55, 29, 0.045);
+  }
+
+  .payment-statistics-page .ps-students-table td {
+    display: grid;
+    grid-template-columns: minmax(105px, 0.75fr) minmax(0, 1.25fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 9px 12px;
+    white-space: normal;
+  }
+
+  .payment-statistics-page .ps-students-table td::before {
+    color: #81796e;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .payment-statistics-page .ps-students-table td:first-child {
+    display: none;
+  }
+
+  .payment-statistics-page .ps-students-table td:nth-child(2) {
+    display: block;
+    padding: 13px 12px;
+    color: #273a55;
+    background: #f6efe3;
+    font-size: 13px;
+  }
+
+  .payment-statistics-page .ps-students-table td:nth-child(2)::before {
+    display: none;
+  }
+
+  .payment-statistics-page .ps-students-table td:nth-child(3)::before { content: 'Joylashuv'; }
+  .payment-statistics-page .ps-students-table:not(.behavior) td:nth-child(4)::before { content: 'Reja'; }
+  .payment-statistics-page .ps-students-table:not(.behavior) td:nth-child(5)::before { content: 'To‘langan'; }
+  .payment-statistics-page .ps-students-table:not(.behavior) td:nth-child(6)::before { content: 'Qarz'; }
+  .payment-statistics-page .ps-students-table:not(.behavior) td:nth-child(7)::before { content: 'Muddat'; }
+  .payment-statistics-page .ps-students-table.payment td:nth-child(8)::before { content: 'To‘lov holati'; }
+  .payment-statistics-page .ps-students-table.timing td:nth-child(8)::before { content: 'Muddat holati'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(4)::before { content: 'Davrlar'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(5)::before { content: 'Vaqtida'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(6)::before { content: 'Kechikkan'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(7)::before { content: 'Foiz'; }
+  .payment-statistics-page .ps-students-table.behavior td:nth-child(8)::before { content: 'To‘lov odati'; }
+
+  .payment-statistics-page .ps-students-table .ps-status {
+    width: max-content;
+    max-width: 100%;
+    justify-self: start;
+    white-space: normal;
+  }
+
+  .payment-statistics-page .ps-students-table .ps-student-money {
+    text-align: left;
+  }
+
+  .payment-statistics-page .ps-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 0 0;
+  }
+
+  .payment-statistics-page .ps-pagination .ant-pagination {
+    display: flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+}
