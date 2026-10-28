@@ -83,7 +83,7 @@ export function PaymentsPage({ currentEmployee }) {
   const isOwner = ["owner", "admin"].includes(currentEmployee?.role);
   const contractAvailableBalance = selectedInstallment
     ? Math.max(0, selectedInstallment.amount - selectedInstallment.paidAmount) +
-      (editingPayment?.amount || 0)
+      (editingPayment?.allocations?.[0]?.installment?.id === selectedInstallment._id ? editingPayment.amount || 0 : 0)
     : 0;
   const availableBalance = paymentPurpose === "deposit"
     ? Math.max(0, Number(selected?.depositBalance || 0) + (editingPayment?.paymentPurpose === "deposit" ? Number(editingPayment.amount || 0) : 0))
@@ -135,6 +135,7 @@ export function PaymentsPage({ currentEmployee }) {
           id: editingPayment.id,
           breakdown: values.breakdown,
           fundHolder: values.fundHolder,
+          installment: values.installment,
           paymentDate: values.paymentDate.format("YYYY-MM-DD"),
           note: values.note,
         }).unwrap();
@@ -481,13 +482,13 @@ export function PaymentsPage({ currentEmployee }) {
             rules={[{ required: true, message: "To‘lov oyini tanlang" }]}
           >
             <Select
-              disabled={!selected || Boolean(editingPayment)}
+              disabled={!selected}
               placeholder="Oy yoki davrni tanlang"
               options={installments.map((item) => {
                 const balance = Math.max(0, item.amount - item.paidAmount);
                 return {
                   value: item._id,
-                  disabled: !editingPayment && balance <= 0,
+                  disabled: balance <= 0 && editingPayment?.allocations?.[0]?.installment?.id !== item._id,
                   label: `${item.periodKey} — ${balance <= 0 ? "to‘liq to‘langan" : `${money(balance)} qoldiq`}`,
                 };
               })}
