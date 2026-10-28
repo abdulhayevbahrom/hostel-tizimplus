@@ -108,6 +108,7 @@ export function PaymentsPage({ currentEmployee }) {
       paymentPurpose: "contract",
       contract: undefined,
       installment: undefined,
+      paymentDate: dayjs(),
       note: "",
       fundHolder: "cashier",
     });
@@ -122,6 +123,7 @@ export function PaymentsPage({ currentEmployee }) {
       amount: payment.amount,
       breakdown: paymentBreakdown(payment),
       fundHolder: effectivePaymentParts(payment).find((part) => ["card", "online"].includes(part.method))?.fundHolder || "organization",
+      paymentDate: dayjs(payment.paymentDate || payment.createdAt),
       note: payment.note || "",
     });
     setOpen(true);
@@ -133,12 +135,14 @@ export function PaymentsPage({ currentEmployee }) {
           id: editingPayment.id,
           breakdown: values.breakdown,
           fundHolder: values.fundHolder,
+          paymentDate: values.paymentDate.format("YYYY-MM-DD"),
           note: values.note,
         }).unwrap();
         toast.success("To‘lov yangilandi");
       } else {
         const result = await createPayment({
           ...values,
+          paymentDate: values.paymentDate.format("YYYY-MM-DD"),
           student: selected?.student?._id,
           breakdown: values.breakdown,
         }).unwrap();
@@ -310,8 +314,7 @@ export function PaymentsPage({ currentEmployee }) {
                     </td>
                     <td data-label="Maqsad"><span className="contract-pill">{payment.paymentPurpose === "deposit" ? "Deposit" : "Shartnoma"}</span></td>
                     <td data-label="Sana">
-                      {dayjs(payment.createdAt).format("DD.MM.YYYY")}
-                      <small>{dayjs(payment.createdAt).format("HH:mm")}</small>
+                      {dayjs(payment.paymentDate || payment.createdAt).format("DD.MM.YYYY")}
                     </td>
                     <td data-label="Usul">
                       <div className="payment-method-parts">{effectivePaymentParts(payment).map((part) => <span className={`method-badge ${part.method}`} key={part.method}>{methods[part.method]}: {Number(part.amount).toLocaleString("uz-UZ")}</span>)}</div>
@@ -517,6 +520,9 @@ export function PaymentsPage({ currentEmployee }) {
               </div>
             </div>
           )}
+          <Form.Item name="paymentDate" label="To‘lov sanasi" rules={[{ required: true, message: "To‘lov sanasini tanlang" }]}>
+            <DatePicker allowClear={false} format="DD.MM.YYYY" style={{ width: "100%" }} />
+          </Form.Item>
           <Form.Item name="note" label="Izoh">
             <Input placeholder="Ixtiyoriy" />
           </Form.Item>

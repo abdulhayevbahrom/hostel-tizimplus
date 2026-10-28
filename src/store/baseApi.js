@@ -69,7 +69,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: guardedBaseQuery,
-  tagTypes: ['Dashboard', 'Report', 'PaymentStatistics', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog'],
+  tagTypes: ['Dashboard', 'Report', 'PaymentStatistics', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog', 'Survey'],
   endpoints: (builder) => ({
     getDashboard: builder.query({
       query: ({ period, date } = {}) => ({ url: '/dashboard', params: { ...(period ? { period } : {}), ...(date ? { date } : {}) } }),
@@ -252,7 +252,7 @@ export const baseApi = createApi({
     getStudents: builder.query({
       query: ({ search = '', page = 1, university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '' } = {}) => ({
         url: '/students',
-        params: { page, ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}) },
+        params: { page, ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}) },
       }),
       transformResponse: (response) => response.data,
       providesTags: (result) => [{ type: 'Student', id: 'LIST' }, ...(result?.students || []).map((item) => ({ type: 'Student', id: item.id }))],
@@ -662,6 +662,26 @@ export const baseApi = createApi({
       transformResponse: (response) => response.data,
       invalidatesTags: [{ type: 'CashSession', id: 'LIST' }],
     }),
+    getSurveys: builder.query({
+      query: () => '/surveys',
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Survey', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Survey', id: 'LIST' }], 'Survey:LIST')
+        const unsubscribe = subscribeSocket(['surveys:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getSurveyResults: builder.query({
+      query: (id) => `/surveys/${id}/results`,
+      transformResponse: (response) => response.data,
+      providesTags: (_result, _error, id) => [{ type: 'Survey', id }],
+    }),
+    createSurvey: builder.mutation({ query: (body) => ({ url: '/surveys', method: 'POST', body }), transformResponse: (response) => response.data, invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
+    updateSurvey: builder.mutation({ query: ({ id, ...body }) => ({ url: `/surveys/${id}`, method: 'PUT', body }), transformResponse: (response) => response.data, invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
+    setSurveyStatus: builder.mutation({ query: ({ id, status }) => ({ url: `/surveys/${id}/status`, method: 'PUT', body: { status } }), transformResponse: (response) => response.data, invalidatesTags: (_r, _e, { id }) => [{ type: 'Survey', id: 'LIST' }, { type: 'Survey', id }] }),
+    deleteSurvey: builder.mutation({ query: (id) => ({ url: `/surveys/${id}`, method: 'DELETE' }), invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
   }),
 })
 
@@ -748,6 +768,12 @@ export const {
   useGetCashSessionsQuery,
   useCloseCashSessionMutation,
   useApproveCashSessionMutation,
+  useGetSurveysQuery,
+  useGetSurveyResultsQuery,
+  useCreateSurveyMutation,
+  useUpdateSurveyMutation,
+  useSetSurveyStatusMutation,
+  useDeleteSurveyMutation,
 } = baseApi
 
 export function apiErrorMessage(error) {

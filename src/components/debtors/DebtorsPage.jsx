@@ -617,7 +617,7 @@ export function DebtorsPage({ currentEmployee }) {
             <tbody>
               {(historyDebtor?.paymentHistory || []).map((payment) => (
                 <tr key={payment.id}>
-                  <td>{dayjs(payment.createdAt).format("DD.MM.YYYY HH:mm")}</td>
+                  <td>{dayjs(payment.paymentDate || payment.createdAt).format("DD.MM.YYYY")}</td>
                   <td>{payment.contract?.contractNumber || "—"}</td>
                   <td>
                     <span>

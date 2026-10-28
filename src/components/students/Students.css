@@ -127,6 +127,7 @@
 .student-capture-btn { display: block; min-height: 40px; padding: 0 18px; margin: 12px auto 0; color: #fff; background: #159988; border: 0; border-radius: 8px; font-weight: 750; }
 .students-filters-modal .ant-modal-content { border: 1px solid #d8e5e8; border-radius: 12px; }
 .students-filters-modal-body { display: grid; gap: 10px; }
+.student-course-remove-icon { display: inline-grid; width: 20px; height: 20px; place-items: center; color: #c43f47; font-size: 22px; font-weight: 500; line-height: 1; }
 @media (max-width: 1920px) {
   .students-toolbar-filters { grid-template-columns:minmax(210px,1.2fr) repeat(7,minmax(0,.68fr)) minmax(150px,.78fr); }
 }

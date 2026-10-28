@@ -31,6 +31,20 @@ const educationTypeLabel = {
   employed: "Ishlaydi",
 };
 const educationTypeOptions = Object.entries(educationTypeLabel).map(([value, label]) => ({ value, label }));
+const courseOptions = [1, 2, 3, 4, 5, 6].map((value) => ({ value, label: `${value}-kurs` }));
+
+function CourseFilter({ value, onChange }) {
+  return <Select
+    mode="multiple"
+    allowClear
+    placeholder="Kurs"
+    value={value}
+    maxTagCount="responsive"
+    options={courseOptions}
+    onChange={onChange}
+    menuItemSelectedIcon={<span className="student-course-remove-icon">×</span>}
+  />;
+}
 
 const isContractExpiringWithinTwoDays = (endDate) => {
   if (!endDate) return false;
@@ -43,7 +57,7 @@ function StudentsListTab() {
   const [page, setPage] = useState(1);
   const [universityFilter, setUniversityFilter] = useState(undefined);
   const [facultyFilter, setFacultyFilter] = useState(undefined);
-  const [courseFilter, setCourseFilter] = useState(undefined);
+  const [courseFilter, setCourseFilter] = useState([]);
   const [educationTypeFilter, setEducationTypeFilter] = useState(undefined);
   const [floorFilter, setFloorFilter] = useState(undefined);
   const [roomFilter, setRoomFilter] = useState(undefined);
@@ -202,14 +216,8 @@ function StudentsListTab() {
                   setPage(1);
                 }}
               />
-              <Select
-                allowClear
-                placeholder="Kurs"
+              <CourseFilter
                 value={courseFilter}
-                options={[1, 2, 3, 4, 5, 6].map((value) => ({
-                  value,
-                  label: `${value}-kurs`,
-                }))}
                 onChange={(value) => {
                   setCourseFilter(value);
                   setPage(1);
@@ -534,14 +542,8 @@ function StudentsListTab() {
               setPage(1);
             }}
           />
-          <Select
-            allowClear
-            placeholder="Kurs"
+          <CourseFilter
             value={courseFilter}
-            options={[1, 2, 3, 4, 5, 6].map((value) => ({
-              value,
-              label: `${value}-kurs`,
-            }))}
             onChange={(value) => {
               setCourseFilter(value);
               setPage(1);

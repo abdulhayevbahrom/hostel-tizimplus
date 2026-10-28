@@ -43,6 +43,7 @@ const sectionOptions = [
   { label: 'Oyliklar', value: 'salaries' },
   { label: 'Xarajatlar', value: 'expenses' },
   { label: 'Hisobot', value: 'reports' },
+  { label: 'So‘rovnomalar', value: 'surveys' },
   { label: 'Sozlamalar', value: 'settings' },
 ]
 

@@ -25,6 +25,7 @@ import { ReportsPage } from './components/reports/ReportsPage'
 import { PaymentStatisticsPage } from './components/payment-statistics/PaymentStatisticsPage'
 import { CashPage } from './components/cash/CashPage'
 import { AuditLogsPage } from './components/audit/AuditLogsPage'
+import { SurveysPage } from './components/surveys/SurveysPage'
 import { baseApi, useGetGeneralSettingsQuery, useGetMeQuery } from './store/baseApi'
 import { LoginPage } from './components/auth/LoginPage'
 import './App.css'
@@ -100,6 +101,7 @@ function App() {
               <Route path="/salaries" element={guard('salaries', <SalariesPage currentEmployee={meData.employee} />)} />
               <Route path="/expenses" element={guard('expenses', <ExpensesPage currentEmployee={meData.employee} />)} />
               <Route path="/reports" element={guard('reports', <ReportsPage />)} />
+              <Route path="/surveys" element={guard('surveys', <SurveysPage currentEmployee={meData.employee} />)} />
               <Route path="/audit-logs" element={isOwner ? <AuditLogsPage /> : firstAllowedPath ? <Navigate to={firstAllowedPath} replace /> : null} />
               <Route path="/settings" element={guard('settings', <Navigate to="/settings/general" replace />)} />
               <Route path="/settings/general" element={guard('settings', <GeneralSettingsPage />)} />
