@@ -44,6 +44,7 @@ const sectionOptions = [
   { label: 'Xarajatlar', value: 'expenses' },
   { label: 'Hisobot', value: 'reports' },
   { label: 'So‘rovnomalar', value: 'surveys' },
+  { label: 'Shikoyatlar', value: 'complaints' },
   { label: 'Sozlamalar', value: 'settings' },
 ]
 

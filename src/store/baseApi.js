@@ -69,7 +69,7 @@ const scheduleInvalidate = (dispatch, tags, key, delay = 250) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: guardedBaseQuery,
-  tagTypes: ['Dashboard', 'Report', 'PaymentStatistics', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog', 'Survey'],
+  tagTypes: ['Dashboard', 'Report', 'PaymentStatistics', 'Employee', 'Room', 'Student', 'StudentContract', 'Payment', 'Debtor', 'Deposit', 'Attendance', 'Expense', 'Fine', 'Salary', 'University', 'Faculty', 'BuildingBlock', 'GeneralSetting', 'Notification', 'CashSession', 'AuditLog', 'Survey', 'Complaint'],
   endpoints: (builder) => ({
     getDashboard: builder.query({
       query: ({ period, date } = {}) => ({ url: '/dashboard', params: { ...(period ? { period } : {}), ...(date ? { date } : {}) } }),
@@ -682,6 +682,22 @@ export const baseApi = createApi({
     updateSurvey: builder.mutation({ query: ({ id, ...body }) => ({ url: `/surveys/${id}`, method: 'PUT', body }), transformResponse: (response) => response.data, invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
     setSurveyStatus: builder.mutation({ query: ({ id, status }) => ({ url: `/surveys/${id}/status`, method: 'PUT', body: { status } }), transformResponse: (response) => response.data, invalidatesTags: (_r, _e, { id }) => [{ type: 'Survey', id: 'LIST' }, { type: 'Survey', id }] }),
     deleteSurvey: builder.mutation({ query: (id) => ({ url: `/surveys/${id}`, method: 'DELETE' }), invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
+    getComplaints: builder.query({
+      query: (params = {}) => ({ url: '/complaints', params }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Complaint', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Complaint', id: 'LIST' }], 'Complaint:LIST')
+        const unsubscribe = subscribeSocket(['complaints:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    updateComplaint: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/complaints/${id}`, method: 'PUT', body }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: [{ type: 'Complaint', id: 'LIST' }],
+    }),
   }),
 })
 
@@ -774,6 +790,8 @@ export const {
   useUpdateSurveyMutation,
   useSetSurveyStatusMutation,
   useDeleteSurveyMutation,
+  useGetComplaintsQuery,
+  useUpdateComplaintMutation,
 } = baseApi
 
 export function apiErrorMessage(error) {

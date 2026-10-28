@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Button, Empty, Input, Modal, Popconfirm, Select, Switch, Tabs, Tag } from 'antd'
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons'
+import { useMemo, useState } from 'react'
+import { Button, Empty, Input, Modal, Popconfirm, Segmented, Select, Switch, Tabs, Tag } from 'antd'
+import { BarChartOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, EyeOutlined, FileTextOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { toast } from 'react-toastify'
 import {
   apiErrorMessage,
@@ -97,7 +97,20 @@ export function SurveysPage({ currentEmployee }) {
   const [editorOpen, setEditorOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [resultsId, setResultsId] = useState(null)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const canManage = ['owner', 'admin'].includes(currentEmployee?.role)
+  const surveys = useMemo(() => data?.surveys || [], [data?.surveys])
+  const overview = useMemo(() => ({
+    total: surveys.length,
+    active: surveys.filter((survey) => survey.status === 'active').length,
+    responses: surveys.reduce((sum, survey) => sum + Number(survey.responseCount || 0), 0),
+    questions: surveys.reduce((sum, survey) => sum + survey.questions.length, 0),
+  }), [surveys])
+  const visibleSurveys = useMemo(() => {
+    const needle = search.trim().toLocaleLowerCase('uz-UZ')
+    return surveys.filter((survey) => (statusFilter === 'all' || survey.status === statusFilter) && (!needle || `${survey.title} ${survey.description || ''}`.toLocaleLowerCase('uz-UZ').includes(needle)))
+  }, [search, statusFilter, surveys])
   const save = async (body) => {
     try {
       if (editing) await updateSurvey({ id: editing.id, ...body }).unwrap(); else await createSurvey(body).unwrap()
@@ -107,14 +120,27 @@ export function SurveysPage({ currentEmployee }) {
   const changeStatus = async (id, status) => { try { await setStatus({ id, status }).unwrap(); toast.success(status === 'active' ? 'So‘rovnoma faollashtirildi' : 'So‘rovnoma yopildi') } catch (e) { toast.error(apiErrorMessage(e)) } }
   const remove = async (id) => { try { await deleteSurvey(id).unwrap(); toast.success('So‘rovnoma o‘chirildi') } catch (e) { toast.error(apiErrorMessage(e)) } }
   return <div className="surveys-page">
-    <div className="surveys-hero"><div><span>Talabalar fikri</span><h2>So‘rovnomalar</h2><p>Savollarni boshqaring, umumiy holat va har bir talabaning javobini kuzating.</p></div>{canManage && <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => { setEditing(null); setEditorOpen(true) }}>Yangi so‘rovnoma</Button>}</div>
+    <header className="surveys-hero">
+      <div className="survey-hero-copy"><span className="survey-eyebrow">Talabalar fikri markazi</span><h2>Fikrlarni qarorlarga aylantiring</h2><p>So‘rovnomalarni yarating, Telegram orqali javob to‘plang va talabalar kayfiyatini bir joyda kuzating.</p></div>
+      {canManage && <Button className="survey-create-button" type="primary" size="large" icon={<PlusOutlined />} onClick={() => { setEditing(null); setEditorOpen(true) }}>Yangi so‘rovnoma</Button>}
+      <div className="survey-overview">
+        <article><span className="overview-icon teal"><FileTextOutlined /></span><div><strong>{overview.total}</strong><small>Jami so‘rovnoma</small></div></article>
+        <article><span className="overview-icon green"><CheckCircleOutlined /></span><div><strong>{overview.active}</strong><small>Hozir faol</small></div></article>
+        <article><span className="overview-icon blue"><BarChartOutlined /></span><div><strong>{overview.responses}</strong><small>Jami javob</small></div></article>
+        <article><span className="overview-icon violet">?</span><div><strong>{overview.questions}</strong><small>Jami savol</small></div></article>
+      </div>
+    </header>
     {error && <div className="form-error">{apiErrorMessage(error)}</div>}
-    {isLoading ? <div className="survey-state">So‘rovnomalar yuklanmoqda…</div> : <div className="survey-grid">{(data?.surveys || []).map((survey) => <article className={`survey-card ${survey.status}`} key={survey.id}>
-      <div className="survey-card-top"><Tag color={statusMeta[survey.status].color}>{statusMeta[survey.status].label}</Tag><span>{survey.responseCount || 0} ta javob</span></div>
-      <h3>{survey.title}</h3><p>{survey.description || 'Izoh kiritilmagan'}</p>
-      <div className="survey-card-meta"><span><b>{survey.questions.length}</b> ta savol</span><span>{new Date(survey.createdAt).toLocaleDateString('uz-UZ')}</span></div>
-      <div className="survey-actions"><Button icon={<EyeOutlined />} onClick={() => setResultsId(survey.id)}>Natijalar</Button>{canManage && survey.status !== 'active' && <Button icon={<EditOutlined />} onClick={() => { setEditing(survey); setEditorOpen(true) }}>Tahrirlash</Button>}{canManage && survey.status !== 'active' && <Popconfirm title="Ushbu so‘rovnomani faollashtirasizmi?" description="Hozirgi faol so‘rovnoma avtomatik yopiladi." onConfirm={() => changeStatus(survey.id, 'active')}><Button type="primary">Faollashtirish</Button></Popconfirm>}{canManage && survey.status === 'active' && <Popconfirm title="So‘rovnomani yopasizmi?" onConfirm={() => changeStatus(survey.id, 'closed')}><Button danger>Yopish</Button></Popconfirm>}{canManage && survey.status === 'draft' && <Popconfirm title="So‘rovnomani o‘chirasizmi?" onConfirm={() => remove(survey.id)}><Button danger type="text" icon={<DeleteOutlined />} /></Popconfirm>}</div>
-    </article>)}{!data?.surveys?.length && <div className="survey-empty"><Empty description="Hali so‘rovnoma yaratilmagan" /></div>}</div>}
+    <section className="survey-library">
+      <div className="survey-library-head"><div><h3>So‘rovnomalar kutubxonasi</h3><p>{visibleSurveys.length} ta natija ko‘rsatilmoqda</p></div><div className="survey-toolbar"><Input allowClear prefix={<SearchOutlined />} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="So‘rovnomani qidiring" /><Segmented value={statusFilter} onChange={setStatusFilter} options={[{ label: 'Barchasi', value: 'all' }, { label: 'Faol', value: 'active' }, { label: 'Qoralama', value: 'draft' }, { label: 'Yopilgan', value: 'closed' }]} /></div></div>
+      {isLoading ? <div className="survey-state"><span className="survey-loader" />So‘rovnomalar yuklanmoqda…</div> : <div className="survey-grid">{visibleSurveys.map((survey, index) => <article className={`survey-card ${survey.status}`} key={survey.id}>
+        <div className="survey-card-accent" />
+        <div className="survey-card-top"><Tag className="survey-status" color={statusMeta[survey.status].color}><i />{statusMeta[survey.status].label}</Tag><span className="survey-index">#{String(surveys.length - index).padStart(2, '0')}</span></div>
+        <div className="survey-card-body"><h3>{survey.title}</h3><p>{survey.description || 'Talabalar fikrini o‘rganish uchun yaratilgan so‘rovnoma.'}</p></div>
+        <div className="survey-card-metrics"><div><BarChartOutlined /><span><b>{survey.responseCount || 0}</b> javob</span></div><div><FileTextOutlined /><span><b>{survey.questions.length}</b> savol</span></div><time>{new Date(survey.createdAt).toLocaleDateString('uz-UZ')}</time></div>
+        <div className="survey-actions"><Button className="result-button" type="primary" ghost icon={<EyeOutlined />} onClick={() => setResultsId(survey.id)}>Natijalar</Button>{canManage && survey.status !== 'active' && <Button icon={<EditOutlined />} onClick={() => { setEditing(survey); setEditorOpen(true) }}>Tahrirlash</Button>}{canManage && survey.status !== 'active' && <Popconfirm title="Ushbu so‘rovnomani faollashtirasizmi?" description="Hozirgi faol so‘rovnoma avtomatik yopiladi." onConfirm={() => changeStatus(survey.id, 'active')}><Button className="activate-button" type="primary">Faollashtirish</Button></Popconfirm>}{canManage && survey.status === 'active' && <Popconfirm title="So‘rovnomani yopasizmi?" onConfirm={() => changeStatus(survey.id, 'closed')}><Button danger>Yopish</Button></Popconfirm>}{canManage && survey.status === 'draft' && <Popconfirm title="So‘rovnomani o‘chirasizmi?" onConfirm={() => remove(survey.id)}><Button className="survey-delete" danger type="text" icon={<DeleteOutlined />} aria-label="O‘chirish" /></Popconfirm>}</div>
+      </article>)}{!visibleSurveys.length && <div className="survey-empty"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={surveys.length ? 'Qidiruv bo‘yicha so‘rovnoma topilmadi' : 'Hali so‘rovnoma yaratilmagan'} />{canManage && !surveys.length && <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditorOpen(true)}>Birinchi so‘rovnomani yarating</Button>}</div>}</div>}
+    </section>
     <SurveyEditor key={`${editing?.id || 'new'}-${editorOpen}`} open={editorOpen} survey={editing} saving={createState.isLoading || updateState.isLoading} onClose={() => { setEditorOpen(false); setEditing(null) }} onSubmit={save} />
     <Modal open={Boolean(resultsId)} width={980} title={(data?.surveys || []).find((s) => s.id === resultsId)?.title || 'Natijalar'} footer={null} onCancel={() => setResultsId(null)}><SurveyResults id={resultsId} /></Modal>
   </div>

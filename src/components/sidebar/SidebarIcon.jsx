@@ -14,6 +14,7 @@ import {
   UserSwitchOutlined,
   WalletOutlined,
   FormOutlined,
+  MessageOutlined,
 } from '@ant-design/icons'
 
 export function SidebarIcon({ name }) {
@@ -34,6 +35,7 @@ export function SidebarIcon({ name }) {
     expenses: ShoppingCartOutlined,
     reports: BarChartOutlined,
     surveys: FormOutlined,
+    complaints: MessageOutlined,
     audit: FileDoneOutlined,
     settings: SettingOutlined,
   }

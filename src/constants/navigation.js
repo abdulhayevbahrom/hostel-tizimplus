@@ -15,6 +15,7 @@ export const navigationItems = [
   { id: 'expenses', path: '/expenses', icon: 'expenses', label: 'Xarajatlar' },
   { id: 'reports', path: '/reports', icon: 'reports', label: 'Hisobot' },
   { id: 'surveys', path: '/surveys', icon: 'surveys', label: 'So‘rovnomalar' },
+  { id: 'complaints', path: '/complaints', icon: 'complaints', label: 'Shikoyatlar' },
   { id: 'audit', path: '/audit-logs', icon: 'audit', label: 'Amallar tarixi' },
   { id: 'settings', path: '/settings', icon: 'settings', label: 'Sozlamalar' },
 ]
