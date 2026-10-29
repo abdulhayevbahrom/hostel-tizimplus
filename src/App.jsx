@@ -25,7 +25,7 @@ import { ReportsPage } from './components/reports/ReportsPage'
 import { PaymentStatisticsPage } from './components/payment-statistics/PaymentStatisticsPage'
 import { CashPage } from './components/cash/CashPage'
 import { AuditLogsPage } from './components/audit/AuditLogsPage'
-import { SurveysPage } from './components/surveys/SurveysPage'
+import { SurveyResultsPage, SurveysPage } from './components/surveys/SurveysPage'
 import { ComplaintsPage } from './components/complaints/ComplaintsPage'
 import { baseApi, useGetGeneralSettingsQuery, useGetMeQuery } from './store/baseApi'
 import { LoginPage } from './components/auth/LoginPage'
@@ -48,8 +48,8 @@ function App() {
     ? element
     : firstAllowedPath ? <Navigate to={firstAllowedPath} replace /> : <div className="hotel-page-loader">Sizga hech bir bo‘lim uchun ruxsat berilmagan</div>
   const isSettings = location.pathname.startsWith('/settings')
-  const currentItem = navigationItems.find((item) => item.path === location.pathname || (item.id === 'students' && location.pathname.startsWith('/student/')) || (item.id === 'settings' && isSettings)) || navigationItems[0]
-  const title = location.pathname.startsWith('/student/') ? 'Talaba profili' : location.pathname === '/settings/general' ? 'Umumiy sozlamalar' : location.pathname === '/settings/building-blocks' ? 'Bino / bloklar' : location.pathname.startsWith('/settings') ? 'Universitetlar' : currentItem.label
+  const currentItem = navigationItems.find((item) => item.path === location.pathname || (item.id === 'students' && location.pathname.startsWith('/student/')) || (item.id === 'surveys' && location.pathname.startsWith('/surveys/')) || (item.id === 'settings' && isSettings)) || navigationItems[0]
+  const title = location.pathname.startsWith('/student/') ? 'Talaba profili' : location.pathname.startsWith('/surveys/') ? 'So‘rovnoma natijalari' : location.pathname === '/settings/general' ? 'Umumiy sozlamalar' : location.pathname === '/settings/building-blocks' ? 'Bino / bloklar' : location.pathname.startsWith('/settings') ? 'Universitetlar' : currentItem.label
   const goTo = (path) => { navigate(path); setMobileNavOpen(false) }
   const logout = () => { localStorage.removeItem('hostelAuthToken'); dispatch(baseApi.util.resetApiState()); setAuthToken(null) }
   const handleLogin = (data) => { dispatch(baseApi.util.resetApiState()); setAuthToken(data.token) }
@@ -103,6 +103,7 @@ function App() {
               <Route path="/expenses" element={guard('expenses', <ExpensesPage currentEmployee={meData.employee} />)} />
               <Route path="/reports" element={guard('reports', <ReportsPage />)} />
               <Route path="/surveys" element={guard('surveys', <SurveysPage currentEmployee={meData.employee} />)} />
+              <Route path="/surveys/:id/results" element={guard('surveys', <SurveyResultsPage />)} />
               <Route path="/complaints" element={guard('complaints', <ComplaintsPage />)} />
               <Route path="/audit-logs" element={isOwner ? <AuditLogsPage /> : firstAllowedPath ? <Navigate to={firstAllowedPath} replace /> : null} />
               <Route path="/settings" element={guard('settings', <Navigate to="/settings/general" replace />)} />

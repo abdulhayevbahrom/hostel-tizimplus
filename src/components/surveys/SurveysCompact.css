@@ -1,0 +1,75 @@
+/* Compact survey workspace */
+.surveys-page{gap:14px}
+.surveys-hero{gap:14px;padding:20px 22px;border-color:#15877c;border-radius:18px;background:radial-gradient(circle at 82% 10%,#67e8d633 0 12%,transparent 34%),radial-gradient(circle at 96% 85%,#2dd4bf2e 0 10%,transparent 30%),linear-gradient(120deg,#115f69 0%,#0f7d75 48%,#159b83 100%);box-shadow:0 12px 28px #0f766e30}
+.surveys-hero:before{position:absolute;inset:auto -70px -105px auto;width:280px;height:280px;border:42px solid #ffffff0b;border-radius:50%;content:""}
+.surveys-hero:after{top:-105px;right:20%;width:240px;height:240px;border-color:#ffffff0a}
+.survey-hero-copy{padding-bottom:4px}
+.survey-eyebrow{margin-bottom:5px;color:#ccfbf1;font-size:10px}
+.survey-eyebrow:before{background:#99f6e4;box-shadow:0 0 0 5px #ffffff18}
+.survey-hero-copy h2{margin-bottom:5px;color:#fff;font-size:26px}
+.survey-hero-copy p{color:#d8f3ef;font-size:13px;line-height:1.45}
+.survey-create-button{height:38px!important;border-color:#ffffff55!important;border-radius:9px!important;color:#0f766e!important;background:#fff!important;box-shadow:0 8px 20px #064e3b30!important;font-size:12px}
+.survey-overview{grid-column:auto;gap:9px;margin:0;padding:0;border:0;background:transparent;backdrop-filter:none}
+.survey-overview article{min-height:58px;gap:10px;padding:10px 13px;border:0!important;border-radius:11px;box-shadow:0 5px 15px #0f172a12}
+.survey-overview article:nth-child(1){background:linear-gradient(135deg,#416f7b,#4b8790)}
+.survey-overview article:nth-child(2){background:linear-gradient(135deg,#08705a,#16a27f)}
+.survey-overview article:nth-child(3){background:linear-gradient(135deg,#326fae,#3f88d4)}
+.survey-overview article:nth-child(4){background:linear-gradient(135deg,#6942b5,#865dd0)}
+.survey-overview .overview-icon{width:32px;height:32px;color:#fff!important;background:#ffffff20!important;box-shadow:inset 0 0 0 1px #ffffff22;font-size:14px}
+.survey-overview strong{color:#fff;font-size:18px}
+.survey-overview small{margin-top:1px;color:#ffffffc9;font-size:10px}
+.survey-library{border-radius:16px}
+.survey-library-head{padding:13px 16px}
+.survey-library-head h3{font-size:15px}
+.survey-library-head p{margin-top:2px;font-size:10px}
+.survey-toolbar>.ant-input-affix-wrapper{width:210px;height:40px;padding-top:0;padding-bottom:0}
+.survey-toolbar .ant-segmented{height:40px;padding:0;border-radius:10px}
+.survey-toolbar .ant-segmented-item{height:40px;border-radius:10px;font-size:12px;font-weight:700}
+.survey-toolbar .ant-segmented-item-label{display:flex;align-items:center;height:40px;padding:0 16px;line-height:40px}
+.survey-toolbar .ant-segmented-item-selected{color:#fff!important;background:#0f766e!important;box-shadow:0 4px 10px #0f766e30!important}
+.survey-toolbar .ant-segmented-item-selected .ant-segmented-item-label{color:#fff!important;font-weight:800}
+.survey-toolbar .ant-segmented-item:not(.ant-segmented-item-selected):hover{color:#0f766e;background:#dff5ef}
+.survey-grid{display:flex;flex-direction:column;gap:8px;padding:10px;background:#f5f8f9}
+.survey-card{display:grid;grid-template-columns:125px minmax(240px,1fr) auto minmax(290px,auto);align-items:center;gap:15px;min-height:0;padding:12px 14px;border-radius:12px;box-shadow:0 2px 9px #0f172a08}
+.survey-card:hover{transform:none;border-color:#9fd2ca;box-shadow:0 5px 15px #0f172a10}
+.survey-card-accent{width:3px}
+.survey-card-top{justify-content:flex-start;gap:8px}
+.survey-index{order:-1;padding-right:7px;border-right:1px solid #e2e8f0}
+.survey-card-body{min-width:0;padding:0}
+.survey-card h3{overflow:hidden;margin:0 0 3px;font-size:16px;line-height:1.3;text-overflow:ellipsis;white-space:nowrap;-webkit-line-clamp:unset}
+.survey-card p{overflow:hidden;margin:0;font-size:12px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap;-webkit-line-clamp:unset}
+.survey-card-metrics{gap:14px;padding:0;border:0;font-size:13px;white-space:nowrap}
+.survey-card-metrics b{font-size:14px}
+.survey-card-metrics time{font-size:12px}
+.survey-card-metrics .anticon{font-size:14px}
+.survey-card-metrics time{margin-left:0}
+.survey-actions{justify-content:flex-end;flex-wrap:nowrap;padding:0}
+.survey-actions .ant-btn{height:32px;padding:0 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.survey-actions .ant-btn .anticon{font-size:14px}
+.survey-actions .survey-delete{margin-left:0;padding:0;width:31px}
+.survey-empty{padding:42px 20px}
+@media(max-width:1200px){
+  .survey-card{grid-template-columns:115px minmax(200px,1fr) auto}
+  .survey-actions{grid-column:1/-1;justify-content:flex-end;padding-top:9px;border-top:1px solid #edf1f5}
+}
+@media(max-width:800px){
+  .surveys-hero{display:flex;padding:18px;flex-direction:column}
+  .survey-create-button{width:100%;margin:0}
+  .survey-overview{grid-template-columns:1fr 1fr;margin:0}
+  .survey-library-head{align-items:stretch;gap:10px}
+  .survey-toolbar{align-items:stretch;flex-direction:column}
+  .survey-toolbar>.ant-input-affix-wrapper{width:100%}
+  .survey-card{grid-template-columns:1fr auto;gap:10px}
+  .survey-card-top{grid-column:1/-1}
+  .survey-card-body{grid-column:1/2}
+  .survey-card-metrics{grid-column:2/3;grid-row:2/3;align-items:flex-end;flex-direction:column;gap:3px}
+  .survey-actions{grid-column:1/-1}
+}
+@media(max-width:520px){
+  .survey-overview{grid-template-columns:1fr 1fr}
+  .survey-overview article{padding:9px}
+  .survey-card{display:flex;align-items:stretch;flex-direction:column}
+  .survey-card-metrics{align-items:center;flex-direction:row;flex-wrap:wrap}
+  .survey-actions{justify-content:stretch}
+  .survey-actions .ant-btn:not(.survey-delete){flex:1}
+}
