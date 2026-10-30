@@ -5,17 +5,25 @@ import { useGetNotificationsQuery, useMarkNotificationReadMutation } from '../..
 import './Header.css'
 
 let notificationAudioContext = null
+let pendingNotificationAudio = false
 
-const unlockNotificationAudio = () => {
+const unlockNotificationAudio = async () => {
   const AudioContext = window.AudioContext || window.webkitAudioContext
-  if (!AudioContext) return
+  if (!AudioContext) return false
   if (!notificationAudioContext) notificationAudioContext = new AudioContext()
-  if (notificationAudioContext.state === 'suspended') notificationAudioContext.resume().catch(() => {})
+  if (notificationAudioContext.state === 'suspended') {
+    try { await notificationAudioContext.resume() } catch { return false }
+  }
+  return notificationAudioContext.state === 'running'
 }
 
-const playNotificationAudio = () => {
-  unlockNotificationAudio()
-  if (!notificationAudioContext || notificationAudioContext.state !== 'running') return
+const playNotificationAudio = async () => {
+  const unlocked = await unlockNotificationAudio()
+  if (!unlocked || !notificationAudioContext) {
+    pendingNotificationAudio = true
+    return
+  }
+  pendingNotificationAudio = false
   const start = notificationAudioContext.currentTime
   ;[1318.51, 1567.98, 2093].forEach((frequency, index) => {
     const oscillator = notificationAudioContext.createOscillator()
@@ -28,6 +36,11 @@ const playNotificationAudio = () => {
     oscillator.connect(gain); gain.connect(notificationAudioContext.destination)
     oscillator.start(noteStart); oscillator.stop(noteStart + 0.29)
   })
+}
+
+const primeNotificationAudio = async () => {
+  const unlocked = await unlockNotificationAudio()
+  if (unlocked && pendingNotificationAudio) playNotificationAudio()
 }
 
 export function Header({ title, onOpenMenu, employee, onLogout }) {
@@ -47,9 +60,12 @@ export function Header({ title, onOpenMenu, employee, onLogout }) {
   }
 
   useEffect(() => {
-    document.addEventListener('pointerdown', unlockNotificationAudio, { once: true })
-    document.addEventListener('keydown', unlockNotificationAudio, { once: true })
-    return () => { document.removeEventListener('pointerdown', unlockNotificationAudio); document.removeEventListener('keydown', unlockNotificationAudio) }
+    document.addEventListener('pointerdown', primeNotificationAudio, { capture: true })
+    document.addEventListener('keydown', primeNotificationAudio, { capture: true })
+    return () => {
+      document.removeEventListener('pointerdown', primeNotificationAudio, { capture: true })
+      document.removeEventListener('keydown', primeNotificationAudio, { capture: true })
+    }
   }, [])
 
   useEffect(() => {
@@ -79,7 +95,7 @@ export function Header({ title, onOpenMenu, employee, onLogout }) {
       <div className="edu-header-title"><button className="mobile-menu-button" onClick={onOpenMenu} aria-label="Menyu"><MenuOutlined /></button><h1>{title}</h1></div>
       <div className="edu-header-actions">
         <div className="notification-wrap" ref={notificationRef}>
-          <button className="header-icon-button" aria-label="Bildirishnomalar" aria-expanded={notificationsOpen} onClick={() => { unlockNotificationAudio(); setNotificationsOpen((open) => !open) }}><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>{unreadCount > 0 && <b className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</b>}</button>
+          <button className="header-icon-button" aria-label="Bildirishnomalar" aria-expanded={notificationsOpen} onClick={() => { primeNotificationAudio(); setNotificationsOpen((open) => !open) }}><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>{unreadCount > 0 && <b className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</b>}</button>
           {notificationsOpen && <div className="notification-panel"><div className="notification-panel-head"><strong>Bildirishnomalar</strong><span>{unreadCount} ta yangi</span></div>{notifications.length ? <div className="notification-panel-list">{notifications.map((notification) => <button type="button" className={`${notification.isRead ? 'read' : 'unread'} notification-${notification.type}`} key={notification.id} onClick={() => openNotification(notification)}><i>{notification.type === 'complaint' ? '!' : notification.count}</i><span><strong>{notification.title}</strong><small>{notification.message}</small><time>{new Date(notification.createdAt).toLocaleString('uz-UZ')}</time></span></button>)}</div> : <p>Yangi bildirishnoma yo‘q.</p>}</div>}
         </div>
         <span className="header-user">{employee ? `${employee.firstname} ${employee.lastname}` : 'Xodim'}</span>
