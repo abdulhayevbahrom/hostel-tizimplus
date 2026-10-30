@@ -739,6 +739,7 @@ export const {
   useDeleteStudentMutation,
   useGetStudentContractsQuery,
   useGetActiveStudentContractsQuery,
+  useLazyGetActiveStudentContractsQuery,
   useCreateStudentContractMutation,
   useUpdateStudentContractMutation,
   useDeleteStudentContractMutation,

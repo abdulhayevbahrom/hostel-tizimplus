@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from 'react'
-import { Pagination, Select } from 'antd'
+import { Button, Pagination, Select } from 'antd'
+import { FileExcelOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -8,8 +9,10 @@ import {
   useGetActiveStudentContractsQuery,
   useGetGeneralSettingsQuery,
   useGetRoomsQuery,
+  useLazyGetActiveStudentContractsQuery,
   useUpdateStudentContractMutation,
 } from '../../store/baseApi'
+import { downloadContractsExcel } from '../../utils/contractsExcel'
 import { ContractFormModal } from './ContractFormModal'
 import { ContractPreviewModal } from './ContractPreviewModal'
 import { ContractDownloadButton } from './ContractDownloadButton'
@@ -38,6 +41,7 @@ export function ActiveContractsTab() {
   const { data: roomData } = useGetRoomsQuery()
   const { data: settingsData } = useGetGeneralSettingsQuery()
   const [updateContract, { isLoading: updating }] = useUpdateStudentContractMutation()
+  const [loadExport, { isFetching: exporting }] = useLazyGetActiveStudentContractsQuery()
   const rooms = useMemo(() => roomData?.rooms || [], [roomData?.rooms])
   const editRooms = useMemo(() => rooms.filter((item) => item.gender === editingContract?.student?.gender && item.status !== 'maintenance' && ((item.occupiedCount || 0) < item.capacity || item.id === editingContract?.room?.id)), [editingContract?.room?.id, editingContract?.student?.gender, rooms])
   const pagination = data?.pagination || { page: 1, limit: 25, total: 0 }
@@ -67,8 +71,17 @@ export function ActiveContractsTab() {
     }
   }
 
+  const exportExcel = async () => {
+    try {
+      const exportData = await loadExport({ export: 1, ...(deferredSearch ? { search: deferredSearch } : {}), ...(room ? { room } : {}), ...(contractType ? { contractType } : {}) }).unwrap()
+      const roomLabel = room ? rooms.find((item) => item.id === room) : null
+      await downloadContractsExcel(exportData.contracts || [], { search: deferredSearch, contractType, roomLabel: roomLabel ? `${roomLabel.block} blok · ${roomLabel.roomNumber}-xona` : '' })
+      toast.success(`${exportData.contracts?.length || 0} ta shartnoma Excel faylga yuklandi`)
+    } catch (requestError) { toast.error(apiErrorMessage(requestError)) }
+  }
+
   return <section className="student-history-card active-contracts-card">
-    <div className="student-history-tools"><div><h2>Amaldagi shartnomalar</h2><p>Hozir istiqomat qilayotgan {pagination.total} ta talaba</p></div><div><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} placeholder="Talaba, telefon yoki shartnoma" /><Select allowClear value={contractType} placeholder="Shartnoma turi" options={[{ value: 'student_contract', label: 'Talaba SH' }, { value: 'standard_contract', label: 'Oddiy SH' }]} onChange={(value) => { setContractType(value); setPage(1) }} /><Select allowClear showSearch optionFilterProp="label" value={room} placeholder="Xona" options={rooms.map((item) => ({ value: item.id, label: `${item.block} blok · ${item.roomNumber}-xona` }))} onChange={(value) => { setRoom(value); setPage(1) }} /></div></div>
+    <div className="student-history-tools"><div><h2>Amaldagi shartnomalar</h2><p>Hozir istiqomat qilayotgan {pagination.total} ta talaba</p></div><div><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} placeholder="Talaba, telefon yoki shartnoma" /><Select allowClear value={contractType} placeholder="Shartnoma turi" options={[{ value: 'student_contract', label: 'Talaba SH' }, { value: 'standard_contract', label: 'Oddiy SH' }]} onChange={(value) => { setContractType(value); setPage(1) }} /><Select allowClear showSearch optionFilterProp="label" value={room} placeholder="Xona" options={rooms.map((item) => ({ value: item.id, label: `${item.block} blok · ${item.roomNumber}-xona` }))} onChange={(value) => { setRoom(value); setPage(1) }} /><Button className="contracts-excel-button" icon={<FileExcelOutlined />} loading={exporting} disabled={!pagination.total} onClick={exportExcel}>Excel</Button></div></div>
     {error && <div className="form-error">{apiErrorMessage(error)}</div>}
     {!isLoading && <div className="active-contracts-summary"><article className="total"><span>Jami shartnomalar</span><strong>{summary.total} ta</strong></article><article className="active"><span>Aktiv</span><strong>{summary.active} ta</strong></article><article className="completed"><span>Yakunlangan</span><strong>{summary.completed} ta</strong></article><article className="cancelled"><span>Bekor qilingan</span><strong>{summary.cancelled} ta</strong></article><article className="amount"><span>Joriy oy summasi</span><strong>{amountNumber(summary.amount)}</strong><div className="amount-breakdown"><div><span>Aktiv</span><b>{amountNumber(summary.amountByStatus?.active)}</b></div><div><span>Yakunlangan</span><b>{amountNumber(summary.amountByStatus?.completed)}</b></div><div><span>Bekor qilingan shartnomadan</span><b>{amountNumber(summary.cancelledPaidAmount)}</b></div></div></article></div>}
     {!isLoading && <div className="student-history-result-count" aria-live="polite">Jami: <strong>{pagination.total}</strong> ta shartnoma</div>}

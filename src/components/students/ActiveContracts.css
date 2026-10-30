@@ -24,6 +24,8 @@
 .active-contracts-card .student-history-table tr.contract-expiring-soon td { background: #ffe5e3; border-bottom-color: #efb9b5; }
 .active-contracts-card .student-history-table tr.contract-expiring-soon td:first-child { box-shadow: inset 4px 0 #c94d4d; }
 .active-contracts-card .student-history-table tr.contract-expiring-soon:hover td { background: #ffdcd9; }
+.active-contracts-card .contracts-excel-button { height: 38px; padding: 0 14px; border-color: #7bc5a2; border-radius: 7px; color: #147a49; background: #edf9f1; font-size: 12px; font-weight: 800; box-shadow: none; }
+.active-contracts-card .contracts-excel-button:hover { border-color: #16834f!important; color: #fff!important; background: #16834f!important; }
 
 @media (max-width: 1250px) {
   .active-contracts-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -38,6 +40,7 @@
   .active-contracts-summary .amount strong { font-size: 19px; }
   .active-contracts-card .student-history-table tr.contract-expiring-soon { background: #ffe5e3; border-color: #e9aaa6; }
   .active-contracts-card .student-history-table tr.contract-expiring-soon td:first-child { box-shadow: none; }
+  .active-contracts-card .contracts-excel-button { width: 100%; height: 34px; }
 }
 
 @media (max-width: 520px) {
