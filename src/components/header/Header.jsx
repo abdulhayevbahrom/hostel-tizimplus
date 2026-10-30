@@ -17,16 +17,16 @@ const playNotificationAudio = () => {
   unlockNotificationAudio()
   if (!notificationAudioContext || notificationAudioContext.state !== 'running') return
   const start = notificationAudioContext.currentTime
-  ;[880, 1174.66, 1396.91].forEach((frequency, index) => {
+  ;[1318.51, 1567.98, 2093].forEach((frequency, index) => {
     const oscillator = notificationAudioContext.createOscillator()
     const gain = notificationAudioContext.createGain()
-    const noteStart = start + index * 0.16
-    oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(frequency, noteStart)
+    const noteStart = start + index * 0.13
+    oscillator.type = index === 1 ? 'triangle' : 'sine'; oscillator.frequency.setValueAtTime(frequency, noteStart)
     gain.gain.setValueAtTime(0.0001, noteStart)
-    gain.gain.exponentialRampToValueAtTime(0.22, noteStart + 0.015)
-    gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.22)
+    gain.gain.exponentialRampToValueAtTime(index === 2 ? 0.2 : 0.16, noteStart + 0.012)
+    gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.28)
     oscillator.connect(gain); gain.connect(notificationAudioContext.destination)
-    oscillator.start(noteStart); oscillator.stop(noteStart + 0.23)
+    oscillator.start(noteStart); oscillator.stop(noteStart + 0.29)
   })
 }
 
@@ -80,7 +80,7 @@ export function Header({ title, onOpenMenu, employee, onLogout }) {
       <div className="edu-header-actions">
         <div className="notification-wrap" ref={notificationRef}>
           <button className="header-icon-button" aria-label="Bildirishnomalar" aria-expanded={notificationsOpen} onClick={() => { unlockNotificationAudio(); setNotificationsOpen((open) => !open) }}><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>{unreadCount > 0 && <b className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</b>}</button>
-          {notificationsOpen && <div className="notification-panel"><div className="notification-panel-head"><strong>Bildirishnomalar</strong><span>{unreadCount} ta yangi</span></div>{notifications.length ? <div className="notification-panel-list">{notifications.map((notification) => <button type="button" className={notification.isRead ? 'read' : 'unread'} key={notification.id} onClick={() => openNotification(notification)}><i>{notification.count}</i><span><strong>{notification.title}</strong><small>{notification.message}</small><time>{new Date(notification.createdAt).toLocaleString('uz-UZ')}</time></span></button>)}</div> : <p>Yangi bildirishnoma yo‘q.</p>}</div>}
+          {notificationsOpen && <div className="notification-panel"><div className="notification-panel-head"><strong>Bildirishnomalar</strong><span>{unreadCount} ta yangi</span></div>{notifications.length ? <div className="notification-panel-list">{notifications.map((notification) => <button type="button" className={`${notification.isRead ? 'read' : 'unread'} notification-${notification.type}`} key={notification.id} onClick={() => openNotification(notification)}><i>{notification.type === 'complaint' ? '!' : notification.count}</i><span><strong>{notification.title}</strong><small>{notification.message}</small><time>{new Date(notification.createdAt).toLocaleString('uz-UZ')}</time></span></button>)}</div> : <p>Yangi bildirishnoma yo‘q.</p>}</div>}
         </div>
         <span className="header-user">{employee ? `${employee.firstname} ${employee.lastname}` : 'Xodim'}</span>
         <button className="header-icon-button" aria-label="Chiqish" onClick={onLogout}><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /></svg></button>

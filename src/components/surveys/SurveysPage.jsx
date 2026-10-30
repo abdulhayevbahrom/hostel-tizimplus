@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Button, Empty, Input, Modal, Popconfirm, Segmented, Select, Switch, Tabs, Tag } from 'antd'
+import { Button, Checkbox, Empty, Input, Modal, Popconfirm, Segmented, Select, Switch, Tabs, Tag } from 'antd'
 import { BarChartOutlined, CheckCircleOutlined, DeleteOutlined, EyeOutlined, FileTextOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { toast } from 'react-toastify'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -7,6 +7,7 @@ import {
   apiErrorMessage,
   useCreateSurveyMutation,
   useDeleteSurveyMutation,
+  useGetSurveyActivationRecipientsQuery,
   useGetSurveyResultsQuery,
   useGetSurveysQuery,
   useSetSurveyStatusMutation,
@@ -31,6 +32,7 @@ const blankFollowUp = () => ({ enabled: false, text: '', type: 'text', required:
 const blankOption = (label = '', value = '', sentiment = 'neutral') => ({ label, value, sentiment, followUp: blankFollowUp() })
 const blankSurvey = () => ({ title: '', description: '', questions: [blankQuestion()] })
 const optionValue = (label, index) => label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || `option_${index + 1}`
+const activationRoomLabel = (room) => room ? `${room.block ? `${room.block} · ` : ''}${room.floor}-qavat · ${room.roomNumber}-xona` : 'Xona aniqlanmagan'
 
 function SurveyEditor({ open, survey, saving, onClose, onSubmit }) {
   const [form, setForm] = useState(() => survey ? {
@@ -96,6 +98,31 @@ function SurveyEditor({ open, survey, saving, onClose, onSubmit }) {
   </Modal>
 }
 
+function SurveyActivationModal({ survey, loading, onClose, onActivate }) {
+  const surveyId = survey?.id
+  const { data, isLoading, error } = useGetSurveyActivationRecipientsQuery(undefined, { skip: !surveyId })
+  const [search, setSearch] = useState('')
+  const [excludedIds, setExcludedIds] = useState([])
+  const selectedIds = useMemo(() => (data?.students || []).filter((student) => student.telegramLinked && !excludedIds.includes(student.id)).map((student) => student.id), [data?.students, excludedIds])
+  const visibleStudents = useMemo(() => {
+    const needle = search.trim().toLocaleLowerCase('uz-UZ')
+    return (data?.students || []).filter((student) => !needle || `${student.fullName} ${student.phone} ${activationRoomLabel(student.room)}`.toLocaleLowerCase('uz-UZ').includes(needle))
+  }, [data?.students, search])
+  const visibleLinkedIds = visibleStudents.filter((student) => student.telegramLinked).map((student) => student.id)
+  const allVisibleSelected = visibleLinkedIds.length > 0 && visibleLinkedIds.every((id) => selectedIds.includes(id))
+  const toggleAllVisible = (checked) => setExcludedIds((current) => checked ? current.filter((id) => !visibleLinkedIds.includes(id)) : [...new Set([...current, ...visibleLinkedIds])])
+  const toggleStudent = (id, checked) => setExcludedIds((current) => checked ? current.filter((studentId) => studentId !== id) : [...new Set([...current, id])])
+  return <Modal className="survey-activation-modal" open={Boolean(survey)} width={760} title="So‘rovnomani faollashtirish" onCancel={onClose} footer={<><Button onClick={onClose}>Bekor qilish</Button><Button type="primary" disabled={!selectedIds.length} loading={loading} onClick={() => onActivate(selectedIds)}>{selectedIds.length ? `Faollashtirish va ${selectedIds.length} talabaga yuborish` : 'Kamida bitta talabani tanlang'}</Button></>}>
+    <div className="activation-intro"><strong>{survey?.title}</strong><p>So‘rovnoma faollashadi va oldingi faol so‘rovnoma yopiladi. Xabar faqat belgilangan hamda Telegram botga ulangan talabalarga yuboriladi.</p></div>
+    <div className="activation-toolbar"><Input allowClear prefix={<SearchOutlined />} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Talaba, telefon, xona yoki qavat bo‘yicha qidiring" /><div><Checkbox checked={allVisibleSelected} indeterminate={!allVisibleSelected && visibleLinkedIds.some((id) => selectedIds.includes(id))} onChange={(event) => toggleAllVisible(event.target.checked)}>Ko‘rinayotgan barchasini tanlash</Checkbox><span>{selectedIds.length} ta tanlandi</span></div></div>
+    {error && <div className="form-error">{apiErrorMessage(error)}</div>}
+    {isLoading ? <div className="activation-loading">Talabalar yuklanmoqda…</div> : <div className="activation-student-list">
+      {visibleStudents.map((student) => <label className={!student.telegramLinked ? 'unavailable' : ''} key={student.id}><Checkbox disabled={!student.telegramLinked} checked={selectedIds.includes(student.id)} onChange={(event) => toggleStudent(student.id, event.target.checked)} /><span className="activation-avatar">{student.fullName?.charAt(0)}</span><span className="activation-student-info"><strong>{student.fullName}</strong><small>+998 {student.phone} · {activationRoomLabel(student.room)}</small></span><em className={student.telegramLinked ? 'linked' : ''}>{student.telegramLinked ? 'Telegram ulangan' : 'Botga ulanmagan'}</em></label>)}
+      {!visibleStudents.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Talaba topilmadi" />}
+    </div>}
+  </Modal>
+}
+
 function SurveyResults({ id }) {
   const { data, isLoading, error } = useGetSurveyResultsQuery(id, { skip: !id })
   const [selected, setSelected] = useState(null)
@@ -130,10 +157,11 @@ export function SurveysPage({ currentEmployee }) {
   const { data, isLoading, error } = useGetSurveysQuery()
   const [createSurvey, createState] = useCreateSurveyMutation()
   const [updateSurvey, updateState] = useUpdateSurveyMutation()
-  const [setStatus] = useSetSurveyStatusMutation()
+  const [setStatus, setStatusState] = useSetSurveyStatusMutation()
   const [deleteSurvey] = useDeleteSurveyMutation()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [activationSurvey, setActivationSurvey] = useState(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const canManage = ['owner', 'admin'].includes(currentEmployee?.role)
@@ -154,7 +182,7 @@ export function SurveysPage({ currentEmployee }) {
       toast.success(editing ? 'So‘rovnoma yangilandi' : 'So‘rovnoma yaratildi'); setEditorOpen(false); setEditing(null)
     } catch (requestError) { toast.error(apiErrorMessage(requestError)) }
   }
-  const changeStatus = async (id, status) => { try { await setStatus({ id, status }).unwrap(); toast.success(status === 'active' ? 'So‘rovnoma faollashtirildi' : 'So‘rovnoma yopildi') } catch (e) { toast.error(apiErrorMessage(e)) } }
+  const changeStatus = async (id, status, studentIds) => { try { const result = await setStatus({ id, status, studentIds }).unwrap(); if (status === 'active') { const sent = result.notificationResult?.sent || 0; const failed = result.notificationResult?.failed || 0; toast.success(`So‘rovnoma faollashtirildi. ${sent} ta talabaga xabar yuborildi${failed ? `, ${failed} ta yuborilmadi` : ''}.`); setActivationSurvey(null) } else toast.success('So‘rovnoma yopildi') } catch (e) { toast.error(apiErrorMessage(e)) } }
   const remove = async (id) => { try { await deleteSurvey(id).unwrap(); toast.success('So‘rovnoma o‘chirildi') } catch (e) { toast.error(apiErrorMessage(e)) } }
   return <div className="surveys-page">
     <header className="surveys-hero">
@@ -178,10 +206,11 @@ export function SurveysPage({ currentEmployee }) {
           <td data-label="Javoblar"><span className="survey-count-cell"><BarChartOutlined /><b>{survey.responseCount || 0}</b></span></td>
           <td data-label="Savollar"><span className="survey-count-cell"><FileTextOutlined /><b>{survey.questions.length}</b></span></td>
           <td data-label="Yaratilgan sana"><time className="survey-date-cell">{new Date(survey.createdAt).toLocaleDateString('uz-UZ')}</time></td>
-          <td data-label="Amallar"><div className="survey-table-actions"><Button className="result-button" onClick={() => navigate(`/surveys/${survey.id}/results`)}>Natijalar</Button>{canManage && survey.status !== 'active' && <Button onClick={() => { setEditing(survey); setEditorOpen(true) }}>Tahrirlash</Button>}{canManage && survey.status !== 'active' && <Popconfirm title="Ushbu so‘rovnomani faollashtirasizmi?" description="Hozirgi faol so‘rovnoma avtomatik yopiladi." onConfirm={() => changeStatus(survey.id, 'active')}><Button className="activate-button" type="primary">Faollashtirish</Button></Popconfirm>}{canManage && survey.status === 'active' && <Popconfirm title="So‘rovnomani yopasizmi?" onConfirm={() => changeStatus(survey.id, 'closed')}><Button danger>Yopish</Button></Popconfirm>}{canManage && survey.status === 'draft' && <Popconfirm title="So‘rovnomani o‘chirasizmi?" onConfirm={() => remove(survey.id)}><Button className="survey-delete" danger type="text" icon={<DeleteOutlined />} aria-label="O‘chirish" /></Popconfirm>}</div></td>
+          <td data-label="Amallar"><div className="survey-table-actions"><Button className="result-button" onClick={() => navigate(`/surveys/${survey.id}/results`)}>Natijalar</Button>{canManage && survey.status !== 'active' && <Button onClick={() => { setEditing(survey); setEditorOpen(true) }}>Tahrirlash</Button>}{canManage && survey.status !== 'active' && <Button className="activate-button" type="primary" onClick={() => setActivationSurvey(survey)}>Faollashtirish</Button>}{canManage && survey.status === 'active' && <Popconfirm title="So‘rovnomani yopasizmi?" onConfirm={() => changeStatus(survey.id, 'closed')}><Button danger>Yopish</Button></Popconfirm>}{canManage && survey.status === 'draft' && <Popconfirm title="So‘rovnomani o‘chirasizmi?" onConfirm={() => remove(survey.id)}><Button className="survey-delete" danger type="text" icon={<DeleteOutlined />} aria-label="O‘chirish" /></Popconfirm>}</div></td>
         </tr>)}</tbody>
       </table></div> : <div className="survey-empty"><Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={surveys.length ? 'Qidiruv bo‘yicha so‘rovnoma topilmadi' : 'Hali so‘rovnoma yaratilmagan'} />{canManage && !surveys.length && <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditorOpen(true)}>Birinchi so‘rovnomani yarating</Button>}</div>}
     </section>
     <SurveyEditor key={`${editing?.id || 'new'}-${editorOpen}`} open={editorOpen} survey={editing} saving={createState.isLoading || updateState.isLoading} onClose={() => { setEditorOpen(false); setEditing(null) }} onSubmit={save} />
+    <SurveyActivationModal key={activationSurvey?.id || 'activation'} survey={activationSurvey} loading={setStatusState.isLoading} onClose={() => setActivationSurvey(null)} onActivate={(studentIds) => changeStatus(activationSurvey.id, 'active', studentIds)} />
   </div>
 }

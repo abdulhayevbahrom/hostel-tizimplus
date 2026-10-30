@@ -125,3 +125,22 @@
   .survey-editor-modal .survey-add-question-bottom.after-even{grid-column:2}
   .survey-editor-modal .question-editor{height:100%;box-sizing:border-box}
 }
+.survey-activation-modal .ant-modal-content{overflow:hidden;padding:0;border-radius:17px}
+.survey-activation-modal .ant-modal-header{margin:0;padding:18px 22px;background:linear-gradient(115deg,#115f69,#0f7d75 55%,#159b83)}
+.survey-activation-modal .ant-modal-title{color:#fff;font-size:18px;font-weight:800}
+.survey-activation-modal .ant-modal-close{top:13px;right:15px;color:#fff;background:#ffffff18}
+.survey-activation-modal .ant-modal-body{padding:18px 21px 8px;background:#f7faf9}
+.survey-activation-modal .ant-modal-footer{margin:0;padding:13px 21px;border-top:1px solid #dfe8e5;background:#fff}
+.survey-activation-modal .ant-modal-footer .ant-btn{height:37px;border-radius:9px;font-size:12px;font-weight:800}
+.survey-activation-modal .ant-modal-footer .ant-btn-primary{border-color:#0f766e;background:#0f766e}
+.activation-intro{padding:13px 15px;border:1px solid #b7dfd5;border-radius:11px;background:linear-gradient(135deg,#effbf7,#e1f6ef)}
+.activation-intro strong{display:block;color:#123f3b;font-size:15px}.activation-intro p{margin:5px 0 0;color:#607874;font-size:11px;line-height:1.55}
+.activation-toolbar{display:grid;gap:9px;margin:13px 0 10px}.activation-toolbar>.ant-input-affix-wrapper{height:38px;border-radius:9px}.activation-toolbar>div{display:flex;align-items:center;justify-content:space-between;gap:12px}.activation-toolbar .ant-checkbox-wrapper{color:#41566d;font-size:11px;font-weight:700}.activation-toolbar>div>span{color:#0f766e;font-size:11px;font-weight:800}
+.activation-student-list{display:flex;max-height:430px;flex-direction:column;gap:7px;overflow-y:auto;padding-right:4px}
+.activation-student-list>label{display:grid;grid-template-columns:auto 34px minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 11px;border:1px solid #dfe8e5;border-radius:10px;background:#fff;cursor:pointer;transition:.18s ease}
+.activation-student-list>label:hover{border-color:#8bcbbc;background:#f1fbf7}.activation-student-list>label.unavailable{cursor:not-allowed;opacity:.62;background:#f3f5f7}
+.activation-avatar{display:grid;width:34px;height:34px;place-items:center;border-radius:9px;color:#fff;background:#168579;font-size:13px;font-weight:900}
+.activation-student-info{display:grid;min-width:0;gap:2px}.activation-student-info strong{overflow:hidden;color:#203b45;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.activation-student-info small{overflow:hidden;color:#7b8d98;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.activation-student-list em{padding:4px 7px;border-radius:7px;color:#87939f;background:#edf0f3;font-size:9px;font-style:normal;font-weight:800;white-space:nowrap}.activation-student-list em.linked{color:#087b69;background:#e2f7f0}
+.activation-loading{display:grid;min-height:220px;place-items:center;color:#71847f;font-size:12px}
+@media(max-width:600px){.activation-student-list>label{grid-template-columns:auto 32px minmax(0,1fr)}.activation-student-list em{grid-column:3}.activation-toolbar>div{align-items:flex-start;flex-direction:column}}

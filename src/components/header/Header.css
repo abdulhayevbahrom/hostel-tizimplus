@@ -20,6 +20,7 @@
 .notification-panel-list > button:hover { background: #f3faf8; }
 .notification-panel-list > button.unread { background: #edf9f6; }
 .notification-panel-list > button > i { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; color: #fff; background: #cf4b4b; border-radius: 50%; font-size: 12px; font-style: normal; font-weight: 800; }
+.notification-panel-list > button.notification-complaint > i { background: linear-gradient(135deg, #dc2626, #f97316); box-shadow: 0 4px 10px rgba(220, 38, 38, .24); }
 .notification-panel-list > button > span { display: grid; min-width: 0; gap: 3px; }
 .notification-panel-list strong { color: #29434c; font-size: 12px; }
 .notification-panel-list small { color: #6e8188; font-size: 11px; line-height: 1.35; }

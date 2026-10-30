@@ -673,6 +673,11 @@ export const baseApi = createApi({
         unsubscribe()
       },
     }),
+    getSurveyActivationRecipients: builder.query({
+      query: () => '/surveys/activation-recipients',
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Student', id: 'SURVEY-RECIPIENTS' }],
+    }),
     getSurveyResults: builder.query({
       query: (id) => `/surveys/${id}/results`,
       transformResponse: (response) => response.data,
@@ -680,7 +685,7 @@ export const baseApi = createApi({
     }),
     createSurvey: builder.mutation({ query: (body) => ({ url: '/surveys', method: 'POST', body }), transformResponse: (response) => response.data, invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
     updateSurvey: builder.mutation({ query: ({ id, ...body }) => ({ url: `/surveys/${id}`, method: 'PUT', body }), transformResponse: (response) => response.data, invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
-    setSurveyStatus: builder.mutation({ query: ({ id, status }) => ({ url: `/surveys/${id}/status`, method: 'PUT', body: { status } }), transformResponse: (response) => response.data, invalidatesTags: (_r, _e, { id }) => [{ type: 'Survey', id: 'LIST' }, { type: 'Survey', id }] }),
+    setSurveyStatus: builder.mutation({ query: ({ id, status, studentIds }) => ({ url: `/surveys/${id}/status`, method: 'PUT', body: { status, ...(studentIds ? { studentIds } : {}) } }), transformResponse: (response) => response.data, invalidatesTags: (_r, _e, { id }) => [{ type: 'Survey', id: 'LIST' }, { type: 'Survey', id }] }),
     deleteSurvey: builder.mutation({ query: (id) => ({ url: `/surveys/${id}`, method: 'DELETE' }), invalidatesTags: [{ type: 'Survey', id: 'LIST' }] }),
     getComplaints: builder.query({
       query: (params = {}) => ({ url: '/complaints', params }),
@@ -785,6 +790,7 @@ export const {
   useCloseCashSessionMutation,
   useApproveCashSessionMutation,
   useGetSurveysQuery,
+  useGetSurveyActivationRecipientsQuery,
   useGetSurveyResultsQuery,
   useCreateSurveyMutation,
   useUpdateSurveyMutation,
