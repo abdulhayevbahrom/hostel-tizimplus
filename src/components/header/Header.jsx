@@ -4,43 +4,51 @@ import { useNavigate } from 'react-router-dom'
 import { useGetNotificationsQuery, useMarkNotificationReadMutation } from '../../store/baseApi'
 import './Header.css'
 
-let notificationAudioContext = null
+let notificationAudio = null
+let notificationAudioPrimed = false
 let pendingNotificationAudio = false
 
-const unlockNotificationAudio = async () => {
-  const AudioContext = window.AudioContext || window.webkitAudioContext
-  if (!AudioContext) return false
-  if (!notificationAudioContext) notificationAudioContext = new AudioContext()
-  if (notificationAudioContext.state === 'suspended') {
-    try { await notificationAudioContext.resume() } catch { return false }
+const getNotificationAudio = () => {
+  if (!notificationAudio) {
+    notificationAudio = new Audio(`${import.meta.env.BASE_URL}audio/iphone-text-message.mp3`)
+    notificationAudio.preload = 'auto'
+    notificationAudio.playsInline = true
   }
-  return notificationAudioContext.state === 'running'
+  return notificationAudio
 }
 
 const playNotificationAudio = async () => {
-  const unlocked = await unlockNotificationAudio()
-  if (!unlocked || !notificationAudioContext) {
+  const audio = getNotificationAudio()
+  try {
+    audio.pause()
+    audio.currentTime = 0
+    audio.volume = 1
+    await audio.play()
+    notificationAudioPrimed = true
+    pendingNotificationAudio = false
+  } catch {
     pendingNotificationAudio = true
-    return
   }
-  pendingNotificationAudio = false
-  const start = notificationAudioContext.currentTime
-  ;[1318.51, 1567.98, 2093].forEach((frequency, index) => {
-    const oscillator = notificationAudioContext.createOscillator()
-    const gain = notificationAudioContext.createGain()
-    const noteStart = start + index * 0.13
-    oscillator.type = index === 1 ? 'triangle' : 'sine'; oscillator.frequency.setValueAtTime(frequency, noteStart)
-    gain.gain.setValueAtTime(0.0001, noteStart)
-    gain.gain.exponentialRampToValueAtTime(index === 2 ? 0.2 : 0.16, noteStart + 0.012)
-    gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.28)
-    oscillator.connect(gain); gain.connect(notificationAudioContext.destination)
-    oscillator.start(noteStart); oscillator.stop(noteStart + 0.29)
-  })
 }
 
 const primeNotificationAudio = async () => {
-  const unlocked = await unlockNotificationAudio()
-  if (unlocked && pendingNotificationAudio) playNotificationAudio()
+  if (notificationAudioPrimed) {
+    if (pendingNotificationAudio) playNotificationAudio()
+    return
+  }
+  const audio = getNotificationAudio()
+  try {
+    audio.volume = 0
+    await audio.play()
+    audio.pause()
+    audio.currentTime = 0
+    audio.volume = 1
+    notificationAudioPrimed = true
+    if (pendingNotificationAudio) playNotificationAudio()
+  } catch {
+    audio.volume = 1
+    /* The next user interaction will retry audio activation. */
+  }
 }
 
 export function Header({ title, onOpenMenu, employee, onLogout }) {
