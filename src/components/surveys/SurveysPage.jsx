@@ -137,8 +137,44 @@ function SurveyResults({ id }) {
     <Tabs items={[
       { key: 'questions', label: 'Savollar bo‘yicha', children: <div className="question-stat-list">{(data?.questionStats || []).map((question, i) => <article key={question.questionId}><div><b>{i + 1}. {question.text}</b><div className="question-stat-meta"><span>{question.typeLabel}</span><span>{question.total} ta javob</span></div></div><div className="answer-bars">{Object.entries(question.values).sort((a, b) => b[1] - a[1]).map(([value, count]) => <div key={value}><span title={value}>{value || 'Javobsiz'}</span><i><em style={{ width: `${question.total ? count * 100 / question.total : 0}%` }} /></i><b>{count}</b></div>)}</div></article>)}</div> },
       { key: 'students', label: 'Talabalar javobi', children: <div className="response-table-wrap"><table className="response-table"><thead><tr><th>Talaba</th><th>Telefon</th><th>Holat</th><th>Sana</th><th>Amal</th></tr></thead><tbody>{(data?.responses || []).map((row) => <tr key={row.id}><td><b>{row.student?.fullName}</b></td><td>+998 {row.student?.phone}</td><td><span className={`response-status-pill ${row.sentiment}`}>{sentimentMeta[row.sentiment]?.label}</span></td><td>{new Date(row.completedAt).toLocaleString('uz-UZ')}</td><td><Button className="answer-view-button" icon={<EyeOutlined />} aria-label="Javoblarni ko‘rish" title="Javoblarni ko‘rish" onClick={() => setSelected(row)} /></td></tr>)}</tbody></table>{!data?.responses?.length && <Empty description="Hali javoblar yo‘q" />}</div> },
+      { key: 'statistics', label: 'Statistika', children: <ParticipationStatistics data={data?.participationStats} /> },
     ]} />
     <Modal open={Boolean(selected)} title={selected?.student?.fullName} footer={null} onCancel={() => setSelected(null)}>{selected?.answers?.map((answer, i) => <div className="answer-detail" key={answer.questionId}><small>{i + 1}. {answer.question}</small><strong>{String(answer.value)}</strong></div>)}</Modal>
+  </div>
+}
+
+function ParticipationStatistics({ data = {} }) {
+  const [missingList, setMissingList] = useState(null)
+  const [missingSearch, setMissingSearch] = useState('')
+  const sections = [
+    { key: 'floors', studentKey: 'floorKey', title: 'Qavatlar kesimida', firstColumn: 'Qavat' },
+    { key: 'courses', studentKey: 'courseKey', title: 'Kurslar kesimida', firstColumn: 'Kurs' },
+    { key: 'rooms', studentKey: 'roomKey', title: 'Xonalar kesimida', firstColumn: 'Xona' },
+  ]
+  const openMissingList = (title, students) => { setMissingSearch(''); setMissingList({ title, students }) }
+  const allMissing = data.notParticipatedStudents || []
+  const visibleMissing = (missingList?.students || []).filter((student) => {
+    const needle = missingSearch.trim().toLocaleLowerCase('uz-UZ')
+    return !needle || `${student.fullName} ${student.phone} ${student.course} ${student.floor} ${student.room}`.toLocaleLowerCase('uz-UZ').includes(needle)
+  })
+  return <div className="participation-statistics">
+    <div className="participation-summary">
+      <article className="contracts"><span>Faol shartnomasi bor</span><strong>{data.totalActiveStudents || 0}</strong><small>talaba</small></article>
+      <article className="participated"><span>So‘rovnomada qatnashdi</span><strong>{data.participated || 0}</strong><small>{data.participationRate || 0}% ishtirok</small></article>
+      <button type="button" className="not-participated" disabled={!allMissing.length} onClick={() => openMissingList('So‘rovnomada qatnashmagan talabalar', allMissing)}><span>Qatnashmadi</span><strong>{data.notParticipated || 0}</strong><small>Ro‘yxatni ko‘rish →</small></button>
+    </div>
+    <div className="participation-breakdowns">
+      {sections.map((section) => <section className={`participation-section ${section.key}`} key={section.key}>
+        <header><div><h3>{section.title}</h3><p>Faol shartnomasi bor talabalar ishtiroki</p></div><b>{(data[section.key] || []).length} ta guruh</b></header>
+        <div className="participation-table-wrap"><table className="participation-table"><thead><tr><th>{section.firstColumn}</th><th>Jami</th><th>Qatnashdi</th><th>Qatnashmadi</th><th>Ishtirok</th></tr></thead><tbody>
+          {(data[section.key] || []).map((row) => <tr key={row.key}><td><strong>{row.label}</strong></td><td>{row.total}</td><td><span className="stat-count joined">{row.participated}</span></td><td><button type="button" className="stat-count missed" disabled={!row.notParticipated} title="Qatnashmagan talabalarni ko‘rish" onClick={() => openMissingList(`${row.label}: qatnashmagan talabalar`, allMissing.filter((student) => student[section.studentKey] === row.key))}>{row.notParticipated}</button></td><td><div className="participation-rate"><i><em style={{ width: `${row.participationRate}%` }} /></i><b>{row.participationRate}%</b></div></td></tr>)}
+        </tbody></table>{!(data[section.key] || []).length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Ma’lumot yo‘q" />}</div>
+      </section>)}
+    </div>
+    <Modal className="missing-students-modal" open={Boolean(missingList)} width={700} title={missingList?.title} footer={null} onCancel={() => setMissingList(null)}>
+      <div className="missing-students-toolbar"><Input allowClear prefix={<SearchOutlined />} value={missingSearch} onChange={(event) => setMissingSearch(event.target.value)} placeholder="Talaba, telefon, kurs yoki xona bo‘yicha qidiring" /><b>{visibleMissing.length} ta talaba</b></div>
+      <div className="missing-students-list">{visibleMissing.map((student) => <article key={student.id}><span className="missing-student-avatar">{student.fullName.charAt(0)}</span><div><strong>{student.fullName}</strong><small>+998 {student.phone}</small></div><p><b>{student.room}</b><span>{student.floor} · {student.course}</span></p></article>)}{!visibleMissing.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Talaba topilmadi" />}</div>
+    </Modal>
   </div>
 }
 
