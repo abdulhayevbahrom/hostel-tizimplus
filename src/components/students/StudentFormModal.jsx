@@ -25,6 +25,7 @@ const initialValues = {
   university: undefined,
   faculty: undefined,
   address: "",
+  note: "",
   course: 1,
   educationType: "daytime",
   hasTemporaryRegistration: false,
@@ -412,6 +413,16 @@ export function StudentFormModal({
               maxLength={1000}
               showCount
               placeholder="Intizomiy holat bo‘yicha batafsil izoh"
+            />
+          </Form.Item>
+        )}
+        {student && (
+          <Form.Item name="note" label="Izoh / eslatma">
+            <Input.TextArea
+              rows={3}
+              maxLength={1000}
+              showCount
+              placeholder="Talaba haqida eslatma yozing"
             />
           </Form.Item>
         )}

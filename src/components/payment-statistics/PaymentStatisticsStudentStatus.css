@@ -1,0 +1,48 @@
+.ps-room-modal .ps-payment-columns,
+.ps-room-modal .ps-modal-list > button {
+  grid-template-columns: 32px minmax(175px, 1fr) 90px 105px 105px 105px 110px 100px 115px;
+}
+
+.ps-room-modal .ps-payment-columns span:nth-child(3),
+.ps-room-modal .ps-payment-columns span:nth-child(8),
+.ps-room-modal .ps-payment-columns span:nth-child(9) {
+  text-align: left;
+}
+
+.ps-room-modal .ps-payment-columns span:nth-child(7) {
+  text-align: right;
+}
+
+.ps-room-modal .ps-student-status {
+  justify-self: start;
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border-radius: 10px;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.ps-room-modal .ps-student-status.green {
+  color: #16685e;
+  background: #dcefe9;
+}
+
+.ps-room-modal .ps-student-status.warning {
+  color: #8b6a22;
+  background: #f4ead0;
+}
+
+.ps-room-modal .ps-student-status.red {
+  color: #9d453c;
+  background: #f6dfdb;
+}
+
+@media (max-width: 800px) {
+  .ps-room-modal .ps-payment-columns,
+  .ps-room-modal .ps-modal-list > button {
+    grid-template-columns: 28px minmax(160px, 1fr) 90px 105px 105px 105px 105px 100px 125px;
+    min-width: 1000px;
+  }
+}

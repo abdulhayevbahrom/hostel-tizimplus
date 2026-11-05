@@ -19,11 +19,13 @@ import './PaymentStatisticsFetching.css'
 import './PaymentStatisticsThreeMetrics.css'
 import './PaymentStatisticsControls.css'
 import './PaymentStatisticsStudentsMobile.css'
+import './PaymentStatisticsStudentStatus.css'
 
 const amount = (value) => Number(value || 0).toLocaleString('uz-UZ')
 const money = (value) => `${amount(value)} so‘m`
 const statusLabels = { onTime: 'Vaqtida', almostOnTime: 'Deyarli vaqtida', late: 'Kechikkan', pending: 'Kutilmoqda' }
 const behaviorLabels = { onTime: 'Vaqtida', almostOnTime: 'Deyarli vaqtida', late: 'Kechiktiradi', insufficient: 'To‘lovlar yetarli emas' }
+const studentStatusLabels = { green: 'Qoladi', warning: '50/50', red: 'Ketadi' }
 
 function DonutChart({ summary, metric }) {
   const timingSegments = [
@@ -216,10 +218,10 @@ export function PaymentStatisticsPage() {
               {selectedRoom && <>
                 <div className="ps-modal-summary"><span>{selectedRoom.room.block || 'Bloksiz'} · {selectedRoom.room.floor}-qavat</span><b>{selectedRoom.studentCount} talaba</b><em>{selectedRoom.onTimeRate == null ? 'Baholanmagan' : `${selectedRoom.onTimeRate}% vaqtida`}</em></div>
                 <div className="ps-modal-list">
-                  <div className="ps-modal-columns ps-payment-columns"><span>№</span><span>Talaba</span><span>To‘landi</span><span>Reja</span><span>Qarz</span><span>To‘lov muddati</span><span>To‘lov sanasi</span><span>Holat</span></div>
+                  <div className="ps-modal-columns ps-payment-columns"><span>№</span><span>Talaba</span><span>Talaba holati</span><span>To‘landi</span><span>Reja</span><span>Qarz</span><span>To‘lov muddati</span><span>To‘lov sanasi</span><span>Holat</span></div>
                   {roomDetailsQuery.isLoading && <div className="ps-empty">Talabalar yuklanmoqda...</div>}
                   {selectedRoomStudents.map((row, index) => <button type="button" key={row.installmentId} onClick={() => navigate(`/student/${row.student.id}`)}>
-                    <i>{index + 1}</i><div><strong>{row.student.fullName}</strong><small>{row.student.phone || 'Telefon kiritilmagan'}</small></div><div className="ps-money-cell paid">{amount(row.paidAmount)}</div><div className="ps-money-cell plan">{amount(row.amount)}</div><div className="ps-money-cell debt">{amount(row.debtAmount)}</div><div className="ps-modal-due"><span>{dayjs(row.dueDate).format('DD.MM.YYYY')}</span></div><time className="ps-paid-date">{row.lastPaidAt ? dayjs(row.lastPaidAt).format('DD.MM.YYYY') : 'To‘lanmagan'}</time><span className={`ps-status ${row.paymentStatus}`}>{statusLabels[row.paymentStatus]}</span>
+                    <i>{index + 1}</i><div className="ps-student-identity"><strong>{row.student.fullName}</strong><small>{row.student.phone || 'Telefon kiritilmagan'}</small></div><span className={`ps-student-status ${row.student.studentStatus || 'green'}`}>{studentStatusLabels[row.student.studentStatus] || studentStatusLabels.green}</span><div className="ps-money-cell paid">{amount(row.paidAmount)}</div><div className="ps-money-cell plan">{amount(row.amount)}</div><div className="ps-money-cell debt">{amount(row.debtAmount)}</div><div className="ps-modal-due"><span>{dayjs(row.dueDate).format('DD.MM.YYYY')}</span></div><time className="ps-paid-date">{row.lastPaidAt ? dayjs(row.lastPaidAt).format('DD.MM.YYYY') : 'To‘lanmagan'}</time><span className={`ps-status ${row.paymentStatus}`}>{statusLabels[row.paymentStatus]}</span>
                   </button>)}
                 </div>
               </>}

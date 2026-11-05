@@ -24,6 +24,18 @@ const studentStatusLabel = {
   warning: "50/50",
   red: "Ketadi",
 };
+const paymentStatusLabel = {
+  onTime: "Ha",
+  almostOnTime: "Yo‘q",
+  late: "Yo‘q",
+  pending: "Kutilmoqda",
+};
+const paymentTimingDetailLabel = {
+  onTime: "Vaqtida",
+  almostOnTime: "Deyarli vaqtida",
+  late: "Kechikkan",
+  pending: "Kutilmoqda",
+};
 const educationTypeLabel = {
   daytime: "Kunduzgi",
   evening: "Kechki",
@@ -72,6 +84,7 @@ function StudentsListTab() {
   } = useGetStudentsQuery({
     search: deferredQuery,
     page,
+    period: dayjs().format("YYYY-MM"),
     university: universityFilter,
     faculty: facultyFilter,
     course: courseFilter,
@@ -299,6 +312,7 @@ function StudentsListTab() {
                     <th>Talaba</th>
                     <th>Xona</th>
                     <th>Holati</th>
+                    <th>Bu oy vaqtida to‘ladi</th>
                     <th>Shartnoma</th>
                     <th>Soliq hujjat</th>
                     <th>Telefon</th>
@@ -307,6 +321,7 @@ function StudentsListTab() {
                     <th>Ta’lim turi</th>
                     <th>Nogironlik</th>
                     <th>Intizom</th>
+                    <th>Izoh</th>
                     <th>Amal</th>
                   </tr>
                 </thead>
@@ -361,6 +376,16 @@ function StudentsListTab() {
                             <i />
                             {studentStatusLabel[status]}
                           </span>
+                        </td>
+                        <td data-label="Bu oy vaqtida to‘ladi">
+                          {student.currentPaymentStatus ? (
+                            <span className={`student-payment-timing ${student.currentPaymentStatus}`}>
+                              <strong>{paymentStatusLabel[student.currentPaymentStatus]}</strong>
+                              <small>Muddat holati: {paymentTimingDetailLabel[student.currentPaymentStatus]}</small>
+                            </span>
+                          ) : (
+                            <span className="student-payment-timing unavailable">—</span>
+                          )}
                         </td>
                         <td data-label="Shartnoma">
                           <span className={`student-contract-badge ${student.hasContract ? "exists" : "missing"}`}>
@@ -428,6 +453,11 @@ function StudentsListTab() {
                                 : "Muammo yo‘q"}
                           </span>
                         </td>
+                        <td data-label="Izoh" className="student-note-cell">
+                          <div className={`student-note ${student.note ? "has-note" : "empty"}`} title={student.note || ""}>
+                            {student.note || "—"}
+                          </div>
+                        </td>
                         <td data-label="Amal">
                           <div className="student-actions">
                             <button
@@ -473,7 +503,7 @@ function StudentsListTab() {
                   })}
                   {!students.length && (
                     <tr>
-                      <td className="students-empty" colSpan={12}>
+                      <td className="students-empty" colSpan={14}>
                         Talabalar topilmadi
                       </td>
                     </tr>

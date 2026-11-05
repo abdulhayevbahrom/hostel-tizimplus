@@ -44,6 +44,14 @@
 .student-status-badge.warning i { background: #e29a16; }
 .student-status-badge.red { color: #a9232e; background: #ffe3e5; }
 .student-status-badge.red i { background: #d93645; }
+.student-payment-timing { display: inline-grid; gap: 1px; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.student-payment-timing strong { font-size: 11px; }
+.student-payment-timing small { font-size: 10px; font-weight: 700; opacity: .9; }
+.student-payment-timing.onTime { color: #17613c; background: #e7f8ec; }
+.student-payment-timing.almostOnTime { color: #a9232e; background: #ffe3e5; }
+.student-payment-timing.late { color: #a9232e; background: #ffe3e5; }
+.student-payment-timing.pending { color: #8a5900; background: #fff2cf; }
+.student-payment-timing.unavailable { color: #718288; background: #edf2f3; }
 .student-contract-badge { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .student-contract-badge.exists { color: #17613c; background: #e7f8ec; }
 .student-contract-badge.missing { color: #a9232e; background: #ffe3e5; }
@@ -56,6 +64,10 @@
 .student-discipline { display: inline-flex; padding: 3px 7px; color: #17613c; background: #e7f8ec; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
 .student-discipline.monitoring { color: #9b5b08; background: #fff2d7; }
 .student-discipline.blacklisted { color: #b4232f; background: #ffdfe2; }
+.students-table td.student-note-cell { padding: 0; }
+.student-note { min-width: 120px; max-width: 190px; overflow: hidden; color: #5e6d72; font-size: 10px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.student-note.has-note { padding: 3px 6px; color: #6f561c; background: #fff7df; border: 1px solid #f0dfad; border-radius: 6px; }
+.student-note.empty { color: #9aa9ad; }
 .student-actions { display: flex; gap: 7px; }
 .student-icon-btn { display: grid; width: 28px; height: 28px; place-items: center; padding: 0; color: #0f766e; background: #eaf8f6; border: 1px solid #bce4df; border-radius: 7px; }
 .student-icon-btn.danger { color: #a02e35; background: #fff3f3; border-color: #edb8bb; }
@@ -159,9 +171,11 @@
   .student-person img, .student-person > span { width: 36px; height: 36px; flex-basis: 36px; }
   .student-person a { font-size: 14px; line-height: 1.25; }
   .student-phone, .student-education, .student-room { min-width: 0; justify-items: end; text-align: right; }
+  .student-note { min-width: 0; max-width: 190px; text-align: right; }
   .student-phone strong, .student-education strong, .student-room strong { font-size: 13px; line-height: 1.2; }
   .student-phone small, .student-education small, .student-room small { max-width: 170px; font-size: 10px; white-space: normal; line-height: 1.25; }
   .student-status-badge,
+  .student-payment-timing,
   .student-course,
   .student-disability,
   .student-discipline { font-size: 10px; }

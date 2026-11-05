@@ -250,15 +250,15 @@ export const baseApi = createApi({
       invalidatesTags: (_result, _error, id) => [{ type: 'Room', id }, { type: 'Room', id: 'LIST' }],
     }),
     getStudents: builder.query({
-      query: ({ search = '', page = 1, university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '' } = {}) => ({
+      query: ({ search = '', page = 1, period = '', university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '' } = {}) => ({
         url: '/students',
-        params: { page, ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}) },
+        params: { page, ...(period ? { period } : {}), ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}) },
       }),
       transformResponse: (response) => response.data,
       providesTags: (result) => [{ type: 'Student', id: 'LIST' }, ...(result?.students || []).map((item) => ({ type: 'Student', id: item.id }))],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Student', id: 'LIST' }], 'Student:LIST')
-        const unsubscribe = subscribeSocket(['students:changed', 'student-contracts:changed'], refresh)
+        const unsubscribe = subscribeSocket(['students:changed', 'student-contracts:changed', 'payments:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
