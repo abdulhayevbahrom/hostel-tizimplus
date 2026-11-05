@@ -26,6 +26,17 @@
 .active-contracts-card .student-history-table tr.contract-expiring-soon:hover td { background: #ffdcd9; }
 .active-contracts-card .contracts-excel-button { height: 38px; padding: 0 14px; border-color: #7bc5a2; border-radius: 7px; color: #147a49; background: #edf9f1; font-size: 12px; font-weight: 800; box-shadow: none; }
 .active-contracts-card .contracts-excel-button:hover { border-color: #16834f!important; color: #fff!important; background: #16834f!important; }
+.cancelled-contract-payments { margin: 0 20px 18px; overflow: hidden; background: #fff8f7; border: 1px solid #efcfcc; border-radius: 10px; }
+.cancelled-contract-payments header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 16px; border-bottom: 1px solid #f0d8d5; }
+.cancelled-contract-payments header div { display: grid; gap: 3px; }
+.cancelled-contract-payments header span { color: #8f4242; font-size: 12px; font-weight: 800; }
+.cancelled-contract-payments header small { color: #9b7a77; font-size: 10px; }
+.cancelled-contract-payments header strong { color: #9b4141; font-size: 18px; white-space: nowrap; }
+.cancelled-contract-periods { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; padding: 12px 16px; }
+.cancelled-contract-periods div { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid #f0dcda; border-radius: 8px; }
+.cancelled-contract-periods span { color: #816b69; font-size: 11px; font-weight: 700; }
+.cancelled-contract-periods b { color: #8f4242; font-size: 12px; white-space: nowrap; }
+.cancelled-contract-periods p { grid-column: 1 / -1; margin: 0; padding: 8px; color: #9a8582; font-size: 11px; text-align: center; }
 
 @media (max-width: 1250px) {
   .active-contracts-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -41,6 +52,8 @@
   .active-contracts-card .student-history-table tr.contract-expiring-soon { background: #ffe5e3; border-color: #e9aaa6; }
   .active-contracts-card .student-history-table tr.contract-expiring-soon td:first-child { box-shadow: none; }
   .active-contracts-card .contracts-excel-button { width: 100%; height: 34px; }
+  .cancelled-contract-payments { margin: 0 12px 12px; }
+  .cancelled-contract-payments header { align-items: flex-start; flex-direction: column; gap: 7px; }
 }
 
 @media (max-width: 520px) {
