@@ -48,7 +48,7 @@
 .student-payment-timing strong { font-size: 11px; }
 .student-payment-timing small { font-size: 10px; font-weight: 700; opacity: .9; }
 .student-payment-timing.onTime { color: #17613c; background: #e7f8ec; }
-.student-payment-timing.almostOnTime { color: #a9232e; background: #ffe3e5; }
+.student-payment-timing.almostOnTime { color: #356f94; background: #dcecf5; }
 .student-payment-timing.late { color: #a9232e; background: #ffe3e5; }
 .student-payment-timing.pending { color: #8a5900; background: #fff2cf; }
 .student-payment-timing.unavailable { color: #718288; background: #edf2f3; }
