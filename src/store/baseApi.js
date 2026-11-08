@@ -748,6 +748,7 @@ export const {
   useGetAdvancePaymentsQuery,
   useGetStudentPaymentsQuery,
   useGetDebtorsQuery,
+  useLazyGetDebtorsQuery,
   useGetDepositsQuery,
   useGetAuditLogsQuery,
   useGetStudentAuditLogsQuery,
