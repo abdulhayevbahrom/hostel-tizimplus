@@ -20,6 +20,30 @@
 @media(max-width:768px){.attendance-chart{grid-template-columns:1fr}.attendance-donut{margin:auto}}
 .debtors-panel header button{padding:7px 11px;color:#fff;background:#287d71;border-radius:7px;font-size:11px;font-weight:700;line-height:1.2;box-shadow:0 3px 7px rgba(40,125,113,.18)}.debtors-panel header button:hover{background:#206e64}
 .dynamics-panel .daily-chart-wrap{padding-top:2px;padding-bottom:3px}.dynamics-panel .daily-chart text{font-size:9px}
+.daily-chart-hit { fill: transparent; cursor: crosshair; }
+.daily-chart :is(.income-dot, .expense-dot, .daily-tooltip) { pointer-events: none; }
+.dynamics-panel header .student-chart-period { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px 10px; color: #887e6d; font-size: 11px; }
+.dynamics-panel .student-chart-period .student-chart-period-toggle .ant-segmented-item-selected,
+.dynamics-panel .student-chart-period .student-chart-period-toggle .ant-segmented-thumb { background: #24786e; color: #fff; }
+.student-expense-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 10px 13px; border-top: 1px solid #eadfcd; color: #566174; }
+.student-expense-summary strong { color: #246b64; font-size: 16px; }
+.student-expense-empty { margin: 0; padding: 13px; color: #566174; }
 @media(max-width:768px){.visual-row{grid-template-columns:1fr!important}.visual-row .attendance-panel,.visual-row .debtors-panel{grid-column:auto!important;min-width:0}.attendance-panel,.debtors-panel{width:100%}.attendance-panel header,.debtors-panel header{gap:10px}.debtors-panel header{align-items:flex-start;flex-direction:column}.debtors-panel header button{align-self:flex-start}}
 @media(max-width:768px){.recent-panel header{padding:10px 12px;gap:8px}.recent-panel header h2{font-size:13px}.recent-panel header span{font-size:10px}.recent-table-wrap{overflow-x:auto}.recent-panel table{min-width:0;width:100%}.recent-panel th,.recent-panel td{padding:7px 6px}.recent-panel th{font-size:9px}.recent-panel td{font-size:10px}.recent-panel td small{margin-top:1px;font-size:9px;line-height:1.2}.recent-panel th:last-child,.recent-panel td:last-child{display:none}.recent-date-cell{width:86px}.recent-date-cell strong,.recent-date-cell small{white-space:nowrap;line-height:1.15}.recent-action-cell{display:grid;gap:3px;justify-items:start}.recent-action-cell b{display:block;white-space:nowrap;font-size:10px;line-height:1.15}.recent-amount-cell{display:none}.operation{padding:3px 6px;border-radius:7px;font-size:9px}.recent-panel td strong{line-height:1.2}}
 @media(max-width:768px){.chart-totals{gap:6px;padding:8px 10px 0}.chart-totals b{padding:4px 7px;font-size:9px;line-height:1.2;white-space:normal;word-break:keep-all}}
+
+.vacancy-loss-panel{min-width:0}.vacancy-loss-panel>header{gap:12px}.vacancy-loss-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px}.vacancy-loss-summary>div{display:grid;gap:7px;padding:12px;background:#fffdf9;border:1px solid #e6d8c2;border-radius:8px}.vacancy-loss-summary span{font-size:12px;color:#657080}.vacancy-loss-summary strong{font-size:18px;color:#a95045;overflow-wrap:anywhere}.vacancy-loss-help{margin:0;padding:0 14px 12px;color:#657080;font-size:12px;line-height:1.6}.vacancy-loss-controls{padding:0 14px 12px}.vacancy-loss-panel .ant-table-wrapper{padding:0 14px 14px}
+@media(max-width:768px){.vacancy-loss-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.vacancy-loss-panel>header{align-items:flex-start;flex-direction:column}.vacancy-loss-summary strong{font-size:16px}}
+
+.vacancy-loss-panel header .vacancy-loss-mode{display:flex;align-items:center;flex-wrap:wrap;gap:10px;color:#887e6d;font-size:11px}.vacancy-loss-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.vacancy-loss-chart-label{padding:0 14px 6px}.vacancy-loss-chart-scroll{overflow-x:auto;padding-bottom:10px}.vacancy-loss-panel .ant-segmented-item-selected,.vacancy-loss-panel .ant-segmented-thumb{background:#24786e;color:#fff}
+
+.vacancy-loss-panel .ant-table-tbody > tr.ant-table-row:nth-child(odd) > td {
+  background: #fffdf9;
+}
+.vacancy-loss-panel .ant-table-tbody > tr.ant-table-row:nth-child(even) > td {
+  background: #edf4f1;
+}
+.vacancy-loss-panel .ant-table-tbody > tr.ant-table-row:hover > td,
+.vacancy-loss-panel .ant-table-tbody > tr.ant-table-row > td.ant-table-cell-row-hover {
+  background: #dcebe5;
+}

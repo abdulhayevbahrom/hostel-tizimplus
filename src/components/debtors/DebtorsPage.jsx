@@ -10,6 +10,8 @@ import {
   Select,
 } from "antd";
 import dayjs from "dayjs";
+import { PaymentDateFields } from "../payments/PaymentDateFields";
+import { formatPaymentDate, paymentDateFields } from "../../utils/paymentDate";
 import { breakdownTotal, paymentMethods, paymentMethodsText } from "../../utils/paymentParts";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -108,7 +110,7 @@ export function DebtorsPage({ currentEmployee }) {
       installment: first?.id,
       breakdown: { cash: null, card: null, online: null, bank: null },
       fundHolder: currentEmployee?.role === "cashier" ? "cashier" : "organization",
-      paymentDate: dayjs(),
+      ...paymentDateFields(),
       note: "",
     });
   };
@@ -124,7 +126,7 @@ export function DebtorsPage({ currentEmployee }) {
         installment: paymentPeriod?.id,
         breakdown: values.breakdown,
         fundHolder: values.fundHolder,
-        paymentDate: values.paymentDate.format("YYYY-MM-DD"),
+        paymentDate: formatPaymentDate(values.paymentDate, values.paymentTime),
         note: values.note || "",
       }).unwrap();
       printPaymentReceipt(result.payment, settingsData?.settings);
@@ -306,7 +308,7 @@ export function DebtorsPage({ currentEmployee }) {
                 {debtors.map((debtor) => {
                   const room = debtor.contracts?.[0]?.room;
                   return (
-                    <tr key={debtor.student.id} className={debtor.isDeadlineReached ? "debtor-deadline-reached" : ""}>
+                    <tr key={debtor.student.id} className={debtor.isDeadlineReached || debtor.isPaymentDueReached ? "debtor-deadline-reached" : ""}>
                       <td data-label="Talaba">
                         <button
                           className="debtor-student"
@@ -358,15 +360,21 @@ export function DebtorsPage({ currentEmployee }) {
                         </span>
                       </td>
                       <td data-label="To‘lov muddati">
-                        {isUpcomingView ? (
-                          <strong className="debtor-upcoming-date">{dayjs(debtor.oldestDueDate).format("DD.MM.YYYY")}</strong>
-                        ) : debtor.paymentDeadline ? (
-                          <>
-                            <strong className="debtor-deadline-date">{dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</strong>
-                            {debtor.isDeadlineReached && <small className="debtor-deadline-reached-label">Muddati yetgan</small>}
-                          </>
+                        {debtor.oldestDueDate ? (
+                          <strong className={isUpcomingView ? "debtor-upcoming-date" : "debtor-deadline-date"}>
+                            {dayjs(debtor.oldestDueDate).format("DD.MM.YYYY")}
+                          </strong>
                         ) : (
-                          <span className="debtor-deadline-empty">Belgilanmagan</span>
+                          <span className="debtor-deadline-empty">—</span>
+                        )}
+                        {!isUpcomingView && debtor.isPaymentDueReached && (
+                          <small className="debtor-deadline-reached-label">To‘lov muddati yetgan</small>
+                        )}
+                        {!isUpcomingView && debtor.paymentDeadline && (
+                          <>
+                            <small className="debtor-deadline-date">Deadline: {dayjs(debtor.paymentDeadline).format("DD.MM.YYYY")}</small>
+                            {debtor.isDeadlineReached && <small className="debtor-deadline-reached-label">Deadline muddati yetgan</small>}
+                          </>
                         )}
                       </td>
                       <td data-label="Summa">
@@ -606,9 +614,7 @@ export function DebtorsPage({ currentEmployee }) {
               </div>
             </div>
           )}
-          <Form.Item name="paymentDate" label="To‘lov sanasi" rules={[{ required: true, message: "To‘lov sanasini tanlang" }]}>
-            <DatePicker allowClear={false} format="DD.MM.YYYY" style={{ width: "100%" }} />
-          </Form.Item>
+          <PaymentDateFields />
           <Form.Item name="note" label="Izoh">
             <Input placeholder="Ixtiyoriy" />
           </Form.Item>

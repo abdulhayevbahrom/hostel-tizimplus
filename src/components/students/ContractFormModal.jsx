@@ -21,6 +21,7 @@ export function ContractFormModal({ open, contract, rooms, loading, error, onClo
   const endDate = Form.useWatch('endDate', form)
   const paymentAmount = Form.useWatch('paymentAmount', form)
   const depositEnabled = Form.useWatch('depositEnabled', form)
+  const isCancelled = contract?.status === 'cancelled'
   const calculation = calculateContractPayment(startDate, endDate, paymentType, paymentAmount)
   const floors = [...new Set(rooms.map((room) => String(room.floor)))].sort((first, second) => first.localeCompare(second, undefined, { numeric: true }))
   const visibleRooms = floor ? rooms.filter((room) => room.floor === floor) : rooms
@@ -31,17 +32,21 @@ export function ContractFormModal({ open, contract, rooms, loading, error, onClo
 
   return (
     <Modal open={open} onCancel={onClose} afterOpenChange={prepare} footer={null} destroyOnHidden width={650} rootClassName="contract-form-modal" title={contract ? 'Shartnomani tahrirlash' : 'Yangi shartnoma tuzish'}>
-      <Form form={form} layout="vertical" requiredMark={false} onFinish={(values) => onSubmit({ ...values, startDate: values.startDate.format('YYYY-MM-DD'), endDate: values.endDate.format('YYYY-MM-DD') })}>
+      <Form form={form} layout="vertical" requiredMark={false} onFinish={(values) => onSubmit({ ...(isCancelled ? form.getFieldsValue(true) : values), startDate: values.startDate.format('YYYY-MM-DD'), endDate: values.endDate.format('YYYY-MM-DD') })}>
+        {!isCancelled && <>
         <div className="contract-form-grid"><Form.Item name="contractNumber" label="Shartnoma raqami" rules={[{ required: true, whitespace: true, message: 'Shartnoma raqamini kiriting' }]}><Input maxLength={60} placeholder="Masalan: TTJ-2026-0001" /></Form.Item><Form.Item name="paymentType" label="Shartnoma turi"><Segmented className="contract-status-segmented" block options={[{ value: 'daily', label: 'Kunlik' }, { value: 'monthly', label: 'Oylik' }]} onChange={(value) => { if (value !== 'daily') form.setFieldsValue({ depositEnabled: false, depositAmount: 0 }) }} /></Form.Item></div>
         <div className="contract-room-filter"><span>Bo‘sh xonalar</span><Select allowClear value={floor} placeholder="Barcha qavatlar" options={floors.map((value) => ({ value, label: `${value}-qavat` }))} onChange={(value) => { setFloor(value); form.setFieldValue('room', undefined) }} /></div>
         <Form.Item name="room" rules={[{ required: true, message: 'Xonani tanlang' }]}><RoomPicker rooms={visibleRooms} /></Form.Item>
+        </>}
         <div className="contract-form-grid"><Form.Item name="startDate" label="Boshlanish sanasi" rules={[{ required: true, message: 'Sanani kiriting' }]}><DatePicker format="DD.MM.YYYY" placeholder="Sanani tanlang" style={{ width: '100%' }} /></Form.Item><Form.Item name="endDate" label="Tugash sanasi" dependencies={['startDate']} rules={[{ required: true, message: 'Sanani kiriting' }, ({ getFieldValue }) => ({ validator(_, value) { return !value || value.isAfter(getFieldValue('startDate'), 'day') ? Promise.resolve() : Promise.reject(new Error('Tugash sanasi boshlanish sanasidan keyin bo‘lishi kerak')) } })]}><DatePicker disabledDate={(current) => Boolean(startDate && !current.isAfter(startDate, 'day'))} format="DD.MM.YYYY" placeholder="Sanani tanlang" style={{ width: '100%' }} /></Form.Item></div>
+        {!isCancelled && <>
         <Form.Item name="paymentAmount" label={paymentType === 'daily' ? 'Bir kunlik to‘lov' : 'Bir oylik to‘lov'} rules={[{ required: true, type: 'number', min: 1, message: 'To‘lov summasi 0 dan katta bo‘lishi kerak' }]}><InputNumber min={1} precision={0} style={{ width: '100%' }} formatter={(value) => String(value || '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} parser={(value) => String(value || '').replace(/\D/g, '')} addonAfter="so‘m" /></Form.Item>
         {paymentType === 'daily' && <><Form.Item name="depositEnabled" label="Deposit" valuePropName="checked"><Switch checkedChildren="Yoqilgan" unCheckedChildren="O‘chirilgan" onChange={(checked) => { if (!checked) form.setFieldValue('depositAmount', 0) }} /></Form.Item>{depositEnabled && <Form.Item name="depositAmount" label="Deposit summasi" rules={[{ required: true, type: 'number', min: 1, message: 'Deposit summasini kiriting' }]}><InputNumber min={1} precision={0} style={{ width: '100%' }} formatter={(value) => String(value || '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} parser={(value) => String(value || '').replace(/\D/g, '')} addonAfter="so‘m" /></Form.Item>}</>}
         <div className="contract-payment-calculation"><div><span>Shartnoma muddati</span><strong>{calculation.durationDays} kun</strong></div><div><span>Hisob birligi</span><strong>{paymentType === 'daily' ? `${calculation.billingQuantity} kun` : `${calculation.billingQuantity} oy`}</strong></div><div><span>Shartnoma qiymati</span><strong>{calculation.totalAmount.toLocaleString('uz-UZ')} so‘m</strong></div></div>
         {paymentType === 'monthly' && calculation.billingQuantity > 0 && <div className="contract-payment-note">To‘lov {calculation.billingQuantity} oyga bo‘linadi. Har oy uchun {Number(paymentAmount || 0).toLocaleString('uz-UZ')} so‘mdan alohida hisob yuritiladi.</div>}
         {contract && <Form.Item name="status" label="Shartnoma holati"><Segmented className="contract-status-segmented" block options={[{ value: 'active', label: 'Aktiv' }, { value: 'cancelled', label: 'Bekor qilish' }]} /></Form.Item>}
         <Form.Item name="note" label="Izoh"><Input.TextArea rows={3} maxLength={1000} showCount placeholder="Shartnoma bo‘yicha izoh" /></Form.Item>
+        </>}
         {error && <div className="form-error">{error}</div>}
         <div className="contract-form-actions"><Button htmlType="submit" loading={loading} className="contract-submit-btn">{contract ? 'Yangilash' : 'Shartnoma tuzish'}</Button><Button onClick={onClose}>Yopish</Button></div>
       </Form>

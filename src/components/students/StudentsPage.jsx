@@ -36,6 +36,19 @@ const paymentTimingDetailLabel = {
   late: "Kechikkan",
   pending: "Kutilmoqda",
 };
+const paymentSummaryLabels = {
+  fullyPaid: "To‘liq to‘lagan",
+  late: "Kechikkan",
+  pending: "Kutilmoqda",
+};
+
+function getPaymentTimingDetail(status, days) {
+  if (Number.isInteger(days)) {
+    if (status === "pending") return `${days} kun qoldi`;
+    if (status === "late") return `${days} kun kechikkan`;
+  }
+  return `Muddat holati: ${paymentTimingDetailLabel[status]}`;
+}
 const educationTypeLabel = {
   daytime: "Kunduzgi",
   evening: "Kechki",
@@ -84,7 +97,6 @@ function StudentsListTab() {
   } = useGetStudentsQuery({
     search: deferredQuery,
     page,
-    period: dayjs().format("YYYY-MM"),
     university: universityFilter,
     faculty: facultyFilter,
     course: courseFilter,
@@ -92,7 +104,7 @@ function StudentsListTab() {
     floor: floorFilter,
     room: roomFilter,
     studentStatus: statusFilter,
-  });
+  }, { refetchOnMountOrArgChange: true });
   const { data: universityData } = useGetUniversitiesQuery();
   const { data: facultyData } = useGetFacultiesQuery();
   const { data: roomData } = useGetRoomsQuery();
@@ -167,6 +179,16 @@ function StudentsListTab() {
   return (
     <div className="students-page">
       <div className="students-card">
+        {data?.paymentSummary && (
+          <dl className="students-payment-summary" aria-label="Bu oydagi to‘lovlar">
+            {Object.entries(paymentSummaryLabels).map(([status, label]) => (
+              <div key={status} className={`students-payment-summary-item ${status}`}>
+                <dt>{label}</dt>
+                <dd>{data.paymentSummary[status]}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
         <div className="students-toolbar">
           <div className="students-toolbar-controls">
             <div className="students-toolbar-actions">
@@ -309,25 +331,27 @@ function StudentsListTab() {
               <table className="students-table">
                 <thead>
                   <tr>
-                    <th>Talaba</th>
-                    <th>Xona</th>
+                    <th className="student-person-cell">Talaba</th>
+                    <th className="student-room-cell">Xona</th>
                     <th>Holati</th>
                     <th>Bu oy vaqtida to‘ladi</th>
-                    <th>Shartnoma</th>
                     <th>Soliq hujjat</th>
-                    <th>Telefon</th>
+                    <th className="student-phone-cell">Telefon</th>
                     <th>Universitet</th>
                     <th>Kurs</th>
                     <th>Ta’lim turi</th>
-                    <th>Nogironlik</th>
-                    <th>Intizom</th>
-                    <th>Izoh</th>
+                    <th className="student-note-cell">Izoh</th>
                     <th>Amal</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.map((student) => {
                     const status = student.studentStatus || "green";
+                    const room = student.activeRoom;
+                    const roomDetails = [
+                      room?.block && `${room.block} blok`,
+                      room?.floor && `${room.floor}-qavat`,
+                    ].filter(Boolean).join(" · ");
                     return (
                       <tr
                         key={student.id}
@@ -336,7 +360,7 @@ function StudentsListTab() {
                           isContractExpiringWithinTwoDays(student.activeContractEndDate) ? "student-row-contract-expiring" : "",
                         ].filter(Boolean).join(" ")}
                       >
-                        <td data-label="Talaba">
+                        <td className="student-person-cell" data-label="Talaba">
                           <div className="student-person">
                             {student.photo ? (
                               <img
@@ -351,20 +375,17 @@ function StudentsListTab() {
                                 {student.fullName.slice(0, 1).toUpperCase()}
                               </span>
                             )}
-                            <Link to={`/student/${student.id}`}>
+                            <Link to={`/student/${student.id}`} title={student.fullName}>
                               {student.fullName}
                             </Link>
                           </div>
                         </td>
-                        <td data-label="Xona">
-                          {student.activeRoom ? (
+                        <td className="student-room-cell" data-label="Xona">
+                          {room ? (
                             <div className="student-room">
-                              <strong>{student.activeRoom.roomNumber}-xona</strong>
-                              {student.activeRoom.block && (
-                                <small>{student.activeRoom.block} blok</small>
-                              )}
-                              {student.activeRoom.floor && (
-                                <small>{student.activeRoom.floor}-qavat</small>
+                              <strong>{room.roomNumber}-xona</strong>
+                              {roomDetails && (
+                                <small title={roomDetails}>{roomDetails}</small>
                               )}
                             </div>
                           ) : (
@@ -381,16 +402,11 @@ function StudentsListTab() {
                           {student.currentPaymentStatus ? (
                             <span className={`student-payment-timing ${student.currentPaymentStatus}`}>
                               <strong>{paymentStatusLabel[student.currentPaymentStatus]}</strong>
-                              <small>Muddat holati: {paymentTimingDetailLabel[student.currentPaymentStatus]}</small>
+                              <small>{getPaymentTimingDetail(student.currentPaymentStatus, student.currentPaymentDays)}</small>
                             </span>
                           ) : (
                             <span className="student-payment-timing unavailable">—</span>
                           )}
-                        </td>
-                        <td data-label="Shartnoma">
-                          <span className={`student-contract-badge ${student.hasContract ? "exists" : "missing"}`}>
-                            {student.hasContract ? "Mavjud" : "Yo‘q"}
-                          </span>
                         </td>
                         <td data-label="Soliq shartnomasi">
                           <span
@@ -405,7 +421,7 @@ function StudentsListTab() {
                             {student.hasTaxContract ? "✓" : "×"}
                           </span>
                         </td>
-                        <td data-label="Telefon">
+                        <td className="student-phone-cell" data-label="Telefon">
                           <div className="student-phone">
                             <strong>{student.phone}</strong>
                             {student.parentPhone && (
@@ -433,28 +449,8 @@ function StudentsListTab() {
                             {educationTypeLabel[student.educationType] || "—"}
                           </span>
                         </td>
-                        <td data-label="Nogironlik">
-                          <span
-                            className={`student-disability ${student.disabilityStatus === "has_disability" ? "has-disability" : ""}`}
-                          >
-                            {student.disabilityStatus === "has_disability"
-                              ? "Mavjud"
-                              : "Yo‘q"}
-                          </span>
-                        </td>
-                        <td data-label="Intizom">
-                          <span
-                            className={`student-discipline ${student.disciplinaryStatus}`}
-                          >
-                            {student.disciplinaryStatus === "blacklisted"
-                              ? "Qora ro‘yxatda"
-                              : student.disciplinaryStatus === "monitoring"
-                                ? "Nazoratda"
-                                : "Muammo yo‘q"}
-                          </span>
-                        </td>
                         <td data-label="Izoh" className="student-note-cell">
-                          <div className={`student-note ${student.note ? "has-note" : "empty"}`} title={student.note || ""}>
+                          <div className={`student-note ${student.note ? "has-note" : "student-note-empty"}`} title={student.note || ""}>
                             {student.note || "—"}
                           </div>
                         </td>
@@ -503,7 +499,7 @@ function StudentsListTab() {
                   })}
                   {!students.length && (
                     <tr>
-                      <td className="students-empty" colSpan={14}>
+                      <td className="students-empty" colSpan={11}>
                         Talabalar topilmadi
                       </td>
                     </tr>

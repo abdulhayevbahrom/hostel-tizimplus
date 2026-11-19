@@ -77,7 +77,7 @@ export const baseApi = createApi({
       providesTags: [{ type: 'Dashboard', id: 'MAIN' }],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Dashboard', id: 'MAIN' }], 'Dashboard:MAIN')
-        const events = ['students:changed', 'student-contracts:changed', 'rooms:changed', 'payments:changed', 'expenses:changed', 'fines:changed', 'attendance:changed', 'salaries:changed', 'employees:changed']
+        const events = ['settings:changed', 'students:changed', 'student-contracts:changed', 'rooms:changed', 'payments:changed', 'expenses:changed', 'fines:changed', 'attendance:changed', 'salaries:changed', 'employees:changed']
         const unsubscribe = subscribeSocket(events, refresh)
         await cacheEntryRemoved
         unsubscribe()
@@ -103,6 +103,17 @@ export const baseApi = createApi({
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Report', id: 'YEARLY' }], 'Report:YEARLY')
         const events = ['students:changed', 'student-contracts:changed', 'rooms:changed', 'payments:changed', 'expenses:changed', 'fines:changed', 'salaries:changed', 'employees:changed']
         const unsubscribe = subscribeSocket(events, refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
+    getPaymentProgress: builder.query({
+      query: (period) => ({ url: '/payment-progress', params: { period } }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'PaymentStatistics', id: 'PROGRESS' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'PaymentStatistics', id: 'PROGRESS' }], 'PaymentStatistics:PROGRESS')
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed', 'students:changed', 'rooms:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
@@ -623,7 +634,7 @@ export const baseApi = createApi({
     updateGeneralSettings: builder.mutation({
       query: (body) => ({ url: '/settings/general', method: 'PUT', body }),
       transformResponse: (response) => response.data,
-      invalidatesTags: [{ type: 'GeneralSetting', id: 'GENERAL' }],
+      invalidatesTags: [{ type: 'GeneralSetting', id: 'GENERAL' }, { type: 'Dashboard', id: 'MAIN' }],
     }),
     getNotifications: builder.query({
       query: () => '/notifications',
@@ -710,6 +721,7 @@ export const {
   useGetDashboardQuery,
   useGetMonthlyReportQuery,
   useGetYearlyReportQuery,
+  useGetPaymentProgressQuery,
   useGetPaymentStatisticsQuery,
   useGetPaymentStatisticsRoomQuery,
   useGetPaymentBehaviorQuery,

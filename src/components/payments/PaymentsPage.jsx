@@ -12,6 +12,8 @@ import {
   Select,
 } from "antd";
 import dayjs from "dayjs";
+import { PaymentDateFields } from "./PaymentDateFields";
+import { formatPaymentDate, paymentDateFields } from "../../utils/paymentDate";
 import { toast } from "react-toastify";
 import {
   apiErrorMessage,
@@ -108,7 +110,7 @@ export function PaymentsPage({ currentEmployee }) {
       paymentPurpose: "contract",
       contract: undefined,
       installment: undefined,
-      paymentDate: dayjs(),
+      ...paymentDateFields(),
       note: "",
       fundHolder: "cashier",
     });
@@ -123,12 +125,12 @@ export function PaymentsPage({ currentEmployee }) {
       amount: payment.amount,
       breakdown: paymentBreakdown(payment),
       fundHolder: effectivePaymentParts(payment).find((part) => ["card", "online"].includes(part.method))?.fundHolder || "organization",
-      paymentDate: dayjs(payment.paymentDate || payment.createdAt),
+      ...paymentDateFields(payment.paymentDate || payment.createdAt),
       note: payment.note || "",
     });
     setOpen(true);
   };
-  const submit = async (values) => {
+  const submit = async ({ paymentDate, paymentTime, ...values }) => {
     try {
       if (editingPayment) {
         await updatePayment({
@@ -136,14 +138,14 @@ export function PaymentsPage({ currentEmployee }) {
           breakdown: values.breakdown,
           fundHolder: values.fundHolder,
           installment: values.installment,
-          paymentDate: values.paymentDate.format("YYYY-MM-DD"),
+          paymentDate: formatPaymentDate(paymentDate, paymentTime),
           note: values.note,
         }).unwrap();
         toast.success("To‘lov yangilandi");
       } else {
         const result = await createPayment({
           ...values,
-          paymentDate: values.paymentDate.format("YYYY-MM-DD"),
+          paymentDate: formatPaymentDate(paymentDate, paymentTime),
           student: selected?.student?._id,
           breakdown: values.breakdown,
         }).unwrap();
@@ -521,9 +523,7 @@ export function PaymentsPage({ currentEmployee }) {
               </div>
             </div>
           )}
-          <Form.Item name="paymentDate" label="To‘lov sanasi" rules={[{ required: true, message: "To‘lov sanasini tanlang" }]}>
-            <DatePicker allowClear={false} format="DD.MM.YYYY" style={{ width: "100%" }} />
-          </Form.Item>
+          <PaymentDateFields />
           <Form.Item name="note" label="Izoh">
             <Input placeholder="Ixtiyoriy" />
           </Form.Item>

@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  FieldTimeOutlined,
   AuditOutlined,
   BarChartOutlined,
   CalendarOutlined,
@@ -25,6 +26,7 @@ export function SidebarIcon({ name }) {
     rooms: ApartmentOutlined,
     attendance: CalendarOutlined,
     payments: CreditCardOutlined,
+    'payment-progress': FieldTimeOutlined,
     'payment-statistics': BarChartOutlined,
     cash: WalletOutlined,
     debtors: UserSwitchOutlined,

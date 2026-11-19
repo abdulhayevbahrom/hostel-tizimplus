@@ -14,6 +14,12 @@
 .students-filter-toggle { width: 32px; min-width: 32px; height: 32px; place-items: center; padding: 0; color: #0f766e; background: #eef8f6; border: 1px solid #bfe2dc; border-radius: 7px; }
 .students-filter-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .students-mobile-create { width: 100%; min-height: 32px; padding: 0 12px; color: #fff; background: linear-gradient(135deg, #159988, #0f766e); border: 0; border-radius: 7px; font-weight: 750; }
+.students-payment-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 12px; }
+.students-payment-summary-item { display: grid; gap: 4px; align-content: start; padding: 10px; border: 1px solid; border-radius: 8px; font-size: 12px; font-weight: 700; }
+.students-payment-summary-item dd { margin: 0; font-size: 22px; font-variant-numeric: tabular-nums; }
+.students-payment-summary-item.fullyPaid { color: #17613c; background: #e7f8ec; border-color: #a9dcc1; }
+.students-payment-summary-item.late { color: #a9232e; background: #fff0f1; border-color: #efbdc1; }
+.students-payment-summary-item.pending { color: #8a5900; background: #fff8e4; border-color: #eddaaa; }
 .students-result-count { padding: 9px 11px; color: #60777e; background: #f4f9f9; border: 1px solid #dce9e9; border-bottom: 0; border-radius: 8px 8px 0 0; font-size: 12px; }
 .students-result-count strong { color: #0f766e; font-size: 14px; }
 .students-table-wrap { overflow-x: auto; }
@@ -21,17 +27,24 @@
 .students-table { width: 100%; border-collapse: collapse; }
 .students-table th, .students-table td { padding: 7px 8px; color: #3b4e56; border-bottom: 1px solid #e3ecee; font-size: 13px; text-align: left; vertical-align: middle; }
 .students-table th { color: #365b67; background: #f4f9f9; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.students-table tbody td { border-bottom: 2px solid #cedde1; }
+.students-table tbody tr:nth-child(even) { background: #eef6f7; }
 .students-table tbody tr:hover td { background: #f8fcfb; }
-.students-table tbody .student-row-blacklisted td, .students-table tbody .student-row-blacklisted:hover td { background: #fff0f1; border-bottom-color: #efb3b8; }
+.students-table tbody .student-row-blacklisted td, .students-table tbody .student-row-blacklisted:hover td { background: #fff0f1; border-bottom-color: #d7929b; }
 .students-table tbody .student-row-blacklisted td:first-child { border-left: 3px solid #d93645; }
-.students-table tbody .student-row-contract-expiring td, .students-table tbody .student-row-contract-expiring:hover td { background: #ffe5e3; border-bottom-color: #efb3b0; }
+.students-table tbody .student-row-contract-expiring td, .students-table tbody .student-row-contract-expiring:hover td { background: #ffe5e3; border-bottom-color: #d7918d; }
 .students-table tbody .student-row-contract-expiring td:first-child { border-left: 3px solid #cf4747; }
 .student-person { display: flex; min-width: 175px; align-items: center; gap: 8px; }
 .student-person img, .student-person > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; object-fit: cover; color: #fff; background: #159988; border-radius: 50%; font-weight: 800; }
 .student-person strong, .student-phone strong, .student-education strong { font-weight: 650; }
 .student-person a { color: #155e75; font-weight: 700; text-decoration: none; }
 .student-person a:hover { color: #0f766e; text-decoration: underline; }
-.student-phone, .student-education, .student-room { display: grid; gap: 2px; min-width: 130px; }
+.student-phone, .student-education, .student-room { display: grid; gap: 2px; }
+.student-education { min-width: 130px; }
+@media (width > 760px) {
+  .students-table .student-room-cell,
+  .students-table .student-phone-cell { width: 1px; white-space: nowrap; }
+}
 .student-phone small, .student-education small, .student-room small { overflow: hidden; max-width: 210px; color: #81949b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .student-course { display: inline-flex; padding: 3px 7px; color: #0f766e; background: #e8f7f5; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
 .student-room strong { color: #155e75; font-weight: 750; white-space: nowrap; }
@@ -52,22 +65,27 @@
 .student-payment-timing.late { color: #a9232e; background: #ffe3e5; }
 .student-payment-timing.pending { color: #8a5900; background: #fff2cf; }
 .student-payment-timing.unavailable { color: #718288; background: #edf2f3; }
-.student-contract-badge { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
-.student-contract-badge.exists { color: #17613c; background: #e7f8ec; }
-.student-contract-badge.missing { color: #a9232e; background: #ffe3e5; }
 .student-education-type { display: inline-flex; padding: 3px 7px; color: #315f68; background: #edf5f6; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
 .student-tax-contract { display: grid; width: 24px; height: 24px; place-items: center; border: 1px solid; border-radius: 6px; font-size: 16px; font-weight: 900; line-height: 1; }
 .student-tax-contract.checked { color: #137a50; background: #e5f7ed; border-color: #a9dcc1; }
 .student-tax-contract.unchecked { color: #a44249; background: #fff1f2; border-color: #efbdc1; }
-.student-disability { display: inline-flex; padding: 3px 7px; color: #60747c; background: #f0f3f4; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
-.student-disability.has-disability { color: #9b5b08; background: #fff2d7; }
-.student-discipline { display: inline-flex; padding: 3px 7px; color: #17613c; background: #e7f8ec; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
-.student-discipline.monitoring { color: #9b5b08; background: #fff2d7; }
-.student-discipline.blacklisted { color: #b4232f; background: #ffdfe2; }
 .students-table td.student-note-cell { padding: 0; }
-.student-note { min-width: 120px; max-width: 190px; overflow: hidden; color: #5e6d72; font-size: 10px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.student-note { min-width: 120px; max-width: 190px; overflow: hidden; color: #5e6d72; font-size: 13px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .student-note.has-note { padding: 3px 6px; color: #6f561c; background: #fff7df; border: 1px solid #f0dfad; border-radius: 6px; }
-.student-note.empty { color: #9aa9ad; }
+.student-note-empty { color: #9aa9ad; }
+@media (width > 760px) {
+  .students-table .student-person-cell { width: 280px; }
+  .student-person { min-width: 250px; max-width: 280px; }
+  .students-table tbody td { line-height: 16px; }
+  .student-person a,
+  .student-note { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
+  .student-phone small, .student-education small, .student-room small { line-height: 14px; }
+  .student-education strong { white-space: nowrap; }
+  .student-payment-timing { line-height: 12px; }
+  .students-table .student-note-cell { width: 30%; }
+  .students-table td.student-note-cell { padding: 7px 8px; }
+  .student-note { min-width: 150px; max-width: none; white-space: normal; }
+}
 .student-actions { display: flex; gap: 7px; }
 .student-icon-btn { display: grid; width: 28px; height: 28px; place-items: center; padding: 0; color: #0f766e; background: #eaf8f6; border: 1px solid #bce4df; border-radius: 7px; }
 .student-icon-btn.danger { color: #a02e35; background: #fff3f3; border-color: #edb8bb; }
@@ -161,8 +179,8 @@
   .students-table, .students-table tbody { display: block; width: 100%; }
   .students-table thead { display: none; }
   .students-table tbody { display: grid; gap: 10px; }
-  .students-table tr { display: block; padding: 10px; background: #fbfefe; border: 1px solid #d8e5e8; border-radius: 10px; box-shadow: 0 3px 10px rgba(15, 76, 92, .04); }
-  .students-table td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border: 0; border-bottom: 1px solid #e6eeef; }
+  .students-table tr { display: block; padding: 10px; background: #fbfefe; border: 1px solid #cedde1; border-radius: 10px; box-shadow: 0 3px 10px rgba(15, 76, 92, .04); }
+  .students-table tbody td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border: 0; border-bottom: 1px solid #e6eeef; }
   .students-table td:first-child { padding-top: 0; }
   .students-table td:last-child { padding-bottom: 0; border-bottom: 0; }
   .students-table td::before { content: attr(data-label); display: flex; flex: 0 0 96px; align-items: center; color: #37616c; font-size: 10px; font-weight: 800; line-height: 1.25; text-transform: uppercase; white-space: nowrap; }
@@ -176,9 +194,7 @@
   .student-phone small, .student-education small, .student-room small { max-width: 170px; font-size: 10px; white-space: normal; line-height: 1.25; }
   .student-status-badge,
   .student-payment-timing,
-  .student-course,
-  .student-disability,
-  .student-discipline { font-size: 10px; }
+  .student-course { font-size: 10px; }
   .student-actions { justify-content: flex-end; gap: 8px; }
   .student-icon-btn { width: 30px; height: 30px; border-radius: 8px; }
   .student-icon-btn svg { width: 17px; height: 17px; }

@@ -1,18 +1,13 @@
 import { useState } from "react";
-import { DatePicker } from "antd";
+import { DatePicker, Segmented } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { apiErrorMessage, useGetDashboardQuery } from "../../store/baseApi";
 import "./Dashboard.css";
+import { DailyLineChart } from "./DailyLineChart";
+import { VacancyLossPanel } from "./VacancyLossPanel";
 
 const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
-const compact = (value) => {
-  const amount = Number(value || 0);
-  if (amount >= 1e9) return `${(amount / 1e9).toFixed(1)} mlrd`;
-  if (amount >= 1e6) return `${(amount / 1e6).toFixed(1)} mln`;
-  if (amount >= 1e3) return `${Math.round(amount / 1e3)} ming`;
-  return amount.toLocaleString("uz-UZ");
-};
 const methodLabels = {
   cash: "Naqd",
   card: "Karta",
@@ -99,101 +94,54 @@ function StatCard({ tone, icon, label, value, detail, onClick }) {
   );
 }
 
-function DailyLineChart({ rows }) {
-  const [hover, setHover] = useState(null);
-  const width = 1100,
-    height = 220,
-    left = 62,
-    right = 18,
-    top = 18,
-    bottom = 30;
-  const plotW = width - left - right,
-    plotH = height - top - bottom;
-  const max = Math.max(1, ...rows.flatMap((row) => [row.income, row.expenses]));
-  const x = (i) => left + (plotW / Math.max(1, rows.length - 1)) * i;
-  const y = (v) => top + plotH - (v / max) * plotH;
-  const income = rows.map((row, i) => `${x(i)},${y(row.income)}`).join(" ");
-  const expense = rows.map((row, i) => `${x(i)},${y(row.expenses)}`).join(" ");
-  const area = `${left},${top + plotH} ${income} ${left + plotW},${top + plotH}`;
+const studentExpenseMetrics = [
+  { key: "cost", title: "Bir talabaga to‘g‘ri keladigan xarajat", label: "Bir talabaga xarajat", tone: "income", format: money },
+  { key: "studentCount", title: "Talabalar sonining o‘zgarishi", label: "Talabalar soni", tone: "income", format: (value) => `${value} ta` },
+];
+const monthNames = [
+  "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+  "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr",
+];
+
+function StudentExpenseChart({ period, summary, metric, yearlyCounts, countPeriod, onCountPeriodChange }) {
+  const isCost = metric.key === "cost";
+  const isYearly = !isCost && countPeriod === "year";
+  const year = period.slice(0, 4);
+  const rows = isYearly ? (yearlyCounts || []).map(({ month, studentCount }) => {
+    const name = monthNames[month - 1];
+    return { day: month, label: name, detailLabel: name, studentCount };
+  }) : summary?.rows || [];
+  const latest = rows.at(-1)?.[metric.key];
   return (
-    <div className="daily-chart-wrap">
-      <svg
-        className="daily-chart"
-        viewBox={`0 0 ${width} ${height}`}
-        role="img"
-        aria-label="Kunlik tushum va xarajat grafigi"
-      >
-        <defs>
-          <linearGradient id="dailyArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#2d8177" stopOpacity=".22" />
-            <stop offset="1" stopColor="#2d8177" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {[0, 0.2, 0.4, 0.6, 0.8, 1].map((tick) => (
-          <g key={tick}>
-            <line
-              x1={left}
-              y1={top + plotH * tick}
-              x2={left + plotW}
-              y2={top + plotH * tick}
-            />
-            <text x={left - 9} y={top + plotH * tick + 4} textAnchor="end">
-              {compact(max * (1 - tick))}
-            </text>
-          </g>
-        ))}
-        <polygon points={area} fill="url(#dailyArea)" />
-        <polyline points={income} className="income-line" />
-        <polyline points={expense} className="expense-line" />
-        {rows.map((row, i) => (
-          <g
-            key={row.day}
-            onMouseEnter={() => setHover(i)}
-            onMouseLeave={() => setHover(null)}
-          >
-            <rect
-              x={x(i) - 12}
-              y={top}
-              width="24"
-              height={plotH}
-              fill="transparent"
-            />
-            <circle
-              cx={x(i)}
-              cy={y(row.income)}
-              r={hover === i ? 4 : 2.5}
-              className="income-dot"
-            />
-            <circle
-              cx={x(i)}
-              cy={y(row.expenses)}
-              r={hover === i ? 4 : 2.5}
-              className="expense-dot"
-            />
-            <text x={x(i)} y={height - 8} textAnchor="middle">
-              {row.day}
-            </text>
-            {hover === i && (
-              <g className="daily-tooltip">
-                <rect
-                  x={Math.min(width - 150, Math.max(5, x(i) - 65))}
-                  y="3"
-                  width="145"
-                  height="45"
-                  rx="7"
-                />
-                <text x={Math.min(width - 140, Math.max(15, x(i) - 55))} y="21">
-                  Tushum: {compact(row.income)}
-                </text>
-                <text x={Math.min(width - 140, Math.max(15, x(i) - 55))} y="38">
-                  Xarajat: {compact(row.expenses)}
-                </text>
-              </g>
-            )}
-          </g>
-        ))}
-      </svg>
-    </div>
+    <section className="light-panel dynamics-panel">
+      <header>
+        <div>
+          <h2>{metric.title}</h2>
+          <span className="chart-keys">
+            <i className={metric.tone} />
+            {isYearly ? "Oy oxiridagi yoki bugungi talabalar soni" : metric.label}
+          </span>
+        </div>
+        <div className="student-chart-period">
+          <span>{isYearly ? year : period}</span>
+          {!isCost && (
+            <Segmented className="student-chart-period-toggle" size="small" aria-label="Talabalar grafigi davri" value={countPeriod}
+              options={[{ label: "Oylik", value: "month" }, { label: "Yillik", value: "year" }]}
+              onChange={onCountPeriodChange} />
+          )}
+        </div>
+      </header>
+      <div className="chart-totals">
+        <b>{isYearly ? "So‘nggi oy" : "So‘nggi kun"}: {latest == null ? "—" : metric.format(Math.round(latest))}</b>
+      </div>
+      <DailyLineChart key={isYearly ? "year" : "month"} rows={rows} series={[metric]} label={metric.title} countScale={!isCost} />
+      {isCost && (
+        <footer className="student-expense-summary">
+          <span>Kunlik ko‘rsatkichlar o‘rtachasi</span>
+          <strong>{summary?.average == null ? "—" : money(Math.round(summary.average))}</strong>
+        </footer>
+      )}
+    </section>
   );
 }
 
@@ -310,6 +258,7 @@ export function DashboardPage() {
   const [period, setPeriod] = useState(() => dayjs());
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
   const [methodPeriod, setMethodPeriod] = useState("month");
+  const [countPeriod, setCountPeriod] = useState("month");
   const { data, isLoading, isFetching, error, refetch } = useGetDashboardQuery({
     period: period.format("YYYY-MM"),
     date: selectedDate.format("YYYY-MM-DD"),
@@ -597,6 +546,13 @@ export function DashboardPage() {
         </div>
         <DailyLineChart rows={data.dailyTrends || []} />
       </section>
+
+      {studentExpenseMetrics.map((metric) => (
+        <StudentExpenseChart key={`${data.period}-${metric.key}`} period={data.period} summary={data.studentExpenses}
+          metric={metric} yearlyCounts={data.yearlyStudentCounts} countPeriod={countPeriod} onCountPeriodChange={setCountPeriod} />
+      ))}
+
+      <VacancyLossPanel summary={data.vacancyLoss} period={data.period} />
 
       <section className="light-panel recent-panel">
         <header>
