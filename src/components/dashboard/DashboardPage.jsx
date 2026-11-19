@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { apiErrorMessage, useGetDashboardQuery } from "../../store/baseApi";
 import "./Dashboard.css";
 import { DailyLineChart } from "./DailyLineChart";
+import { LiveVacancyLossPanel } from "./LiveVacancyLossPanel";
 import { VacancyLossPanel } from "./VacancyLossPanel";
 
 const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
@@ -262,7 +263,7 @@ export function DashboardPage() {
   const { data, isLoading, isFetching, error, refetch } = useGetDashboardQuery({
     period: period.format("YYYY-MM"),
     date: selectedDate.format("YYYY-MM-DD"),
-  });
+  }, { pollingInterval: 60000, refetchOnFocus: true, refetchOnReconnect: true });
   if (isLoading)
     return (
       <div className="dashboard-loading">
@@ -527,6 +528,8 @@ export function DashboardPage() {
           </table>
         </article>
       </section>
+
+      <LiveVacancyLossPanel summary={data.vacancyLoss} period={data.period} />
 
       <section className="light-panel dynamics-panel">
         <header>

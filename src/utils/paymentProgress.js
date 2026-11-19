@@ -10,10 +10,13 @@ export function calculatePaymentProgress(row, now) {
   const earned = duration > 0 ? Math.floor(Math.min(paid, amount * elapsed / duration)) : 0
   const remaining = Math.max(0, paid - earned)
   const coveredUntil = start + coveredDuration
-  const status = paid <= 0 ? 'unpaid' : now < start ? 'upcoming' : remaining <= 0 ? 'completed' : 'active'
+  const accruedAmount = duration > 0 ? Math.floor(amount * elapsed / duration) : 0
+  const unpaidServiceAmount = Math.max(0, accruedAmount - paid)
+  const overdueTime = Math.max(0, elapsed - coveredDuration)
+  const status = paid <= 0 ? 'unpaid' : now < start ? 'upcoming' : overdueTime > 0 && paid < amount ? 'overdue' : remaining <= 0 ? 'completed' : 'active'
   return { ...row, paymentStatus: paid <= 0 ? 'unpaid' : paid >= amount ? 'paid' : 'partial', paidAmount: paid, earned, remaining, percent: paid > 0 ? earned / paid * 100 : 0,
     elapsed: Math.min(elapsed, coveredDuration), remainingTime: Math.max(0, coveredUntil - Math.max(now, start)),
-    coveredDuration, coveredUntil, startsIn: Math.max(0, start - now), status }
+    accruedAmount, unpaidServiceAmount, overdueTime, livedTime: elapsed, coveredDuration, coveredUntil, startsIn: Math.max(0, start - now), status }
 }
 
 export function splitDuration(milliseconds) {
@@ -24,8 +27,8 @@ export function splitDuration(milliseconds) {
 
 export function summarizePaymentProgress(rows) {
   const students = new Map()
-  const priority = { completed: 0, upcoming: 1, active: 2, unpaid: 3 }
-  const summary = { paid: 0, earned: 0, remaining: 0, active: 0, completed: 0, upcoming: 0, unpaid: 0, studentCount: 0, periodCount: rows.length }
+  const priority = { completed: 0, upcoming: 1, active: 2, overdue: 3, unpaid: 4 }
+  const summary = { paid: 0, earned: 0, remaining: 0, active: 0, completed: 0, upcoming: 0, unpaid: 0, overdue: 0, studentCount: 0, periodCount: rows.length }
   for (const row of rows) {
     summary.paid += row.paidAmount
     summary.earned += row.earned

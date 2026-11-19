@@ -5,7 +5,7 @@
 .students-toolbar-actions { display: none; }
 .students-toolbar-actions > input,
 .students-toolbar-filters > input { width: 100%; height: 36px; padding: 0 11px; color: #263b45; border: 1px solid #cbdde1; border-radius: 7px; outline: 0; }
-.students-toolbar-filters { display: grid; width: 100%; grid-template-columns:minmax(240px,1.45fr) repeat(7,minmax(0,.68fr)) minmax(160px,.85fr); gap: 6px; align-items: center; }
+.students-toolbar-filters { display: grid; width: 100%; grid-template-columns:minmax(240px,1.45fr) repeat(7,minmax(0,.68fr)) minmax(145px,.85fr) minmax(160px,.85fr); gap: 6px; align-items: center; }
 .students-toolbar-filters .ant-select { width: 100%; height: 36px; --ant-select-height: 36px !important; }
 .students-toolbar-actions > input:focus,
 .students-toolbar-filters > input:focus { border-color: #159988; box-shadow: 0 0 0 2px rgba(20, 184, 166, .14); }
@@ -14,12 +14,6 @@
 .students-filter-toggle { width: 32px; min-width: 32px; height: 32px; place-items: center; padding: 0; color: #0f766e; background: #eef8f6; border: 1px solid #bfe2dc; border-radius: 7px; }
 .students-filter-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .students-mobile-create { width: 100%; min-height: 32px; padding: 0 12px; color: #fff; background: linear-gradient(135deg, #159988, #0f766e); border: 0; border-radius: 7px; font-weight: 750; }
-.students-payment-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 12px; }
-.students-payment-summary-item { display: grid; gap: 4px; align-content: start; padding: 10px; border: 1px solid; border-radius: 8px; font-size: 12px; font-weight: 700; }
-.students-payment-summary-item dd { margin: 0; font-size: 22px; font-variant-numeric: tabular-nums; }
-.students-payment-summary-item.fullyPaid { color: #17613c; background: #e7f8ec; border-color: #a9dcc1; }
-.students-payment-summary-item.late { color: #a9232e; background: #fff0f1; border-color: #efbdc1; }
-.students-payment-summary-item.pending { color: #8a5900; background: #fff8e4; border-color: #eddaaa; }
 .students-result-count { padding: 9px 11px; color: #60777e; background: #f4f9f9; border: 1px solid #dce9e9; border-bottom: 0; border-radius: 8px 8px 0 0; font-size: 12px; }
 .students-result-count strong { color: #0f766e; font-size: 14px; }
 .students-table-wrap { overflow-x: auto; }
@@ -49,6 +43,10 @@
 .student-course { display: inline-flex; padding: 3px 7px; color: #0f766e; background: #e8f7f5; border-radius: 999px; font-size: 11px; font-weight: 750; white-space: nowrap; }
 .student-room strong { color: #155e75; font-weight: 750; white-space: nowrap; }
 .student-room-empty { color: #9aa9ad; font-weight: 750; }
+.student-contract-created-at { white-space: nowrap; }
+.student-contract-dates { display: grid; gap: 3px; font-weight: 700; white-space: nowrap; }
+.student-contract-date-start { color: #17613c; }
+.student-contract-date-end { color: #a9232e; }
 .student-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .student-status-badge i { width: 8px; height: 8px; border-radius: 50%; }
 .student-status-badge.green { color: #17613c; background: #e7f8ec; }
@@ -159,7 +157,7 @@
 .students-filters-modal-body { display: grid; gap: 10px; }
 .student-course-remove-icon { display: inline-grid; width: 20px; height: 20px; place-items: center; color: #c43f47; font-size: 22px; font-weight: 500; line-height: 1; }
 @media (max-width: 1920px) {
-  .students-toolbar-filters { grid-template-columns:minmax(210px,1.2fr) repeat(7,minmax(0,.68fr)) minmax(150px,.78fr); }
+  .students-toolbar-filters { grid-template-columns:minmax(210px,1.2fr) repeat(7,minmax(0,.68fr)) minmax(145px,.85fr) minmax(150px,.78fr); }
 }
 
 @media (max-width: 760px) {
@@ -188,7 +186,7 @@
   .student-person { min-width: 0; gap: 9px; }
   .student-person img, .student-person > span { width: 36px; height: 36px; flex-basis: 36px; }
   .student-person a { font-size: 14px; line-height: 1.25; }
-  .student-phone, .student-education, .student-room { min-width: 0; justify-items: end; text-align: right; }
+  .student-phone, .student-education, .student-room, .student-contract-dates { min-width: 0; justify-items: end; text-align: right; }
   .student-note { min-width: 0; max-width: 190px; text-align: right; }
   .student-phone strong, .student-education strong, .student-room strong { font-size: 13px; line-height: 1.2; }
   .student-phone small, .student-education small, .student-room small { max-width: 170px; font-size: 10px; white-space: normal; line-height: 1.25; }

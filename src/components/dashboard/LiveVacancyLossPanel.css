@@ -1,0 +1,26 @@
+.live-loss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px; }
+.live-loss-card { min-width: 0; padding: 18px; border: 1px solid #efc5bd; border-radius: 12px; background: linear-gradient(135deg, #fffdf9, #fff0eb); }
+.live-loss-card h3 { margin: 0 0 12px; color: #81564b; font-size: 13px; }
+.live-loss-amount { display: block; color: #b44539; font-size: clamp(22px, 2.5vw, 34px); font-variant-numeric: tabular-nums; }
+.live-loss-amount small { font-size: 13px; font-weight: 500; }
+.live-loss-time-label { display: block; margin: 18px 0 8px; color: #876f66; font-size: 11px; }
+.live-loss-clock { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 360px; }
+.live-loss-clock > div { display: grid; gap: 4px; padding: 10px 4px; border: 1px solid #efdbd4; border-radius: 8px; background: #fffaf6; text-align: center; }
+.live-loss-clock strong { color: #934b40; font-size: 24px; }
+.live-loss-clock > div > span { color: #947a70; font-size: 10px; }
+.live-loss-card p, .live-loss-help { color: #8a776b; font-size: 11px; line-height: 1.6; }
+.live-loss-card p { margin: 12px 0 0; }
+.live-loss-help { margin: 0; padding: 0 14px 14px; }
+.live-loss-panel .pp-animated-number { display: inline-block; vertical-align: baseline; font-variant-numeric: tabular-nums; }
+.live-loss-panel .pp-number-visual { display: inline-flex; align-items: baseline; white-space: pre; }
+.live-loss-panel .pp-number-accessible { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.live-loss-panel .pp-rolling-digit { display: inline-block; height: 1.2em; line-height: 1.2; overflow: hidden; vertical-align: bottom; }
+.live-loss-panel .pp-digit-pair { display: inline-grid; position: relative; height: 100%; }
+.live-loss-panel .pp-digit-new, .live-loss-panel .pp-digit-old { grid-area: 1 / 1; display: block; }
+.live-loss-panel .pp-digit-old { visibility: hidden; }
+.live-loss-panel .pp-digit-changing .pp-digit-old { visibility: visible; animation: live-loss-out 380ms ease both; }
+.live-loss-panel .pp-digit-changing .pp-digit-new { animation: live-loss-in 380ms ease both; }
+@keyframes live-loss-out { to { transform: translateY(-100%); opacity: 0; } }
+@keyframes live-loss-in { from { transform: translateY(100%); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .live-loss-panel .pp-digit-changing .pp-digit-old { visibility: hidden; animation: none; } .live-loss-panel .pp-digit-changing .pp-digit-new { animation: none; } }
+@media (max-width: 640px) { .live-loss-grid { grid-template-columns: 1fr; } .live-loss-card { padding: 14px; } }

@@ -261,9 +261,9 @@ export const baseApi = createApi({
       invalidatesTags: (_result, _error, id) => [{ type: 'Room', id }, { type: 'Room', id: 'LIST' }],
     }),
     getStudents: builder.query({
-      query: ({ search = '', page = 1, period = '', university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '' } = {}) => ({
+      query: ({ search = '', page = 1, period = '', university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '', paymentStatus = '' } = {}) => ({
         url: '/students',
-        params: { page, ...(period ? { period } : {}), ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}) },
+        params: { page, ...(period ? { period } : {}), ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}), ...(paymentStatus ? { paymentStatus } : {}) },
       }),
       transformResponse: (response) => response.data,
       providesTags: (result) => [{ type: 'Student', id: 'LIST' }, ...(result?.students || []).map((item) => ({ type: 'Student', id: item.id }))],

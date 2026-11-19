@@ -36,7 +36,7 @@ const paymentTimingDetailLabel = {
   late: "Kechikkan",
   pending: "Kutilmoqda",
 };
-const paymentSummaryLabels = {
+const paymentFilterLabels = {
   fullyPaid: "To‘liq to‘lagan",
   late: "Kechikkan",
   pending: "Kutilmoqda",
@@ -87,6 +87,7 @@ function StudentsListTab() {
   const [floorFilter, setFloorFilter] = useState(undefined);
   const [roomFilter, setRoomFilter] = useState(undefined);
   const [statusFilter, setStatusFilter] = useState(undefined);
+  const [paymentFilter, setPaymentFilter] = useState(undefined);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const deferredQuery = useDeferredValue(query.trim());
   const {
@@ -104,6 +105,7 @@ function StudentsListTab() {
     floor: floorFilter,
     room: roomFilter,
     studentStatus: statusFilter,
+    paymentStatus: paymentFilter,
   }, { refetchOnMountOrArgChange: true });
   const { data: universityData } = useGetUniversitiesQuery();
   const { data: facultyData } = useGetFacultiesQuery();
@@ -179,16 +181,6 @@ function StudentsListTab() {
   return (
     <div className="students-page">
       <div className="students-card">
-        {data?.paymentSummary && (
-          <dl className="students-payment-summary" aria-label="Bu oydagi to‘lovlar">
-            {Object.entries(paymentSummaryLabels).map(([status, label]) => (
-              <div key={status} className={`students-payment-summary-item ${status}`}>
-                <dt>{label}</dt>
-                <dd>{data.paymentSummary[status]}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
         <div className="students-toolbar">
           <div className="students-toolbar-controls">
             <div className="students-toolbar-actions">
@@ -293,6 +285,17 @@ function StudentsListTab() {
               />
               <Select
                 allowClear
+                aria-label="Bu oydagi to‘lov holati"
+                placeholder="To‘lov holati"
+                value={paymentFilter}
+                options={Object.entries(paymentFilterLabels).map(([value, label]) => ({ value, label }))}
+                onChange={(value) => {
+                  setPaymentFilter(value);
+                  setPage(1);
+                }}
+              />
+              <Select
+                allowClear
                 placeholder="Talaba holati"
                 value={statusFilter}
                 options={Object.entries(studentStatusLabel).map(([value, label]) => ({
@@ -333,8 +336,10 @@ function StudentsListTab() {
                   <tr>
                     <th className="student-person-cell">Talaba</th>
                     <th className="student-room-cell">Xona</th>
-                    <th>Holati</th>
+                    <th>Tuzilgan sana</th>
+                    <th>Kirgan / tugash</th>
                     <th>Bu oy vaqtida to‘ladi</th>
+                    <th>Holati</th>
                     <th>Soliq hujjat</th>
                     <th className="student-phone-cell">Telefon</th>
                     <th>Universitet</th>
@@ -392,21 +397,39 @@ function StudentsListTab() {
                             <span className="student-room-empty">—</span>
                           )}
                         </td>
-                        <td data-label="Holati">
-                          <span className={`student-status-badge ${status}`}>
-                            <i />
-                            {studentStatusLabel[status]}
+                        <td data-label="Tuzilgan sana">
+                          <span className="student-contract-created-at">
+                            {student.activeContractCreatedAt
+                              ? dayjs(student.activeContractCreatedAt).format("DD.MM.YYYY HH:mm")
+                              : "—"}
                           </span>
+                        </td>
+                        <td data-label="Kirgan / tugash">
+                          <div className="student-contract-dates">
+                            <span className="student-contract-date-start">
+                              Kirgan: {student.activeContractStartDate ? dayjs(student.activeContractStartDate).format("DD.MM.YYYY") : "—"}
+                            </span>
+                            <span className="student-contract-date-end">
+                              Tugash: {student.activeContractEndDate ? dayjs(student.activeContractEndDate).format("DD.MM.YYYY") : "—"}
+                            </span>
+                          </div>
                         </td>
                         <td data-label="Bu oy vaqtida to‘ladi">
                           {student.currentPaymentStatus ? (
                             <span className={`student-payment-timing ${student.currentPaymentStatus}`}>
                               <strong>{paymentStatusLabel[student.currentPaymentStatus]}</strong>
                               <small>{getPaymentTimingDetail(student.currentPaymentStatus, student.currentPaymentDays)}</small>
+                              <small>Oxirgi to‘lov: {student.currentPaymentLastPaidAt ? dayjs(student.currentPaymentLastPaidAt).format("DD.MM.YYYY") : "—"}</small>
                             </span>
                           ) : (
                             <span className="student-payment-timing unavailable">—</span>
                           )}
+                        </td>
+                        <td data-label="Holati">
+                          <span className={`student-status-badge ${status}`}>
+                            <i />
+                            {studentStatusLabel[status]}
+                          </span>
                         </td>
                         <td data-label="Soliq shartnomasi">
                           <span
@@ -499,7 +522,7 @@ function StudentsListTab() {
                   })}
                   {!students.length && (
                     <tr>
-                      <td className="students-empty" colSpan={11}>
+                      <td className="students-empty" colSpan={13}>
                         Talabalar topilmadi
                       </td>
                     </tr>
@@ -605,6 +628,17 @@ function StudentsListTab() {
             options={roomOptions}
             onChange={(value) => {
               setRoomFilter(value);
+              setPage(1);
+            }}
+          />
+          <Select
+            allowClear
+            aria-label="Bu oydagi to‘lov holati"
+            placeholder="To‘lov holati"
+            value={paymentFilter}
+            options={Object.entries(paymentFilterLabels).map(([value, label]) => ({ value, label }))}
+            onChange={(value) => {
+              setPaymentFilter(value);
               setPage(1);
             }}
           />

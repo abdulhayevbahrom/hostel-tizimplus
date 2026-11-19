@@ -14,15 +14,20 @@ const date = (value) => {
   const parts = Object.fromEntries(dateFormat.formatToParts(new Date(value)).map(({ type, value: part }) => [type, part]))
   return `${parts.day}.${parts.month}.${parts.year}`
 }
-const statusLabels = { active: 'Oqlanmoqda', completed: 'To‘liq oqlandi', upcoming: 'Hali boshlanmagan', unpaid: 'To‘lov qilmagan' }
+const statusLabels = { active: 'Oqlanmoqda', completed: 'To‘liq oqlandi', upcoming: 'Hali boshlanmagan', unpaid: 'To‘lov qilmagan', overdue: 'To‘lov yetmay qolgan' }
 const statusOptions = [{ value: 'all', label: 'Barcha holatlar' }, ...Object.entries(statusLabels).map(([value, label]) => ({ value, label }))]
 const currentPeriod = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tashkent', year: 'numeric', month: '2-digit' }).format(new Date())
 
 const countdownLabel = (row) => row.startsIn > 0 ? 'Boshlanishiga qoldi' : row.status === 'completed' ? 'To‘lov to‘liq oqlandi' : 'Oqlanishiga qolgan vaqt'
 const countdownValue = (row) => row.startsIn > 0 ? row.startsIn : row.remainingTime
 
-function PaymentPending() {
-  return <div className="pp-payment-pending"><WalletOutlined /><div><strong>To‘lov kutilmoqda</strong><p>Vaqt hisobi to‘lov amalga oshirilgach ko‘rsatiladi.</p></div></div>
+function PaymentExposure({ row }) {
+  return <div className="pp-payment-exposure">
+    <div className="pp-time-label"><ClockCircleOutlined /><span>{row.startsIn > 0 ? 'Davr boshlanishiga qoldi' : 'To‘lov kechikkan vaqt'}</span></div>
+    <Countdown value={row.startsIn > 0 ? row.startsIn : row.overdueTime} compact />
+    <div className="pp-exposure-amount"><span>To‘lovsiz ko‘rsatilgan xizmat</span><strong>{row.unpaidServiceAmount > 0 ? '−' : ''}<AnimatedNumber value={money(row.unpaidServiceAmount)} /> <small>so‘m</small></strong></div>
+    <p>Hisob to‘lov qoplamagan yashash vaqtiga asoslanadi va davr oxirida to‘xtaydi.</p>
+  </div>
 }
 
 function Countdown({ value, compact = false }) {
@@ -81,12 +86,12 @@ function StudentCard({ row, onOpen }) {
       <div><span><i className="pp-dot pp-dot-remaining" />Qoldi</span><strong><AnimatedNumber value={money(row.remaining)} /> <small>so‘m</small></strong></div>
     </div>
     <div className="pp-card-time">
-      {row.status === 'unpaid' ? <PaymentPending /> : <>
+      {(row.status === 'unpaid' || row.status === 'overdue') ? <PaymentExposure row={row} /> : <>
         <div className="pp-time-label"><ClockCircleOutlined /><span>{countdownLabel(row)}</span></div>
         <Countdown value={countdownValue(row)} compact />
       </>}
     </div>
-    <button className="pp-card-footer" onClick={() => onOpen(row.id)}><span>{date(row.startDate)} — {date(row.status === 'unpaid' ? row.endDate : row.coveredUntil)}</span><span>Batafsil <ArrowRightOutlined /></span></button>
+    <button className="pp-card-footer" onClick={() => onOpen(row.id)}><span>{date(row.startDate)} — {date((row.status === 'unpaid' || row.status === 'overdue') ? row.endDate : row.coveredUntil)}</span><span>Batafsil <ArrowRightOutlined /></span></button>
   </article>
 }
 
@@ -138,7 +143,7 @@ export function PaymentProgressPage() {
         <div className="pp-summary-stack">
           <div className="pp-summary-card"><div className="pp-stat-icon pp-icon-earned"><CheckCircleOutlined /></div><div><span>Oqlangan summa</span><strong><AnimatedNumber value={money(summary.earned)} /> <small>so‘m</small></strong><p>Ko‘rsatilgan turar joy xizmati</p></div><span className="pp-stat-percent"><AnimatedNumber value={percent.toFixed(1)} />%</span></div>
           <div className="pp-summary-card"><div className="pp-stat-icon pp-icon-remaining"><ClockCircleOutlined /></div><div><span>Hali oqlanmagan</span><strong><AnimatedNumber value={money(summary.remaining)} /> <small>so‘m</small></strong><p>Oldinda ko‘rsatiladigan xizmat</p></div><span className="pp-stat-percent"><AnimatedNumber value={(summary.paid ? 100 - percent : 0).toFixed(1)} />%</span></div>
-          <div className="pp-summary-foot"><span><i className="pp-dot pp-dot-earned" /><strong>{summary.active}</strong> nafar · to‘lovi oqlanmoqda</span><span><CheckCircleOutlined /><strong>{summary.completed}</strong> nafar · to‘lovi oqlangan</span>{summary.unpaid > 0 && <span className="pp-unpaid-amount"><WalletOutlined /><strong>{summary.unpaid}</strong> nafar · to‘lov qilmagan</span>}{summary.upcoming > 0 && <span><ClockCircleOutlined /><strong>{summary.upcoming}</strong> nafar · hali boshlanmagan</span>}</div>
+          <div className="pp-summary-foot"><span><i className="pp-dot pp-dot-earned" /><strong>{summary.active}</strong> nafar · to‘lovi oqlanmoqda</span><span><CheckCircleOutlined /><strong>{summary.completed}</strong> nafar · to‘lovi oqlangan</span>{summary.overdue > 0 && <span className="pp-unpaid-amount"><ClockCircleOutlined /><strong>{summary.overdue}</strong> nafar · to‘lovi yetmay qolgan</span>}{summary.unpaid > 0 && <span className="pp-unpaid-amount"><WalletOutlined /><strong>{summary.unpaid}</strong> nafar · to‘lov qilmagan</span>}{summary.upcoming > 0 && <span><ClockCircleOutlined /><strong>{summary.upcoming}</strong> nafar · hali boshlanmagan</span>}</div>
         </div>
       </section>
       <div className="pp-explainer"><InfoCircleOutlined /><p><strong>Qanday hisoblanadi?</strong> To‘langan pul yashalgan vaqtga mutanosib oqlanadi. Masalan, 30 kun uchun 1 200 000 so‘m to‘langan bo‘lsa, 10 kunda 400 000 so‘m oqlanadi, 800 000 so‘m qoladi.</p></div>
@@ -156,9 +161,9 @@ export function PaymentProgressPage() {
       {selected && <div className="pp-detail"><div className="pp-detail-heading"><h2>{selected.student.fullName}</h2><p>{roomLabel(selected.room)} · Shartnoma: {selected.contractNumber}</p><span className={`pp-status pp-status-${selected.status}`}><i />{statusLabels[selected.status]}</span></div>
         <div className="pp-detail-money"><div><span>To‘langan</span><strong><AnimatedNumber value={money(selected.paidAmount)} /> so‘m</strong></div><div><span>Oqlangan</span><strong><AnimatedNumber value={money(selected.earned)} /> so‘m</strong></div><div><span>Qolgan</span><strong><AnimatedNumber value={money(selected.remaining)} /> so‘m</strong></div></div>
         <div className="pp-progress-label"><span>Davr summasidan oqlandi</span><strong><AnimatedNumber value={(selected.amount > 0 ? selected.earned / selected.amount * 100 : 0).toFixed(2)} />%</strong></div><ProgressBar row={selected} />
-        {selected.status === 'unpaid' ? <PaymentPending /> : <div className="pp-detail-clocks"><div><h4>Oqlangan vaqt</h4><Countdown value={selected.elapsed} /></div><div><h4>{countdownLabel(selected)}</h4><Countdown value={countdownValue(selected)} /></div></div>}
+        {(selected.status === 'unpaid' || selected.status === 'overdue') ? <PaymentExposure row={selected} /> : <div className="pp-detail-clocks"><div><h4>Oqlangan vaqt</h4><Countdown value={selected.elapsed} /></div><div><h4>{countdownLabel(selected)}</h4><Countdown value={countdownValue(selected)} /></div></div>}
         <dl className="pp-detail-facts"><div><dt>Hisob davri</dt><dd>{date(selected.startDate)} — {date(selected.endDate)}</dd></div><div><dt>Davr uchun belgilangan summa</dt><dd><AnimatedNumber value={money(selected.amount)} /> so‘m</dd></div><div><dt>To‘lov qoplaydigan muddat oxiri</dt><dd>{selected.status === 'unpaid' ? 'To‘lov mavjud emas' : new Intl.DateTimeFormat('uz-UZ', { timeZone: 'Asia/Tashkent', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(selected.coveredUntil))}</dd></div><div><dt>To‘lov turi</dt><dd>{selected.paymentType === 'daily' ? 'Kunlik' : 'Oylik'}</dd></div></dl>
-        <p className="pp-detail-note">Oqlangan summa = davr summasi × yashalgan vaqt ÷ davr davomiyligi. Natija amalda to‘langan summadan oshmaydi. Summalar butun so‘mda ko‘rsatiladi.</p>
+        <p className="pp-detail-note">Oqlangan summa = davr summasi × yashalgan vaqt ÷ davr davomiyligi. Oqlangan pul amalda to‘langan summadan oshmaydi. To‘lovsiz ko‘rsatilgan xizmat = yashalgan vaqt qiymati − to‘langan summa (kamida 0). Bu summa minus bilan ko‘rsatiladi; davr oxirida hisob to‘xtaydi. Summalar butun so‘mda ko‘rsatiladi.</p>
       </div>}
     </Modal>
   </div>
