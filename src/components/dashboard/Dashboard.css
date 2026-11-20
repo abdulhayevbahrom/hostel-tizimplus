@@ -47,3 +47,16 @@
 .vacancy-loss-panel .ant-table-tbody > tr.ant-table-row > td.ant-table-cell-row-hover {
   background: #dcebe5;
 }
+
+.dashboard-data-table { min-width: 0; }
+.dashboard-data-table .chart-totals { margin-bottom: 12px; }
+.dashboard-data-table .ant-table-wrapper { padding: 0 14px 14px; }
+.dashboard-data-table .ant-table-cell, .vacancy-loss-panel .ant-table-cell { font-size: 13px; line-height: 1.5; }
+.dashboard-data-table .ant-table-tbody .ant-table-cell, .vacancy-loss-panel .ant-table-tbody .ant-table-cell { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dashboard-data-table .ant-table-tbody > tr:nth-child(even) > td { background: #edf4f1; }
+.dashboard-data-table .ant-table-thead > tr > th, .vacancy-loss-panel .ant-table-thead > tr > th { color: #365b52; background: #e5eee8; }
+
+.dashboard-payment-progress { min-width: 0; --pp-teal: #0d9488; --pp-ink: #153744; --pp-muted: #617781; }
+.dashboard-progress-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.dashboard-progress-heading h2 { margin: 0; color: #253952; font-size: 16px; }
+.dashboard-progress-heading > div { display: flex; align-items: center; gap: 10px; color: #887e6d; font-size: 12px; }

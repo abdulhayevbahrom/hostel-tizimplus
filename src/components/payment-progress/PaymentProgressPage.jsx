@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Button, DatePicker, Empty, Input, Modal, Pagination, Select, Skeleton } from 'antd'
-import { ArrowRightOutlined, CheckCircleOutlined, ClockCircleOutlined, InfoCircleOutlined, ReloadOutlined, SearchOutlined, WalletOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, ClockCircleOutlined, InfoCircleOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { apiErrorMessage, useGetPaymentProgressQuery } from '../../store/baseApi'
 import { calculatePaymentProgress, splitDuration, summarizePaymentProgress } from '../../utils/paymentProgress'
 import { AnimatedNumber } from './AnimatedNumber'
+import { PaymentProgressOverview } from './PaymentProgressOverview'
 import './PaymentProgress.css'
 
 const roomLabel = (room) => [room.block, room.floor != null && room.floor !== '' ? `${room.floor}-qavat` : null, `${room.roomNumber}-xona`].filter(Boolean).join(' · ')
@@ -36,18 +37,6 @@ function Countdown({ value, compact = false }) {
     {Object.entries(parts).map(([key, number], index) => <div className="pp-time-unit" key={key}>
       <strong><AnimatedNumber value={String(number).padStart(2, '0')} /></strong><span>{['kun', 'soat', 'minut', 'sekund'][index]}</span>
     </div>)}
-  </div>
-}
-
-function ProgressRing({ percent }) {
-  const radius = 76
-  const circumference = 2 * Math.PI * radius
-  return <div className="pp-ring">
-    <svg viewBox="0 0 184 184" aria-hidden="true">
-      <circle cx="92" cy="92" r={radius} className="pp-ring-track" />
-      <circle cx="92" cy="92" r={radius} className="pp-ring-value" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - percent / 100)} transform="rotate(-90 92 92)" />
-    </svg>
-    <div><strong><AnimatedNumber value={percent.toFixed(1)} /><small>%</small></strong><span>to‘lov oqlandi</span></div>
   </div>
 }
 
@@ -114,7 +103,6 @@ export function PaymentProgressPage() {
   const now = clock + offset
   const rows = useMemo(() => (currentData?.rows || []).map((row) => calculatePaymentProgress(row, now)), [currentData, now])
   const summary = summarizePaymentProgress(rows)
-  const percent = summary.paid ? summary.earned / summary.paid * 100 : 0
   const rooms = [...new Map(rows.map((row) => [row.room.id, { value: row.room.id, label: roomLabel(row.room) }])).values()]
     .sort((a, b) => a.label.localeCompare(b.label, 'uz', { numeric: true }))
   const filtered = rows.filter((row) => (paymentStatus === 'all' || row.paymentStatus === paymentStatus) && (status === 'all' || row.status === status) && (room === 'all' || row.room.id === room)
@@ -135,17 +123,7 @@ export function PaymentProgressPage() {
     </div>
     {error && <Alert type="error" showIcon title="Ma’lumotlarni yuklab bo‘lmadi" description={apiErrorMessage(error)} action={<Button onClick={refetch}>Qayta urinish</Button>} />}
     {loading ? <div className="pp-loading"><Skeleton active paragraph={{ rows: 5 }} /><Skeleton active paragraph={{ rows: 8 }} /></div> : <>
-      <section className="pp-overview" aria-label="Umumiy to‘lov progressi">
-        <div className="pp-hero">
-          <div className="pp-hero-content"><span className="pp-hero-kicker"><WalletOutlined /> TO‘LOVLAR HOLATI</span><h2>Pulingizning vaqt<br />bilan o‘lchangan qiymati.</h2><p>Tanlangan oyga tegishli to‘lovlar qancha oqlangani va qancha xizmat hali oldinda ekanini kuzating.</p><div className="pp-hero-total"><span>Jami to‘langan</span><strong><AnimatedNumber value={money(summary.paid)} /> <small>so‘m</small></strong></div></div>
-          <div className="pp-hero-visual"><ProgressRing percent={percent} /><div className="pp-ring-legend"><span><i />Oqlangan</span><span><i />Qolgan</span></div></div>
-        </div>
-        <div className="pp-summary-stack">
-          <div className="pp-summary-card"><div className="pp-stat-icon pp-icon-earned"><CheckCircleOutlined /></div><div><span>Oqlangan summa</span><strong><AnimatedNumber value={money(summary.earned)} /> <small>so‘m</small></strong><p>Ko‘rsatilgan turar joy xizmati</p></div><span className="pp-stat-percent"><AnimatedNumber value={percent.toFixed(1)} />%</span></div>
-          <div className="pp-summary-card"><div className="pp-stat-icon pp-icon-remaining"><ClockCircleOutlined /></div><div><span>Hali oqlanmagan</span><strong><AnimatedNumber value={money(summary.remaining)} /> <small>so‘m</small></strong><p>Oldinda ko‘rsatiladigan xizmat</p></div><span className="pp-stat-percent"><AnimatedNumber value={(summary.paid ? 100 - percent : 0).toFixed(1)} />%</span></div>
-          <div className="pp-summary-foot"><span><i className="pp-dot pp-dot-earned" /><strong>{summary.active}</strong> nafar · to‘lovi oqlanmoqda</span><span><CheckCircleOutlined /><strong>{summary.completed}</strong> nafar · to‘lovi oqlangan</span>{summary.overdue > 0 && <span className="pp-unpaid-amount"><ClockCircleOutlined /><strong>{summary.overdue}</strong> nafar · to‘lovi yetmay qolgan</span>}{summary.unpaid > 0 && <span className="pp-unpaid-amount"><WalletOutlined /><strong>{summary.unpaid}</strong> nafar · to‘lov qilmagan</span>}{summary.upcoming > 0 && <span><ClockCircleOutlined /><strong>{summary.upcoming}</strong> nafar · hali boshlanmagan</span>}</div>
-        </div>
-      </section>
+      <PaymentProgressOverview summary={summary} />
       <div className="pp-explainer"><InfoCircleOutlined /><p><strong>Qanday hisoblanadi?</strong> To‘langan pul yashalgan vaqtga mutanosib oqlanadi. Masalan, 30 kun uchun 1 200 000 so‘m to‘langan bo‘lsa, 10 kunda 400 000 so‘m oqlanadi, 800 000 so‘m qoladi.</p></div>
       <section className="pp-students-section" aria-label="Talabalar bo‘yicha progress">
         <div className="pp-section-heading"><div><h2>Talabalar kesimida <span>{filteredSummary.studentCount} talaba</span></h2><p>{filteredSummary.periodCount} ta to‘lov davri · Har bir talaba soni bir marta hisoblanadi.</p></div></div>

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { DatePicker, Segmented } from "antd";
+import { DatePicker, Segmented, Table } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { apiErrorMessage, useGetDashboardQuery } from "../../store/baseApi";
 import "./Dashboard.css";
 import { DailyLineChart } from "./DailyLineChart";
+import { DashboardPaymentProgress } from "./DashboardPaymentProgress";
 import { LiveVacancyLossPanel } from "./LiveVacancyLossPanel";
 import { VacancyLossPanel } from "./VacancyLossPanel";
 
@@ -104,7 +105,7 @@ const monthNames = [
   "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr",
 ];
 
-function StudentExpenseChart({ period, summary, metric, yearlyCounts, countPeriod, onCountPeriodChange }) {
+function StudentExpenseTable({ period, summary, metric, yearlyCounts, countPeriod, onCountPeriodChange }) {
   const isCost = metric.key === "cost";
   const isYearly = !isCost && countPeriod === "year";
   const year = period.slice(0, 4);
@@ -112,9 +113,28 @@ function StudentExpenseChart({ period, summary, metric, yearlyCounts, countPerio
     const name = monthNames[month - 1];
     return { day: month, label: name, detailLabel: name, studentCount };
   }) : summary?.rows || [];
+  const tableRows = rows.map((row, index) => ({
+    ...row,
+    date: isYearly ? `${row.label} ${year}` : `${String(row.day).padStart(2, "0")}.${period.slice(5)}.${year}`,
+    dailyExpense: row.totalExpense - (rows[index - 1]?.totalExpense || 0),
+    change: index ? row.studentCount - rows[index - 1].studentCount : null,
+  }));
+  const columns = [
+    { title: isYearly ? "Oy" : "Sana", dataIndex: "date" },
+    ...(isCost ? [
+      { title: "Shu kungi xarajat", dataIndex: "dailyExpense", align: "right", render: money },
+      { title: "Oy boshidan jami xarajat", dataIndex: "totalExpense", align: "right", render: money },
+    ] : []),
+    { title: "Talabalar soni", dataIndex: "studentCount", align: "right", render: (value) => `${value.toLocaleString("uz-UZ")} ta` },
+    ...(isCost ? [
+      { title: "Bir talabaga xarajat", dataIndex: "cost", align: "right", render: (value) => value == null ? "—" : money(Math.round(value * 100) / 100) },
+    ] : [
+      { title: isYearly ? "Oldingi oyga nisbatan o‘zgarish" : "Oldingi kunga nisbatan o‘zgarish", dataIndex: "change", align: "right", render: (value) => value == null ? "—" : `${value > 0 ? "+" : ""}${value} ta` },
+    ]),
+  ];
   const latest = rows.at(-1)?.[metric.key];
   return (
-    <section className="light-panel dynamics-panel">
+    <section className="light-panel dynamics-panel dashboard-data-table">
       <header>
         <div>
           <h2>{metric.title}</h2>
@@ -126,7 +146,7 @@ function StudentExpenseChart({ period, summary, metric, yearlyCounts, countPerio
         <div className="student-chart-period">
           <span>{isYearly ? year : period}</span>
           {!isCost && (
-            <Segmented className="student-chart-period-toggle" size="small" aria-label="Talabalar grafigi davri" value={countPeriod}
+            <Segmented className="student-chart-period-toggle" size="small" aria-label="Talabalar jadvali davri" value={countPeriod}
               options={[{ label: "Oylik", value: "month" }, { label: "Yillik", value: "year" }]}
               onChange={onCountPeriodChange} />
           )}
@@ -135,11 +155,13 @@ function StudentExpenseChart({ period, summary, metric, yearlyCounts, countPerio
       <div className="chart-totals">
         <b>{isYearly ? "So‘nggi oy" : "So‘nggi kun"}: {latest == null ? "—" : metric.format(Math.round(latest))}</b>
       </div>
-      <DailyLineChart key={isYearly ? "year" : "month"} rows={rows} series={[metric]} label={metric.title} countScale={!isCost} />
+      <Table size="small" bordered rowKey="day" columns={columns} dataSource={tableRows}
+        pagination={false} scroll={{ x: isCost ? 820 : 560 }}
+        locale={{ emptyText: "Tanlangan davr bo‘yicha ma’lumot yo‘q" }} />
       {isCost && (
         <footer className="student-expense-summary">
           <span>Kunlik ko‘rsatkichlar o‘rtachasi</span>
-          <strong>{summary?.average == null ? "—" : money(Math.round(summary.average))}</strong>
+          <strong>{summary?.average == null ? "—" : money(Math.round(summary.average * 100) / 100)}</strong>
         </footer>
       )}
     </section>
@@ -317,6 +339,10 @@ export function DashboardPage() {
           />
         </div>
       </div>
+      <LiveVacancyLossPanel summary={data.vacancyLoss} period={data.period} />
+
+      <DashboardPaymentProgress period={data.period} />
+
       <section className="summary-grid">
         <StatCard
           tone="purple"
@@ -529,8 +555,6 @@ export function DashboardPage() {
         </article>
       </section>
 
-      <LiveVacancyLossPanel summary={data.vacancyLoss} period={data.period} />
-
       <section className="light-panel dynamics-panel">
         <header>
           <div>
@@ -551,7 +575,7 @@ export function DashboardPage() {
       </section>
 
       {studentExpenseMetrics.map((metric) => (
-        <StudentExpenseChart key={`${data.period}-${metric.key}`} period={data.period} summary={data.studentExpenses}
+        <StudentExpenseTable key={`${data.period}-${metric.key}`} period={data.period} summary={data.studentExpenses}
           metric={metric} yearlyCounts={data.yearlyStudentCounts} countPeriod={countPeriod} onCountPeriodChange={setCountPeriod} />
       ))}
 
