@@ -96,18 +96,13 @@ function StatCard({ tone, icon, label, value, detail, onClick }) {
   );
 }
 
-const studentExpenseMetrics = [
-  { key: "cost", title: "Bir talabaga to‘g‘ri keladigan xarajat", label: "Bir talabaga xarajat", tone: "income", format: money },
-  { key: "studentCount", title: "Talabalar sonining o‘zgarishi", label: "Talabalar soni", tone: "income", format: (value) => `${value} ta` },
-];
 const monthNames = [
   "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
   "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr",
 ];
 
-function StudentExpenseTable({ period, summary, metric, yearlyCounts, countPeriod, onCountPeriodChange }) {
-  const isCost = metric.key === "cost";
-  const isYearly = !isCost && countPeriod === "year";
+function StudentCountTable({ period, summary, yearlyCounts, countPeriod, onCountPeriodChange }) {
+  const isYearly = countPeriod === "year";
   const year = period.slice(0, 4);
   const rows = isYearly ? (yearlyCounts || []).map(({ month, studentCount }) => {
     const name = monthNames[month - 1];
@@ -116,54 +111,37 @@ function StudentExpenseTable({ period, summary, metric, yearlyCounts, countPerio
   const tableRows = rows.map((row, index) => ({
     ...row,
     date: isYearly ? `${row.label} ${year}` : `${String(row.day).padStart(2, "0")}.${period.slice(5)}.${year}`,
-    dailyExpense: row.totalExpense - (rows[index - 1]?.totalExpense || 0),
     change: index ? row.studentCount - rows[index - 1].studentCount : null,
   }));
   const columns = [
     { title: isYearly ? "Oy" : "Sana", dataIndex: "date" },
-    ...(isCost ? [
-      { title: "Shu kungi xarajat", dataIndex: "dailyExpense", align: "right", render: money },
-      { title: "Oy boshidan jami xarajat", dataIndex: "totalExpense", align: "right", render: money },
-    ] : []),
     { title: "Talabalar soni", dataIndex: "studentCount", align: "right", render: (value) => `${value.toLocaleString("uz-UZ")} ta` },
-    ...(isCost ? [
-      { title: "Bir talabaga xarajat", dataIndex: "cost", align: "right", render: (value) => value == null ? "—" : money(Math.round(value * 100) / 100) },
-    ] : [
-      { title: isYearly ? "Oldingi oyga nisbatan o‘zgarish" : "Oldingi kunga nisbatan o‘zgarish", dataIndex: "change", align: "right", render: (value) => value == null ? "—" : `${value > 0 ? "+" : ""}${value} ta` },
-    ]),
+    { title: isYearly ? "Oldingi oyga nisbatan o‘zgarish" : "Oldingi kunga nisbatan o‘zgarish", dataIndex: "change", align: "right", render: (value) => value == null ? "—" : `${value > 0 ? "+" : ""}${value} ta` },
   ];
-  const latest = rows.at(-1)?.[metric.key];
+  const latest = rows.at(-1)?.studentCount;
   return (
     <section className="light-panel dynamics-panel dashboard-data-table">
       <header>
         <div>
-          <h2>{metric.title}</h2>
+          <h2>Talabalar sonining o‘zgarishi</h2>
           <span className="chart-keys">
-            <i className={metric.tone} />
-            {isYearly ? "Oy oxiridagi yoki bugungi talabalar soni" : metric.label}
+            <i className="income" />
+            {isYearly ? "Oy oxiridagi yoki bugungi talabalar soni" : "Talabalar soni"}
           </span>
         </div>
         <div className="student-chart-period">
           <span>{isYearly ? year : period}</span>
-          {!isCost && (
             <Segmented className="student-chart-period-toggle" size="small" aria-label="Talabalar jadvali davri" value={countPeriod}
               options={[{ label: "Oylik", value: "month" }, { label: "Yillik", value: "year" }]}
               onChange={onCountPeriodChange} />
-          )}
         </div>
       </header>
       <div className="chart-totals">
-        <b>{isYearly ? "So‘nggi oy" : "So‘nggi kun"}: {latest == null ? "—" : metric.format(Math.round(latest))}</b>
+        <b>{isYearly ? "So‘nggi oy" : "So‘nggi kun"}: {latest == null ? "—" : `${Math.round(latest)} ta`}</b>
       </div>
       <Table size="small" bordered rowKey="day" columns={columns} dataSource={tableRows}
-        pagination={false} scroll={{ x: isCost ? 820 : 560 }}
+        pagination={false} scroll={{ x: 560 }}
         locale={{ emptyText: "Tanlangan davr bo‘yicha ma’lumot yo‘q" }} />
-      {isCost && (
-        <footer className="student-expense-summary">
-          <span>Kunlik ko‘rsatkichlar o‘rtachasi</span>
-          <strong>{summary?.average == null ? "—" : money(Math.round(summary.average * 100) / 100)}</strong>
-        </footer>
-      )}
     </section>
   );
 }
@@ -285,7 +263,7 @@ export function DashboardPage() {
   const { data, isLoading, isFetching, error, refetch } = useGetDashboardQuery({
     period: period.format("YYYY-MM"),
     date: selectedDate.format("YYYY-MM-DD"),
-  }, { pollingInterval: 60000, refetchOnFocus: true, refetchOnReconnect: true });
+  }, { refetchOnFocus: true, refetchOnReconnect: true });
   if (isLoading)
     return (
       <div className="dashboard-loading">
@@ -304,6 +282,7 @@ export function DashboardPage() {
     d = data.debt || {},
     r = data.rooms || {},
     a = data.attendance || {};
+  const latestStudentExpense = data.studentExpenses?.rows?.at(-1);
   const monthLabel = period.format("MMMM YYYY");
   const selectedMethods =
     methodPeriod === "month"
@@ -414,6 +393,15 @@ export function DashboardPage() {
           value={money(d.amount)}
           detail={`${monthLabel} qarzi · ${d.students || 0} talaba`}
           onClick={() => navigate("/debtors")}
+        />
+        <StatCard
+          tone="red"
+          icon="expense"
+          label="Bir talabaga to‘g‘ri keladigan xarajat"
+          value={latestStudentExpense?.cost == null ? "—" : money(Math.round(latestStudentExpense.cost * 100) / 100)}
+          detail={latestStudentExpense
+            ? `${String(latestStudentExpense.day).padStart(2, "0")}.${data.period.slice(5)}.${data.period.slice(0, 4)} holatiga · ${latestStudentExpense.studentCount} talaba · oy boshidan`
+            : "Tanlangan davr bo‘yicha ma’lumot yo‘q"}
         />
       </section>
 
@@ -574,10 +562,8 @@ export function DashboardPage() {
         <DailyLineChart rows={data.dailyTrends || []} />
       </section>
 
-      {studentExpenseMetrics.map((metric) => (
-        <StudentExpenseTable key={`${data.period}-${metric.key}`} period={data.period} summary={data.studentExpenses}
-          metric={metric} yearlyCounts={data.yearlyStudentCounts} countPeriod={countPeriod} onCountPeriodChange={setCountPeriod} />
-      ))}
+      <StudentCountTable key={data.period} period={data.period} summary={data.studentExpenses}
+        yearlyCounts={data.yearlyStudentCounts} countPeriod={countPeriod} onCountPeriodChange={setCountPeriod} />
 
       <VacancyLossPanel summary={data.vacancyLoss} period={data.period} />
 

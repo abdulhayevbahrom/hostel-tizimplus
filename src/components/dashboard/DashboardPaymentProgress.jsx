@@ -8,7 +8,7 @@ import { PaymentProgressOverview } from '../payment-progress/PaymentProgressOver
 export function DashboardPaymentProgress({ period }) {
   const [clock, setClock] = useState(Date.now)
   const { currentData, isFetching, error, refetch, fulfilledTimeStamp } = useGetPaymentProgressQuery(period, {
-    pollingInterval: 60000, refetchOnFocus: true, refetchOnReconnect: true,
+    refetchOnFocus: true, refetchOnReconnect: true,
   })
   useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 1000)
