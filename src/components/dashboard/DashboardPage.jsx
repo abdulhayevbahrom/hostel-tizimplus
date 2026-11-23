@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DatePicker, Segmented, Table } from "antd";
+import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { apiErrorMessage, useGetDashboardQuery } from "../../store/baseApi";
@@ -8,6 +8,7 @@ import { DailyLineChart } from "./DailyLineChart";
 import { DashboardPaymentProgress } from "./DashboardPaymentProgress";
 import { LiveVacancyLossPanel } from "./LiveVacancyLossPanel";
 import { VacancyLossPanel } from "./VacancyLossPanel";
+import { StudentCountTable } from "./StudentCountTable";
 
 const money = (value) => `${Number(value || 0).toLocaleString("uz-UZ")} so‘m`;
 const methodLabels = {
@@ -93,56 +94,6 @@ function StatCard({ tone, icon, label, value, detail, onClick }) {
       <strong>{value}</strong>
       <small>{detail}</small>
     </button>
-  );
-}
-
-const monthNames = [
-  "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
-  "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr",
-];
-
-function StudentCountTable({ period, summary, yearlyCounts, countPeriod, onCountPeriodChange }) {
-  const isYearly = countPeriod === "year";
-  const year = period.slice(0, 4);
-  const rows = isYearly ? (yearlyCounts || []).map(({ month, studentCount }) => {
-    const name = monthNames[month - 1];
-    return { day: month, label: name, detailLabel: name, studentCount };
-  }) : summary?.rows || [];
-  const tableRows = rows.map((row, index) => ({
-    ...row,
-    date: isYearly ? `${row.label} ${year}` : `${String(row.day).padStart(2, "0")}.${period.slice(5)}.${year}`,
-    change: index ? row.studentCount - rows[index - 1].studentCount : null,
-  }));
-  const columns = [
-    { title: isYearly ? "Oy" : "Sana", dataIndex: "date" },
-    { title: "Talabalar soni", dataIndex: "studentCount", align: "right", render: (value) => `${value.toLocaleString("uz-UZ")} ta` },
-    { title: isYearly ? "Oldingi oyga nisbatan o‘zgarish" : "Oldingi kunga nisbatan o‘zgarish", dataIndex: "change", align: "right", render: (value) => value == null ? "—" : `${value > 0 ? "+" : ""}${value} ta` },
-  ];
-  const latest = rows.at(-1)?.studentCount;
-  return (
-    <section className="light-panel dynamics-panel dashboard-data-table">
-      <header>
-        <div>
-          <h2>Talabalar sonining o‘zgarishi</h2>
-          <span className="chart-keys">
-            <i className="income" />
-            {isYearly ? "Oy oxiridagi yoki bugungi talabalar soni" : "Talabalar soni"}
-          </span>
-        </div>
-        <div className="student-chart-period">
-          <span>{isYearly ? year : period}</span>
-            <Segmented className="student-chart-period-toggle" size="small" aria-label="Talabalar jadvali davri" value={countPeriod}
-              options={[{ label: "Oylik", value: "month" }, { label: "Yillik", value: "year" }]}
-              onChange={onCountPeriodChange} />
-        </div>
-      </header>
-      <div className="chart-totals">
-        <b>{isYearly ? "So‘nggi oy" : "So‘nggi kun"}: {latest == null ? "—" : `${Math.round(latest)} ta`}</b>
-      </div>
-      <Table size="small" bordered rowKey="day" columns={columns} dataSource={tableRows}
-        pagination={false} scroll={{ x: 560 }}
-        locale={{ emptyText: "Tanlangan davr bo‘yicha ma’lumot yo‘q" }} />
-    </section>
   );
 }
 

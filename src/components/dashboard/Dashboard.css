@@ -28,6 +28,16 @@
 .student-expense-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 10px 13px; border-top: 1px solid #eadfcd; color: #566174; }
 .student-expense-summary strong { color: #246b64; font-size: 16px; }
 .student-expense-empty { margin: 0; padding: 13px; color: #566174; }
+.student-count-panel > header { gap: 10px; flex-wrap: wrap; }
+.student-count-panel > header > .student-count-header-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px 18px; margin-left: auto; }
+.student-count-panel .student-count-toggle { flex-shrink: 0; color: #246b64; background: #eef7f4; border-color: #c9dfda; border-radius: 8px; font-weight: 500; box-shadow: none; }
+.student-count-panel .student-count-toggle:not(:disabled):hover { color: #1d574f; background: #e0f0ea; border-color: #8bbfb0; }
+.student-count-latest { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 5px 10px; color: #657080; font-size: 12px; }
+.student-count-latest strong { color: #246b64; font-size: 15px; font-variant-numeric: tabular-nums; }
+.student-count-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px; }
+.student-count-controls .ant-picker { max-width: 100%; }
+.student-count-controls .ant-segmented { max-width: 100%; }
+.student-count-controls .ant-segmented-item-selected, .student-count-controls .ant-segmented-thumb { background: #24786e; color: #fff; }
 @media(max-width:768px){.visual-row{grid-template-columns:1fr!important}.visual-row .attendance-panel,.visual-row .debtors-panel{grid-column:auto!important;min-width:0}.attendance-panel,.debtors-panel{width:100%}.attendance-panel header,.debtors-panel header{gap:10px}.debtors-panel header{align-items:flex-start;flex-direction:column}.debtors-panel header button{align-self:flex-start}}
 @media(max-width:768px){.recent-panel header{padding:10px 12px;gap:8px}.recent-panel header h2{font-size:13px}.recent-panel header span{font-size:10px}.recent-table-wrap{overflow-x:auto}.recent-panel table{min-width:0;width:100%}.recent-panel th,.recent-panel td{padding:7px 6px}.recent-panel th{font-size:9px}.recent-panel td{font-size:10px}.recent-panel td small{margin-top:1px;font-size:9px;line-height:1.2}.recent-panel th:last-child,.recent-panel td:last-child{display:none}.recent-date-cell{width:86px}.recent-date-cell strong,.recent-date-cell small{white-space:nowrap;line-height:1.15}.recent-action-cell{display:grid;gap:3px;justify-items:start}.recent-action-cell b{display:block;white-space:nowrap;font-size:10px;line-height:1.15}.recent-amount-cell{display:none}.operation{padding:3px 6px;border-radius:7px;font-size:9px}.recent-panel td strong{line-height:1.2}}
 @media(max-width:768px){.chart-totals{gap:6px;padding:8px 10px 0}.chart-totals b{padding:4px 7px;font-size:9px;line-height:1.2;white-space:normal;word-break:keep-all}}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Empty, Segmented, Select } from 'antd'
 import dayjs from 'dayjs'
+import { RoomVacancyCalendar } from './RoomVacancyCalendar'
 import './VacancyLossPanel.css'
 
 const money = (value) => `${Number(value || 0).toLocaleString('uz-UZ')} so‘m`
@@ -24,8 +25,6 @@ export function VacancyLossPanel({ summary, period }) {
   const rooms = byLoss(displayed?.rooms)
   const floors = byLoss(displayed?.floors)
   const cards = view === 'rooms' ? rooms : floors
-  const topFloor = floors[0]
-  const topRoom = rooms[0]
   const dateLabel = isDaily && selectedDay ? dayjs(selectedDay.date).format('DD.MM.YYYY') : period
   return (
     <section className="light-panel dynamics-panel vacancy-loss-panel">
@@ -53,19 +52,11 @@ export function VacancyLossPanel({ summary, period }) {
           { label: 'Xonalar', value: 'rooms' }, { label: 'Qavatlar', value: 'floors' },
         ]} />
       </div>
-      {topFloor && topRoom && (
-        <div className="vacancy-priority">
-          <span>Birinchi navbatda e’tibor bering</span>
-          <strong>{floorName(topFloor)}</strong>
-          <p>Tanlangan davrda eng katta yo‘qotish: {money(topFloor.loss)}. Talaba jalb qilishda shu qavatga ustuvorlik bering.</p>
-          <p>Eng katta yo‘qotishli xona: {roomName(topRoom)} ({floorName(topRoom)}) — {money(topRoom.loss)}.</p>
-        </div>
-      )}
       <p className="vacancy-loss-help">
         Faqat yo‘qotilgan daromadi bor {view === 'rooms' ? 'xonalar' : 'qavatlar'} ko‘rsatiladi, eng katta yo‘qotish birinchi turadi.
         {' '}Oylik hisob — davr davomida bo‘sh turgan o‘rinlar; tanlangan kundagi bo‘sh o‘rinlarni ko‘rish uchun «Kunlik»ni tanlang.
       </p>
-      <div className="vacancy-cards">
+      <div className={`vacancy-cards ${view === 'rooms' ? 'vacancy-cards-with-calendar' : ''}`}>
         {cards.map((row, index) => {
           const vacancyRate = row.capacityBedDays ? Math.round(row.vacantBedDays / row.capacityBedDays * 100) : 0
           const lossShare = displayed?.loss ? Math.round(row.loss / displayed.loss * 100) : 0
@@ -76,10 +67,20 @@ export function VacancyLossPanel({ summary, period }) {
               <div className="vacancy-card-heading">
                 <div><h3>{view === 'rooms' ? roomName(row) : floorName(row)}</h3>
                   {view === 'rooms' && <span>{floorName(row)}</span>}</div>
-                <span className="vacancy-card-rank">#{index + 1}</span>
+                {view === 'rooms' ? <div className="vacancy-card-top-right">
+                  <div className="vacancy-card-income">
+                    <span className="vacancy-card-label">Yo‘qotilgan daromad</span>
+                    <strong className="vacancy-card-amount">{money(row.loss)}</strong>
+                  </div>
+                  <span className="vacancy-card-rank">#{index + 1}</span>
+                </div> : <span className="vacancy-card-rank">#{index + 1}</span>}
               </div>
-              <span className="vacancy-card-label">Yo‘qotilgan daromad</span>
-              <strong className="vacancy-card-amount">{money(row.loss)}</strong>
+              {view === 'floors' && <>
+                <span className="vacancy-card-label">Yo‘qotilgan daromad</span>
+                <strong className="vacancy-card-amount">{money(row.loss)}</strong>
+              </>}
+              {view === 'rooms' ? <RoomVacancyCalendar room={row} summary={summary} period={period}
+                selectedDate={isDaily ? selectedDay?.date : null} /> : <>
               <dl>
                 <div><dt>{isDaily ? 'Bo‘sh o‘rinlar' : 'Bo‘sh o‘rin-kun'}</dt><dd>{number(row.vacantBedDays)}</dd></div>
                 <div><dt>Bo‘sh turish ulushi</dt><dd>{vacancyRate}%</dd></div>
@@ -90,6 +91,7 @@ export function VacancyLossPanel({ summary, period }) {
                 <span style={{ width: `${vacancyRate}%` }} />
               </div>
               {view === 'floors' && <p className="vacancy-card-rooms">Xonalar: {affectedRooms.map((room) => room.roomNumber).join(', ')}</p>}
+              </>}
             </article>
           )
         })}

@@ -83,6 +83,17 @@ export const baseApi = createApi({
         unsubscribe()
       },
     }),
+    getStudentCountRange: builder.query({
+      query: ({ startDate, endDate }) => ({ url: '/dashboard/student-counts', params: { startDate, endDate } }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Dashboard', id: 'MAIN' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Dashboard', id: 'MAIN' }], 'Dashboard:MAIN')
+        const unsubscribe = subscribeSocket(['students:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
     getMonthlyReport: builder.query({
       query: (period) => ({ url: '/reports/monthly', params: period ? { period } : undefined }),
       transformResponse: (response) => response.data,
@@ -719,6 +730,7 @@ export const baseApi = createApi({
 
 export const {
   useGetDashboardQuery,
+  useGetStudentCountRangeQuery,
   useGetMonthlyReportQuery,
   useGetYearlyReportQuery,
   useGetPaymentProgressQuery,

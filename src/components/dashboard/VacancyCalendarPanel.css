@@ -1,0 +1,32 @@
+.vacancy-calendar-panel { margin-top: 20px; }
+.vacancy-calendar-panel > header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+.vacancy-calendar-panel > header > span { color: #657080; font-size: 13px; }
+.vacancy-calendar-content { display: grid; gap: 18px; padding: 0 14px 18px; min-width: 0; }
+.vacancy-calendar-help { margin: 0; color: #657080; font-size: 13px; line-height: 1.65; }
+.vacancy-room-link { display: grid; gap: 4px; background: none; border: 0; padding: 5px 0; color: #253952; text-align: left; cursor: pointer; font: inherit; }
+.vacancy-room-link strong { color: #996139; text-decoration: underline; text-underline-offset: 3px; }
+.vacancy-room-link span { font-size: 12px; color: #657080; }
+.vacancy-ranking .vacancy-selected-row > td { background: #fff4e6; }
+.vacancy-calendar-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: #253952; }
+.vacancy-calendar-toolbar .ant-select { width: 320px; max-width: 100%; }
+.vacancy-calendar-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.vacancy-calendar-stats > div { display: grid; gap: 8px; padding: 16px; border: 1px solid #e6d8c2; background: #fffdf9; border-radius: 10px; }
+.vacancy-calendar-stats span { color: #657080; font-size: 12px; }
+.vacancy-calendar-stats strong { color: #253952; font-size: 24px; font-variant-numeric: tabular-nums; }
+.vacancy-calendar-legend { display: flex; gap: 18px; flex-wrap: wrap; color: #657080; font-size: 12px; }
+.vacancy-calendar-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.vacancy-calendar-legend i { width: 14px; height: 14px; border-radius: 3px; }
+.vacancy-calendar-scroll { overflow-x: auto; max-width: 100%; }
+.vacancy-calendar-table { border-collapse: separate; border-spacing: 3px; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; color: #253952; }
+.vacancy-calendar-table caption { text-align: left; padding-bottom: 10px; font-weight: 600; }
+.vacancy-calendar-table th { font-weight: 500; }
+.vacancy-calendar-table th:first-child { text-align: left; white-space: nowrap; padding-right: 12px; }
+.vacancy-calendar-table td, .vacancy-calendar-table thead th:not(:first-child) { min-width: 25px; height: 34px; text-align: center; }
+.vacancy-day-empty { background: #fbe2c3; color: #764918; }
+.vacancy-day-full { background: #e6efe9; color: #2f6249; }
+.vacancy-day-unknown { background: #f2f3f5; color: #657080; }
+@media (max-width: 640px) {
+  .vacancy-calendar-stats { grid-template-columns: 1fr; }
+  .vacancy-calendar-toolbar { align-items: stretch; flex-direction: column; }
+  .vacancy-calendar-toolbar .ant-select { width: 100%; }
+}

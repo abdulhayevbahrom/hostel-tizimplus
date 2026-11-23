@@ -1,11 +1,14 @@
-.vacancy-priority { display: grid; gap: 6px; margin: 0 14px 14px; padding: 16px; background: #fff0df; border: 1px solid #e1b47b; border-radius: 10px; }
-.vacancy-priority > span { color: #98612d; font-size: 12px; font-weight: 600; }
-.vacancy-priority > strong { color: #643c21; font-size: 18px; }
-.vacancy-priority p { margin: 0; color: #785638; font-size: 13px; line-height: 1.6; }
 .vacancy-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0 14px 14px; }
+.vacancy-cards.vacancy-cards-with-calendar { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
 .vacancy-card { min-width: 0; padding: 18px; border: 1px solid #e6d8c2; border-radius: 10px; background: #fffdf9; }
-.vacancy-card-priority { border-color: #cf8776; background: #fff8f3; }
+.vacancy-card-priority { border: 2px solid #dc2626; background: #fee2e2; }
+.vacancy-card-priority .vacancy-card-heading .vacancy-card-rank { background: #b91c1c; color: #fff; }
+.vacancy-card-priority .vacancy-card-amount { color: #991b1b; }
 .vacancy-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+.vacancy-cards-with-calendar .vacancy-card-heading { flex-wrap: wrap; }
+.vacancy-card-top-right { display: flex; align-items: flex-start; gap: 12px; min-width: 0; max-width: 100%; margin-left: auto; }
+.vacancy-card-income { min-width: 0; text-align: right; }
+.vacancy-card-top-right > .vacancy-card-rank { flex-shrink: 0; color: #9c5242; }
 .vacancy-card-heading h3 { margin: 0 0 5px; color: #253952; font-size: 17px; }
 .vacancy-card-heading div > span, .vacancy-card-label { color: #657080; font-size: 12px; }
 .vacancy-card-rank { padding: 5px 9px; border-radius: 6px; background: #f5e9df; color: #9c5242; font-size: 12px; font-weight: 700; }
@@ -18,5 +21,22 @@
 .vacancy-card-meter > span { display: block; height: 100%; border-radius: inherit; background: #c47862; }
 .vacancy-card-rooms { margin: 12px 0 0; color: #657080; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 .vacancy-cards-empty { padding: 12px 14px 24px; }
+.vacancy-bed-calendar { display: grid; min-width: 0; gap: 8px; margin-top: 14px; }
+.vacancy-bed-legend { display: flex; flex-wrap: wrap; gap: 14px; color: #657080; font-size: 12px; }
+.vacancy-bed-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.vacancy-bed-legend i { width: 13px; height: 13px; border-radius: 3px; }
+.vacancy-bed-scroll { max-width: 100%; overflow-x: auto; }
+.vacancy-bed-table { width: 100%; border-collapse: separate; border-spacing: 2px; color: #253952; font-size: 11px; font-variant-numeric: tabular-nums; }
+.vacancy-bed-caption { text-align: left; padding-bottom: 8px; color: #657080; }
+.vacancy-bed-table th { font-weight: 500; }
+.vacancy-bed-table th:first-child { text-align: left; min-width: 62px; white-space: nowrap; }
+.vacancy-bed-table th:last-child, .vacancy-bed-total { min-width: 52px; text-align: right; white-space: nowrap; }
+.vacancy-bed-table td:not(:last-child), .vacancy-bed-table thead th:not(:first-child):not(:last-child) { min-width: 14px; height: 22px; padding: 0; text-align: center; }
+.vacancy-bed-vacant { background: #b91c1c; color: #fff; }
+.vacancy-bed-occupied { background: #15803d; color: #fff; }
+.vacancy-bed-unknown { background: #f0ece7; color: #657080; }
+.vacancy-bed-total { color: #253952; font-weight: 600; }
+.vacancy-bed-note { margin: 0; color: #657080; font-size: 12px; line-height: 1.6; }
 @media (max-width: 1100px) { .vacancy-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .vacancy-cards.vacancy-cards-with-calendar { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .vacancy-cards { grid-template-columns: minmax(0, 1fr); } .vacancy-loss-controls .ant-segmented { max-width: 100%; } }
