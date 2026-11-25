@@ -256,6 +256,17 @@ export const baseApi = createApi({
         unsubscribe()
       },
     }),
+    getContractRooms: builder.query({
+      query: (params) => ({ url: '/rooms', params }),
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Room', id: 'LIST' }],
+      async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
+        const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Room', id: 'LIST' }], 'Room:LIST')
+        const unsubscribe = subscribeSocket(['rooms:changed', 'student-contracts:changed'], refresh)
+        await cacheEntryRemoved
+        unsubscribe()
+      },
+    }),
     createRoom: builder.mutation({
       query: (body) => ({ url: '/rooms', method: 'POST', body }),
       transformResponse: (response) => response.data,
@@ -272,9 +283,9 @@ export const baseApi = createApi({
       invalidatesTags: (_result, _error, id) => [{ type: 'Room', id }, { type: 'Room', id: 'LIST' }],
     }),
     getStudents: builder.query({
-      query: ({ search = '', page = 1, period = '', university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '', paymentStatus = '' } = {}) => ({
+      query: ({ search = '', page = 1, period = '', university = '', faculty = '', course = '', educationType = '', floor = '', room = '', studentStatus = '', paymentStatus = '', contractCreatedFrom = '', contractCreatedTo = '' } = {}) => ({
         url: '/students',
-        params: { page, ...(period ? { period } : {}), ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}), ...(paymentStatus ? { paymentStatus } : {}) },
+        params: { page, ...(period ? { period } : {}), ...(search ? { search } : {}), ...(university ? { university } : {}), ...(faculty ? { faculty } : {}), ...(Array.isArray(course) ? (course.length ? { course: course.join(',') } : {}) : course ? { course } : {}), ...(educationType ? { educationType } : {}), ...(floor ? { floor } : {}), ...(room ? { room } : {}), ...(studentStatus ? { studentStatus } : {}), ...(paymentStatus ? { paymentStatus } : {}), ...(contractCreatedFrom ? { contractCreatedFrom } : {}), ...(contractCreatedTo ? { contractCreatedTo } : {}) },
       }),
       transformResponse: (response) => response.data,
       providesTags: (result) => [{ type: 'Student', id: 'LIST' }, ...(result?.students || []).map((item) => ({ type: 'Student', id: item.id }))],
@@ -303,6 +314,11 @@ export const baseApi = createApi({
       query: (body) => ({ url: '/students', method: 'POST', body }),
       transformResponse: (response) => response.data,
       invalidatesTags: [{ type: 'Student', id: 'LIST' }],
+    }),
+    admitStudent: builder.mutation({
+      query: (body) => ({ url: '/students/admit', method: 'POST', body }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: (result) => result ? ['Student', 'StudentContract', 'Room', 'Dashboard', 'Payment', 'Debtor', 'Deposit', 'University', 'Faculty'] : [{ type: 'Room', id: 'LIST' }],
     }),
     updateStudent: builder.mutation({
       query: ({ id, body }) => ({ url: `/students/${id}`, method: 'PUT', body }),
@@ -751,6 +767,7 @@ export const {
   useDeleteSalaryPaymentMutation,
   useGetRoomsQuery,
   useGetRoomStudentsQuery,
+  useGetContractRoomsQuery,
   useCreateRoomMutation,
   useUpdateRoomMutation,
   useDeleteRoomMutation,
@@ -759,6 +776,7 @@ export const {
   useGetStudentHistoryQuery,
   useLazyCheckStudentBlacklistQuery,
   useCreateStudentMutation,
+  useAdmitStudentMutation,
   useUpdateStudentMutation,
   useDeleteStudentMutation,
   useGetStudentContractsQuery,

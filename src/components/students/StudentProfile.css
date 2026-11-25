@@ -78,6 +78,10 @@
 .contract-form-modal .ant-form-vertical .ant-form-item-label { padding: 0 0 3px; }
 .contract-form-modal .ant-form-item-label > label { min-height: auto; font-size: 12px; line-height: 1.2; }
 .contract-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.contract-deposit-controls { display: flex; align-items: flex-start; gap: 10px; min-height: 42px; }
+.contract-deposit-toggle { display: flex; flex: 0 0 auto; align-items: center; min-height: 42px; }
+.contract-deposit-controls .contract-deposit-switch { width: 44px; min-width: 44px; flex: 0 0 44px; }
+.contract-fields .contract-deposit-controls .contract-deposit-amount { flex: 1; min-width: 0; margin: 0; }
 .contract-room-picker { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px; }
 .contract-room-picker button { display: grid; grid-template-areas: "room free" "location free"; grid-template-columns: minmax(0, 1fr) auto; width: 135px; min-height: 46px; align-items: center; gap: 1px 4px; padding: 6px 7px; color: #486067; background: #fff; border: 1px solid #d5e3e4; border-radius: 7px; text-align: left; transition: .16s; }
 .contract-room-picker button:hover { border-color: #67bcb1; background: #f0fbf8; }
@@ -92,6 +96,14 @@
 .contract-room-picker button.selected span, .contract-room-picker button.selected small { color: #e8fffb; }
 .contract-room-picker button.selected small { background: rgba(255, 255, 255, .16); }
 .contract-room-empty { padding: 20px; color: #87979c; background: #f7fafb; border: 1px dashed #cbdadd; border-radius: 9px; text-align: center; }
+.contract-room-feedback { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; color: #526b74; font-size: 13px; }
+.contract-bed-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.contract-bed-picker button { display: grid; gap: 3px; min-width: 62px; padding: 8px 12px; border: 1px solid #8ca6ad; border-radius: 8px; color: #0f625a; background: #effaf7; cursor: pointer; }
+.contract-bed-picker strong { font-size: 18px; }
+.contract-bed-picker span { font-size: 11px; }
+.contract-bed-picker button.selected { color: #fff; background: #0f766e; border-color: #0f766e; box-shadow: 0 0 0 2px #bce4df; }
+.contract-bed-picker button.occupied { color: #7b6464; background: #f1ecec; border-color: #d5c9c9; cursor: not-allowed; }
+.contract-bed-picker button:focus-visible { outline: 2px solid #155e75; outline-offset: 3px; }
 .contract-status-segmented .ant-segmented-item-selected { color: #fff; background: #155e75; }
 .contract-form-actions { display: flex; gap: 8px; margin-top: 12px; }
 .contract-payment-calculation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px; margin-bottom: 16px; background: #eef9f7; border: 1px solid #bce4df; border-radius: 10px; }

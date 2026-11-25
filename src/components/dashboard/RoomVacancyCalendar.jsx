@@ -1,4 +1,11 @@
 import dayjs from 'dayjs'
+import { Tooltip } from 'antd'
+import { Link } from 'react-router-dom'
+
+const contractDate = new Intl.DateTimeFormat('ru-RU', {
+  timeZone: 'Asia/Tashkent', day: '2-digit', month: '2-digit', year: 'numeric',
+})
+const formatDate = (value) => value ? contractDate.format(new Date(value)) : '—'
 
 export function RoomVacancyCalendar({ room, summary, period, selectedDate }) {
   const history = new Map((summary.daily || []).map((day) => [day.date,
@@ -17,9 +24,20 @@ export function RoomVacancyCalendar({ room, summary, period, selectedDate }) {
           const emptyDays = dates.filter((date) => history.get(date)?.bedStates?.[index] === 'vacant').length
           return <tr key={index}><th scope="row">{index + 1}-o‘rin</th>{dates.map((date) => {
             const state = history.get(date)?.bedStates?.[index]
+            const occupant = state === 'occupied' ? history.get(date)?.bedOccupants?.[index] : null
             const label = state === 'vacant' ? 'Bo‘sh' : state === 'occupied' ? 'Band' : 'Hisoblanmagan'
             return <td key={date} className={`vacancy-bed-${state || 'unknown'}`} aria-label={`${index + 1}-o‘rin, ${date}: ${label}`}>
-              {state === 'vacant' || state === 'occupied' ? null : '—'}
+              {occupant?.studentId ? <Tooltip trigger={['hover', 'focus']} title={
+                <div className="vacancy-bed-tooltip">
+                  <strong>{occupant.fullName || 'Talaba'}</strong>
+                  <span>Shartnoma boshlanishi: {formatDate(occupant.startDate)}</span>
+                  <span>Shartnoma tugashi: {formatDate(occupant.endDate)}</span>
+                  <small>Talaba profilini ochish uchun bosing</small>
+                </div>
+              }>
+                <Link className="vacancy-bed-student" to={`/student/${occupant.studentId}`}
+                  aria-label={`${index + 1}-o‘rin, ${dayjs(date).format('DD.MM.YYYY')}: ${occupant.fullName || 'Talaba'}, shartnoma ${formatDate(occupant.startDate)} — ${formatDate(occupant.endDate)}. Talaba profilini ochish`} />
+              </Tooltip> : state === 'vacant' || state === 'occupied' ? null : '—'}
             </td>
           })}<td className="vacancy-bed-total">{emptyDays} kun</td></tr>
         })}</tbody>

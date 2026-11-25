@@ -7,6 +7,7 @@ import { navigationItems } from './constants/navigation'
 import { EmployeesPage } from './components/employees/EmployeesPage'
 import { RoomsPage } from './components/rooms/RoomsPage'
 import { StudentsPage } from './components/students/StudentsPage'
+import { StudentAdmissionPage } from './components/students/StudentAdmissionPage'
 import { StudentProfilePage } from './components/students/StudentProfilePage'
 import { ActiveContractsTab } from './components/students/ActiveContractsTab'
 import { BuildingBlocksPage } from './components/settings/BuildingBlocksPage'
@@ -43,14 +44,15 @@ function App() {
   const generalSettings = generalSettingsData?.settings
   const isOwner = ['owner', 'admin'].includes(meData?.employee?.role)
   const allowedSections = new Set(meData?.employee?.sections || [])
-  const allowedNavigationItems = isOwner ? navigationItems : navigationItems.filter((item) => allowedSections.has(item.id))
+  const allowedNavigationItems = isOwner ? navigationItems : navigationItems.filter((item) => allowedSections.has(item.section || item.id))
   const firstAllowedPath = allowedNavigationItems[0]?.path || null
   const guard = (section, element) => isOwner || allowedSections.has(section)
     ? element
     : firstAllowedPath ? <Navigate to={firstAllowedPath} replace /> : <div className="hotel-page-loader">Sizga hech bir bo‘lim uchun ruxsat berilmagan</div>
   const isSettings = location.pathname.startsWith('/settings')
-  const currentItem = navigationItems.find((item) => item.path === location.pathname || (item.id === 'students' && location.pathname.startsWith('/student/')) || (item.id === 'surveys' && location.pathname.startsWith('/surveys/')) || (item.id === 'settings' && isSettings)) || navigationItems[0]
-  const title = location.pathname.startsWith('/student/') ? 'Talaba profili' : location.pathname.startsWith('/surveys/') ? 'So‘rovnoma natijalari' : location.pathname === '/settings/general' ? 'Umumiy sozlamalar' : location.pathname === '/settings/building-blocks' ? 'Bino / bloklar' : location.pathname.startsWith('/settings') ? 'Universitetlar' : currentItem.label
+  const currentItem = navigationItems.find((item) => item.path === location.pathname)
+    || navigationItems.find((item) => (item.id === 'students' && (location.pathname.startsWith('/student/') || location.pathname.startsWith('/students/'))) || (item.id === 'surveys' && location.pathname.startsWith('/surveys/')) || (item.id === 'settings' && isSettings)) || navigationItems[0]
+  const title = location.pathname === '/students/new' ? 'Yangi talaba qabul qilish' : location.pathname.startsWith('/student/') ? 'Talaba profili' : location.pathname.startsWith('/surveys/') ? 'So‘rovnoma natijalari' : location.pathname === '/settings/general' ? 'Umumiy sozlamalar' : location.pathname === '/settings/building-blocks' ? 'Bino / bloklar' : location.pathname.startsWith('/settings') ? 'Universitetlar' : currentItem.label
   const goTo = (path) => { navigate(path); setMobileNavOpen(false) }
   const logout = () => { localStorage.removeItem('hostelAuthToken'); dispatch(baseApi.util.resetApiState()); setAuthToken(null) }
   const handleLogin = (data) => { dispatch(baseApi.util.resetApiState()); setAuthToken(data.token) }
@@ -89,6 +91,7 @@ function App() {
             <Routes>
               <Route path="/" element={guard('dashboard', <DashboardPage employee={meData.employee} />)} />
               <Route path="/students" element={guard('students', <StudentsPage />)} />
+              <Route path="/students/new" element={guard('students', <StudentAdmissionPage />)} />
               <Route path="/contracts" element={guard('contracts', <ActiveContractsTab />)} />
               <Route path="/student/:id" element={guard('students', <StudentProfilePage currentEmployee={meData.employee} />)} />
               <Route path="/rooms" element={guard('rooms', <RoomsPage />)} />

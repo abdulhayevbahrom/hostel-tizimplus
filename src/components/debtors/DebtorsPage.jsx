@@ -78,6 +78,7 @@ export function DebtorsPage({ currentEmployee }) {
     label: `${room.block ? `${room.block} blok · ` : ""}${room.roomNumber}-xona · ${room.floor}-qavat`,
   })), [rooms]);
   const debtors = data?.debtors || [];
+  const todayKey = paymentDateFields().paymentDate.format("YYYY-MM-DD");
   const pagination = data?.pagination || { page: 1, limit: 30, total: 0, totalPages: 1 };
   const updatePeriod = (date) => {
     setPeriod(date.format("YYYY-MM"));
@@ -307,8 +308,11 @@ export function DebtorsPage({ currentEmployee }) {
               <tbody>
                 {debtors.map((debtor) => {
                   const room = debtor.contracts?.[0]?.room;
+                  const isDeadlineToday = debtor.paymentDeadline
+                    && paymentDateFields(debtor.paymentDeadline).paymentDate.format("YYYY-MM-DD") === todayKey;
                   return (
-                    <tr key={debtor.student.id} className={debtor.isDeadlineReached || debtor.isPaymentDueReached ? "debtor-deadline-reached" : ""}>
+                    <tr key={debtor.student.id} className={isDeadlineToday ? "debtor-deadline-today"
+                      : debtor.isDeadlineReached || debtor.isPaymentDueReached ? "debtor-deadline-reached" : ""}>
                       <td data-label="Talaba">
                         <button
                           className="debtor-student"

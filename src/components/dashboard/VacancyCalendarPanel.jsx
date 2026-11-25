@@ -62,7 +62,7 @@ export function VacancyCalendarPanel({ summary, period }) {
           </table>
         </div>
         <p className="vacancy-calendar-help">Kunlik bo‘sh o‘rinlar yig‘indisi: <strong>{number(selected.vacantBedDays)} o‘rin-kun</strong>. Hisoblangan sig‘im: {number(selected.capacityBedDays)} o‘rin-kun. Bandlik: {selected.occupancyRate.toFixed(1)}%.</p>
-        <p className="vacancy-calendar-help">Hisob shartnomalar asosida tuziladi. Kravat raqami qayd etilmagani uchun kunlik holat xona bo‘yicha ko‘rsatiladi. Joriy oy bugungacha hisoblanadi; kelgusi kunlar bo‘sh deb olinmaydi.</p>
+        <p className="vacancy-calendar-help">Hisob shartnomalar asosida tuziladi. Raqamlangan o‘rinlar shartnomada saqlanadi; eski raqamsiz shartnomalarning o‘rni taxminan belgilanadi. Joriy oy bugungacha hisoblanadi; kelgusi kunlar bo‘sh deb olinmaydi.</p>
       </>}
     </div>
   </section>

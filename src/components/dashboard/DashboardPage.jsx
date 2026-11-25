@@ -273,6 +273,8 @@ export function DashboardPage() {
 
       <DashboardPaymentProgress period={data.period} />
 
+      <VacancyLossPanel summary={data.vacancyLoss} period={data.period} />
+
       <section className="summary-grid">
         <StatCard
           tone="purple"
@@ -515,8 +517,6 @@ export function DashboardPage() {
 
       <StudentCountTable key={data.period} period={data.period} summary={data.studentExpenses}
         yearlyCounts={data.yearlyStudentCounts} countPeriod={countPeriod} onCountPeriodChange={setCountPeriod} />
-
-      <VacancyLossPanel summary={data.vacancyLoss} period={data.period} />
 
       <section className="light-panel recent-panel">
         <header>

@@ -1,6 +1,6 @@
 .active-contracts-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(480px, 1.55fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   padding: 0 20px 18px;
 }
@@ -10,7 +10,7 @@
 .active-contracts-summary article.active { background: #e6f6eb; border-color: #c5e5ce; }
 .active-contracts-summary article.completed { background: #e8f3f8; border-color: #c9dfe8; }
 .active-contracts-summary article.cancelled { background: #fff0ef; border-color: #f1cdca; }
-.active-contracts-summary article.amount { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); grid-template-rows: auto auto; align-content: center; column-gap: 18px; row-gap: 8px; background: #fff5dd; border-color: #ecdcae; }
+.active-contracts-summary article.amount { display: grid; grid-column: 1 / -1; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); grid-template-rows: auto auto; align-content: center; column-gap: 18px; row-gap: 8px; background: #fff5dd; border-color: #ecdcae; }
 .active-contracts-summary span { color: #688087; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .active-contracts-summary strong { color: #194d4d; font-size: 24px; line-height: 1.15; }
 .active-contracts-summary .active strong { color: #277045; }
@@ -31,13 +31,29 @@
 .active-contract-date-end { color: #a9232e; }
 .active-contracts-card .contracts-excel-button { height: 38px; padding: 0 14px; border-color: #7bc5a2; border-radius: 7px; color: #147a49; background: #edf9f1; font-size: 12px; font-weight: 800; box-shadow: none; }
 .active-contracts-card .contracts-excel-button:hover { border-color: #16834f!important; color: #fff!important; background: #16834f!important; }
-.cancelled-contract-payments { display: grid; width: min(100% - 40px, 520px); grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; margin: 0 20px 18px auto; padding: 12px 16px; background: #fff8f7; border: 1px solid #efcfcc; border-radius: 10px; }
+.cancelled-contract-payments { display: grid; width: min(100% - 40px, 860px); grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; margin: 0 20px 18px auto; padding: 12px 16px; background: #fff8f7; border: 1px solid #efcfcc; border-radius: 10px; }
+.cancelled-contract-payments > .cancelled-report-controls { display: flex; grid-column: 1 / -1; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.cancelled-report-controls .ant-picker { width: 150px; max-width: 100%; }
 .cancelled-contract-payments > div { display: grid; gap: 3px; }
-.cancelled-contract-payments span { color: #8f4242; font-size: 12px; font-weight: 800; }
-.cancelled-contract-payments small { color: #9b7a77; font-size: 10px; }
-.cancelled-future-periods { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.cancelled-contract-payments > div:not(.cancelled-report-controls):not(.cancelled-future-periods) { gap: 6px; }
+.cancelled-contract-payments span { color: #8f4242; font-size: 14px; font-weight: 800; line-height: 1.5; }
+.cancelled-contract-payments small { color: #88635f; font-size: 12px; line-height: 1.6; }
+.cancelled-contract-payments > .cancelled-future-periods { display: grid; gap: 6px; }
+.cancelled-period-amount { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: #fff; border: 1px solid #f0dcda; border-radius: 7px; }
+.cancelled-period-amount b { color: #9b4141; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cancelled-contract-payments .cancelled-period-amount time { padding: 0; border: 0; }
 .cancelled-contract-payments time { padding: 5px 8px; color: #816b69; background: #fff; border: 1px solid #f0dcda; border-radius: 7px; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .cancelled-contract-payments strong { color: #9b4141; font-size: 18px; white-space: nowrap; }
+.active-contracts-summary.active-contracts-finance { display: flex; flex-wrap: wrap; align-items: stretch; gap: 14px; }
+.active-contracts-finance > article.amount { flex: 1 1 0; min-width: 0; }
+.active-contracts-finance > .cancelled-contract-payments { flex: 1 1 0; min-width: 0; max-width: 100%; width: auto; margin: 0; }
+.cancelled-report-controls .ant-segmented-item-selected,
+.cancelled-report-controls .ant-segmented-thumb { color: #fff; background: #a63f3f; }
+.cancelled-report-controls .ant-segmented-item-selected .ant-segmented-item-label { color: #fff; }
+@media (max-width: 1100px) {
+  .active-contracts-finance > article.amount,
+  .active-contracts-finance > .cancelled-contract-payments { flex-basis: 100%; }
+}
 
 @media (width > 800px) {
   .active-contracts-card .student-history-table :is(th, td) { padding: 7px 8px; }

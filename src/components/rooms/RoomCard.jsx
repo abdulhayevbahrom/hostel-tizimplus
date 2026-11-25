@@ -5,7 +5,7 @@ export function RoomCard({ room, deleting, onResidents, onView, onEdit, onDelete
   const capacity = Math.max(0, Number(room.capacity) || 0)
   const recordedOccupiedCount = room.occupiedCount ?? room.residents?.length
   const occupiedCount = Math.min(capacity, Math.max(0, Number(recordedOccupiedCount) || 0))
-  const availableCount = capacity - occupiedCount
+  const availableCount = room.beds ? room.beds.filter((bed) => bed.available).length : capacity - occupiedCount
   const displayedStatus = room.status === 'maintenance' ? optionLabel(statusOptions, room.status) : occupiedCount ? `${occupiedCount} ta band` : 'Bo‘sh'
   const displayedStatusClass = room.status === 'maintenance' ? room.status : occupiedCount ? 'occupied' : 'available'
 
@@ -21,9 +21,10 @@ export function RoomCard({ room, deleting, onResidents, onView, onEdit, onDelete
           <span>Sig‘imi:</span>
           <strong className="room-capacity">
             <span title="Jami / bo‘sh o‘rinlar">{capacity} / {availableCount}</span>
-            <span className="room-bed-dots" aria-label={`${occupiedCount} ta band, ${availableCount} ta bo‘sh joy`}>
+            <span className="room-bed-dots room-bed-numbers" aria-label={`${occupiedCount} ta band, ${availableCount} ta bo‘sh joy`}>
               {Array.from({ length: capacity }, (_, index) => (
-                <i key={index} className={index < occupiedCount ? 'room-bed-dot occupied' : 'room-bed-dot available'} />
+                <i key={index} className={room.beds?.[index]?.occupied ?? index < occupiedCount ? 'room-bed-number occupied' : 'room-bed-number available'}
+                  title={`${index + 1}-o‘rin: ${room.beds?.[index]?.occupied ?? index < occupiedCount ? 'band' : 'bo‘sh'}`}>{index + 1}</i>
               ))}
             </span>
           </strong>

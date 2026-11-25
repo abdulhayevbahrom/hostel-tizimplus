@@ -1,5 +1,5 @@
 import { useDeferredValue, useMemo, useState } from "react";
-import { Button, Pagination, Select } from "antd";
+import { Button, DatePicker, Pagination, Segmented, Select } from "antd";
 import { FileExcelOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { Link } from "react-router-dom";
@@ -40,6 +40,8 @@ export function ActiveContractsTab() {
   const [search, setSearch] = useState("");
   const [room, setRoom] = useState();
   const [contractType, setContractType] = useState();
+  const [cancelledView, setCancelledView] = useState('month');
+  const [cancelledPeriod, setCancelledPeriod] = useState(() => dayjs());
   const [previewContract, setPreviewContract] = useState(null);
   const [editingContract, setEditingContract] = useState(null);
   const [formError, setFormError] = useState("");
@@ -47,6 +49,8 @@ export function ActiveContractsTab() {
   const { data, isLoading, isFetching, error } =
     useGetActiveStudentContractsQuery({
       page,
+      cancelledView,
+      cancelledPeriod: cancelledPeriod.format(cancelledView === 'year' ? 'YYYY' : 'YYYY-MM'),
       ...(deferredSearch ? { search: deferredSearch } : {}),
       ...(room ? { room } : {}),
       ...(contractType ? { contractType } : {}),
@@ -204,6 +208,10 @@ export function ActiveContractsTab() {
             <span>Bekor qilingan</span>
             <strong>{summary.cancelled} ta</strong>
           </article>
+        </div>
+      )}
+      {!isLoading && (
+        <div className="active-contracts-summary active-contracts-finance">
           <article className="amount">
             <span>Joriy oy summasi</span>
             <strong>{amountNumber(summary.amount)}</strong>
@@ -222,24 +230,32 @@ export function ActiveContractsTab() {
               </div>
             </div>
           </article>
-        </div>
-      )}
-      {!isLoading && (
-        <section className="cancelled-contract-payments">
+        <section className="cancelled-contract-payments" aria-busy={isFetching}>
+          <div className="cancelled-report-controls">
+            <Segmented size="small" value={cancelledView} onChange={setCancelledView} aria-label="Bekor qilingan shartnomalar hisobining davri"
+              options={[{ label: 'Oylik', value: 'month' }, { label: 'Yillik', value: 'year' }]} />
+            <DatePicker picker={cancelledView === 'year' ? 'year' : 'month'} value={cancelledPeriod} allowClear={false}
+              format={cancelledView === 'year' ? 'YYYY' : 'MM.YYYY'} onChange={(value) => value && setCancelledPeriod(value)}
+              aria-label="Bekor qilingan shartnomalar hisobining oyi yoki yili" />
+          </div>
           <div>
-            <span>Joriy oyda bekor qilingan shartnomalardan</span>
-            <small>Kelgusi oylar uchun oldindan to‘langan jami summa</small>
+            <span>{cancelledView === 'year' ? 'Tanlangan yilda' : 'Tanlangan oyda'} bekor qilingan shartnomalardan</span>
+            <small>Bekor qilingan oydan keyingi oylar uchun oldindan to‘langan jami summa</small>
           </div>
           <div className="cancelled-future-periods">
-            {(summary.cancelledFuturePaidByPeriod || []).map((row) => (
-              <time key={row.period} title={amountNumber(row.amount)}>
-                {dayjs(`${row.period}-01`).format("MM.YYYY")}
-              </time>
+            {(!isFetching ? summary.cancelledFuturePaidByPeriod || [] : []).map((row) => (
+              <div className="cancelled-period-amount" key={row.period}>
+                <time dateTime={row.period}>{dayjs(`${row.period}-01`).format("MM.YYYY")}</time>
+                <b>{money(row.amount)}</b>
+              </div>
             ))}
-            {!summary.cancelledFuturePaidByPeriod?.length && <time>—</time>}
+            {!isFetching && !summary.cancelledFuturePaidByPeriod?.length && <time>—</time>}
           </div>
-          <strong>{amountNumber(summary.cancelledFuturePaidAmount)}</strong>
+          <strong aria-live="polite" aria-label={`Jami: ${money(summary.cancelledFuturePaidAmount)}`}>
+            {isFetching ? '…' : amountNumber(summary.cancelledFuturePaidAmount)}
+          </strong>
         </section>
+        </div>
       )}
       {!isLoading && (
         <div className="student-history-result-count" aria-live="polite">
@@ -320,7 +336,7 @@ export function ActiveContractsTab() {
                     <strong>
                       {contract.room.block} · {contract.room.roomNumber}-xona
                     </strong>
-                    <small>{contract.room.floor}-qavat</small>
+                    <small>{contract.room.floor}-qavat{contract.bedNumber ? ` · ${contract.bedNumber}-o‘rin` : ''}</small>
                   </td>
                   <td data-label="Shartnoma">
                     <strong>{contract.contractNumber}</strong>
@@ -422,7 +438,7 @@ export function ActiveContractsTab() {
         organization={settingsData?.settings}
         onClose={() => setPreviewContract(null)}
       />
-      <ContractFormModal
+      <ContractFormModal studentGender={editingContract?.student?.gender}
         open={Boolean(editingContract)}
         contract={editingContract}
         rooms={editRooms}

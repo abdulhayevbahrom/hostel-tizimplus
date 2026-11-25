@@ -13,6 +13,7 @@ import {
   ShoppingCartOutlined,
   TeamOutlined,
   UserSwitchOutlined,
+  UserAddOutlined,
   WalletOutlined,
   FormOutlined,
   MessageOutlined,
@@ -22,6 +23,7 @@ export function SidebarIcon({ name }) {
   const icons = {
     home: HomeOutlined,
     students: TeamOutlined,
+    'student-add': UserAddOutlined,
     contracts: FileTextOutlined,
     rooms: ApartmentOutlined,
     attendance: CalendarOutlined,

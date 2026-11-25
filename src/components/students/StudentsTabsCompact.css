@@ -1,4 +1,7 @@
 .students-module {
+  min-width: 0;
+  max-width: 100%;
+  grid-template-columns: minmax(0, 1fr);
   margin-top: calc(clamp(10px, 2vw, 18px) * -1 + 4px);
 }
 

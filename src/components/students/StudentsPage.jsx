@@ -1,11 +1,10 @@
 import { useDeferredValue, useMemo, useState } from "react";
-import { Modal, Pagination, Popconfirm, Select } from "antd";
-import { Link } from "react-router-dom";
+import { ConfigProvider, DatePicker, Modal, Pagination, Popconfirm, Select } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import {
   apiErrorMessage,
-  useCreateStudentMutation,
   useDeleteStudentMutation,
   useGetFacultiesQuery,
   useGetRoomsQuery,
@@ -77,7 +76,15 @@ const isContractExpiringWithinTwoDays = (endDate) => {
   return daysLeft >= 0 && daysLeft <= 2;
 };
 
+function ContractDateFilter({ value, onChange }) {
+  return <div className="students-contract-date-filter">
+    <DatePicker.RangePicker value={value} onChange={onChange} format="DD.MM.YYYY" allowClear
+      placeholder={["Boshlanish sanasi", "Tugash sanasi"]} aria-label="Shartnoma tuzilgan sana oralig‘i" />
+  </div>;
+}
+
 function StudentsListTab() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [universityFilter, setUniversityFilter] = useState(undefined);
@@ -88,6 +95,11 @@ function StudentsListTab() {
   const [roomFilter, setRoomFilter] = useState(undefined);
   const [statusFilter, setStatusFilter] = useState(undefined);
   const [paymentFilter, setPaymentFilter] = useState(undefined);
+  const [contractDateRange, setContractDateRange] = useState(null);
+  const updateContractDateRange = (value) => {
+    setContractDateRange(value);
+    setPage(1);
+  };
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const deferredQuery = useDeferredValue(query.trim());
   const {
@@ -106,11 +118,12 @@ function StudentsListTab() {
     room: roomFilter,
     studentStatus: statusFilter,
     paymentStatus: paymentFilter,
+    contractCreatedFrom: contractDateRange?.[0]?.format("YYYY-MM-DD"),
+    contractCreatedTo: contractDateRange?.[1]?.format("YYYY-MM-DD"),
   }, { refetchOnMountOrArgChange: true });
   const { data: universityData } = useGetUniversitiesQuery();
   const { data: facultyData } = useGetFacultiesQuery();
   const { data: roomData } = useGetRoomsQuery();
-  const [createStudent, { isLoading: creating }] = useCreateStudentMutation();
   const [updateStudent, { isLoading: updating }] = useUpdateStudentMutation();
   const [deleteStudent, { isLoading: deleting }] = useDeleteStudentMutation();
   const [modalOpen, setModalOpen] = useState(false);
@@ -159,9 +172,8 @@ function StudentsListTab() {
       body.append("payload", JSON.stringify({ ...values, removePhoto }));
       if (photoFiles[0]?.originFileObj)
         body.append("photo", photoFiles[0].originFileObj);
-      if (editing) await updateStudent({ id: editing.id, body }).unwrap();
-      else await createStudent(body).unwrap();
-      toast.success(editing ? "Talaba yangilandi" : "Talaba qo‘shildi");
+      await updateStudent({ id: editing.id, body }).unwrap();
+      toast.success("Talaba yangilandi");
       close();
     } catch (requestError) {
       const message = apiErrorMessage(requestError);
@@ -179,6 +191,7 @@ function StudentsListTab() {
   };
 
   return (
+    <ConfigProvider theme={{ token: { colorBorder: "#8ca6ad", colorText: "#263b45", colorTextPlaceholder: "#5e7580", colorBgContainer: "#f8fbfc", colorPrimary: "#0f766e" } }}>
     <div className="students-page">
       <div className="students-card">
         <div className="students-toolbar">
@@ -202,16 +215,10 @@ function StudentsListTab() {
                   <path d="M4 7h16M7 12h10M10 17h4" />
                 </svg>
               </button>
+              <ContractDateFilter value={contractDateRange} onChange={updateContractDateRange} />
+              <button type="button" className="students-create-button" onClick={() => navigate('/students/new')}>+ Yangi talaba</button>
             </div>
             <div className="students-toolbar-filters">
-              <input
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setPage(1);
-                }}
-                placeholder="F.I.O, telefon, JSHR yoki pasport"
-              />
               <Select
                 allowClear
                 showSearch
@@ -307,15 +314,7 @@ function StudentsListTab() {
                   setPage(1);
                 }}
               />
-              <button onClick={() => setModalOpen(true)}>+ Yangi talaba</button>
             </div>
-            <button
-              type="button"
-              className="students-mobile-create"
-              onClick={() => setModalOpen(true)}
-            >
-              + Yangi talaba
-            </button>
           </div>
         </div>
         {listError && (
@@ -388,7 +387,7 @@ function StudentsListTab() {
                         <td className="student-room-cell" data-label="Xona">
                           {room ? (
                             <div className="student-room">
-                              <strong>{room.roomNumber}-xona</strong>
+                              <strong>{room.roomNumber}-xona{student.activeBedNumber ? ` · ${student.activeBedNumber}-o‘rin` : ''}</strong>
                               {roomDetails && (
                                 <small title={roomDetails}>{roomDetails}</small>
                               )}
@@ -547,7 +546,7 @@ function StudentsListTab() {
       <StudentFormModal
         open={modalOpen}
         student={editing}
-        loading={creating || updating}
+        loading={updating}
         error={error}
         onClose={close}
         onSubmit={submit}
@@ -560,6 +559,7 @@ function StudentsListTab() {
         className="students-filters-modal"
       >
         <div className="students-filters-modal-body">
+          <ContractDateFilter value={contractDateRange} onChange={updateContractDateRange} />
           <Select
             allowClear
             showSearch
@@ -658,6 +658,7 @@ function StudentsListTab() {
         </div>
       </Modal>
     </div>
+    </ConfigProvider>
   );
 }
 

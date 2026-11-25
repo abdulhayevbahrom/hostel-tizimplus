@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Modal } from 'antd'
 import { EyeOutlined, EnvironmentOutlined } from '@ant-design/icons'
 import { actionLabels, entityLabels } from './auditLabels'
+import { paymentAuditChanges } from '../../utils/paymentAudit'
+import { deadlineAuditChanges } from '../../utils/deadlineAudit'
 
 const dateTime = (value) => {
   if (!value) return '—'
@@ -29,11 +31,11 @@ function Location({ log }) {
     : <span>{label}</span>
 }
 
-const ignoredFields = new Set(['_id', 'id', '__v', 'createdAt', 'updatedAt', 'spentAt', 'createdBy', 'updatedBy', 'deletedAt', 'deletedBy', 'isDeleted', 'studentId', 'expenseId', 'paymentId', 'fineId', 'employeeId', 'roomId', 'universityId', 'facultyId', 'blockId', 'auditHistory', 'cashSession'])
+const ignoredFields = new Set(['_id', 'id', '__v', 'bookingVersion', 'createdAt', 'updatedAt', 'spentAt', 'createdBy', 'updatedBy', 'deletedAt', 'deletedBy', 'isDeleted', 'studentId', 'expenseId', 'paymentId', 'fineId', 'employeeId', 'roomId', 'universityId', 'facultyId', 'blockId', 'auditHistory', 'cashSession'])
 const fieldLabels = {
   title: 'Nomi', category: 'Kategoriya', amount: 'Summa', paymentType: 'To‘lov turi', note: 'Izoh',
   fullName: 'F.I.Sh.', firstname: 'Ism', lastname: 'Familiya', phone: 'Telefon', parentPhone: 'Ota-ona telefoni',
-  address: 'Manzil', course: 'Kurs', status: 'Holati', studentStatus: 'Talaba holati', room: 'Xona',
+  address: 'Manzil', course: 'Kurs', status: 'Holati', studentStatus: 'Talaba holati', room: 'Xona', bedNumber: 'O‘rin raqami',
   university: 'Universitet', faculty: 'Fakultet', student: 'Talaba', contract: 'Shartnoma',
   paymentPurpose: 'To‘lov maqsadi', paymentMethod: 'To‘lov usuli', method: 'To‘lov usuli', contractAmount: 'Shartnoma summasi',
   depositAmount: 'Depozit summasi', hostelName: 'Yotoqxona nomi', login: 'Login', role: 'Lavozim turi',
@@ -45,6 +47,20 @@ const fieldLabels = {
   receivedBy: 'Qabul qilgan xodim', startDate: 'Boshlanish sanasi', endDate: 'Tugash sanasi',
   durationDays: 'Davomiyligi (kun)', billingQuantity: 'Hisoblash miqdori', action: 'Amal',
   performedBy: 'Bajargan xodim', performedAt: 'Bajarilgan vaqt', before: 'Oldingi holat', after: 'Yangi holat',
+  depositEnabled: 'Depozit qo‘llaniladi', educationType: 'Ta’lim shakli', gender: 'Jinsi',
+  hasTemporaryRegistration: 'Vaqtinchalik ro‘yxatga olingan', temporaryRegistrationMonths: 'Ro‘yxat muddati (oy)',
+  hasTaxContract: 'Soliq shartnomasi mavjud', taxContractType: 'Soliq shartnomasi turi',
+  disciplinaryStatus: 'Intizomiy holati', disciplinaryNote: 'Intizomiy izoh', disabilityStatus: 'Nogironlik holati',
+  jshr: 'JShShIR', passportSeries: 'Pasport seriyasi', passportNumber: 'Pasport raqami', photo: 'Surat',
+  capacity: 'O‘rinlar soni', images: 'Xona rasmlari', name: 'Nomi', shortName: 'Qisqa nomi',
+  reason: 'Sabab', issuedBy: 'Belgilagan xodim', employee: 'Xodim', salary: 'Oylik maoshi',
+  payrollStartMonth: 'Maosh hisoblash boshlangan oy', payrollOpeningBalance: 'Maosh boshlang‘ich qoldig‘i',
+  sections: 'Ruxsat etilgan bo‘limlar', assignedRooms: 'Biriktirilgan xonalar',
+  period: 'Davr', setBy: 'Belgilagan xodim', paymentDate: 'To‘lov sanasi', paymentPeriod: 'To‘lov oyi',
+  organizationPhone: 'Tashkilot telefoni', organizationAddress: 'Tashkilot manzili', logo: 'Logotip',
+  receiptThankYou: 'Chekdagi minnatdorchilik matni', vacantBedDailyRate: 'Bo‘sh o‘rin uchun kunlik narx',
+  cashier: 'Kassir', expectedAmount: 'Kutilgan summa', receivedAmount: 'Qabul qilingan summa', paymentCount: 'To‘lovlar soni',
+  breakdown: 'To‘lovlar tarkibi', reviewNote: 'Tekshiruv izohi', reviewedBy: 'Tekshirgan xodim',
 }
 
 const valueLabels = {
@@ -53,6 +69,12 @@ const valueLabels = {
   monthly: 'Oylik', daily: 'Kunlik', active: 'Faol', completed: 'Yakunlangan', cancelled: 'Bekor qilingan',
   paid: 'To‘langan', partial: 'Qisman to‘langan', unpaid: 'To‘lanmagan', created: 'Yaratilgan',
   updated: 'O‘zgartirilgan', owner: 'Rahbar', manager: 'Menejer',
+  admin: 'Administrator', employee: 'Xodim', cashier: 'Kassir', click: 'Click',
+  male: 'Erkak', female: 'Ayol', daytime: 'Kunduzgi', evening: 'Kechki', extramural: 'Sirtqi', employed: 'Ishlovchi',
+  green: 'Yaxshi', warning: 'Ogohlantirish', red: 'Xavfli', clear: 'Muammo yo‘q', monitoring: 'Nazoratda', blacklisted: 'Qora ro‘yxatda',
+  none: 'Yo‘q', has_disability: 'Nogironligi bor', student_contract: 'Talaba shartnomasi', standard_contract: 'Standart shartnoma',
+  available: 'Foydalanishda', maintenance: 'Ta’mirda', standart: 'Standart', komfort: 'Komfort', premium: 'Premium', maxsus: 'Maxsus',
+  open: 'Ochiq', pending: 'Kutilmoqda', approved: 'Tasdiqlangan', rejected: 'Rad etilgan',
 }
 
 const contextualValueLabels = {
@@ -74,6 +96,9 @@ const valueText = (value, key = '') => {
   }
   if (contextualValueLabels[key]?.[value]) return contextualValueLabels[key][value]
   if (valueLabels[value]) return valueLabels[value]
+  if (['startDate', 'endDate', 'dueDate', 'deadline', 'date'].includes(key) && !Number.isNaN(new Date(value).getTime())) {
+    return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Tashkent', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(value)).replaceAll('/', '.')
+  }
   if (/Date$|At$/.test(key) && !Number.isNaN(new Date(value).getTime())) return dateTime(value)
   if (['amount', 'totalAmount', 'paymentAmount', 'contractAmount', 'depositAmount', 'paidAmount'].includes(key) && Number.isFinite(Number(value))) return `${Number(value).toLocaleString('uz-UZ')} so‘m`
   return String(value)
@@ -102,6 +127,8 @@ const unwrapAuditValue = (log, value) => {
 const auditChanges = (log) => {
   const oldData = unwrapAuditValue(log, log.oldValue)
   const newData = unwrapAuditValue(log, log.newValue)
+  if (log.entityType === 'payment' && log.action === 'update') return paymentAuditChanges(oldData, newData)
+  if (log.entityType === 'debtor-deadline') return deadlineAuditChanges(oldData, newData)
   return [...new Set([...Object.keys(oldData), ...Object.keys(newData)])]
     .filter((key) => !ignoredFields.has(key))
     .filter((key) => !valuesEqual(oldData[key], newData[key]))
@@ -117,7 +144,7 @@ const auditSummary = (log) => {
   }
   const changes = auditChanges(log)
   if (!changes.length) return log.description
-  const details = changes.slice(0, 2).map(({ key, before, after }) => `${fieldLabels[key] || key}: ${before} → ${after}`).join('; ')
+  const details = changes.slice(0, 2).map(({ key, label, before, after }) => `${label || fieldLabels[key] || 'Qo‘shimcha ma’lumot'}: ${before} → ${after}`).join('; ')
   return `${details}${changes.length > 2 ? `; yana ${changes.length - 2} ta o‘zgarish` : ''}`
 }
 
@@ -126,12 +153,12 @@ function Changes({ log }) {
   if (log.action === 'delete') {
     const deletedFields = Object.keys(oldData).filter((key) => !ignoredFields.has(key)).map((key) => ({ key, value: valueText(oldData[key], key) })).filter(({ value }) => value !== '—')
     if (!deletedFields.length) return <div className="audit-no-changes">O‘chirilgan ma’lumot tafsiloti mavjud emas</div>
-    return <section className="audit-deleted"><h4>O‘chirilgan ma’lumot</h4><div>{deletedFields.map(({ key, value }) => <div className="audit-deleted-row" key={key}><span>{fieldLabels[key] || key}</span><strong>{value}</strong></div>)}</div></section>
+    return <section className="audit-deleted"><h4>O‘chirilgan ma’lumot</h4><div>{deletedFields.map(({ key, value }) => <div className="audit-deleted-row" key={key}><span>{fieldLabels[key] || 'Qo‘shimcha ma’lumot'}</span><strong>{value}</strong></div>)}</div></section>
   }
   const changes = auditChanges(log)
   if (!changes.length) return <div className="audit-no-changes">Ko‘rsatiladigan ma’lumot o‘zgarishi yo‘q</div>
-  return <div className="audit-changes">{changes.map(({ key, before, after }) => <div className="audit-change" key={key}>
-    <span className="audit-change-label">{fieldLabels[key] || key}</span>
+  return <div className="audit-changes">{changes.map(({ key, label, before, after }) => <div className="audit-change" key={key}>
+    <span className="audit-change-label">{label || fieldLabels[key] || 'Qo‘shimcha ma’lumot'}</span>
     <div><strong className="audit-before">{before}</strong><span className="audit-arrow">→</span><strong className="audit-after">{after}</strong></div>
   </div>)}</div>
 }

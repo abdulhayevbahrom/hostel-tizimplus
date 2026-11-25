@@ -18,8 +18,19 @@
 .advance-modal-summary span,.advance-modal-summary small { color: #607a80; }
 .advance-modal-summary strong { color: #08786c; font-size: 18px; }
 .advance-modal-summary small { margin-left: auto; }
-.advance-payment-modal .ant-modal-content { max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px); overflow: hidden; }
-.advance-payment-modal .ant-modal-body { min-height: 0; overflow: hidden; }
+.payment-audit-changes { display: grid; gap: 8px; margin: 10px 0; }
+.payment-audit-changes > div { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 7px; font-size: 12px; }
+.payment-audit-changes b { grid-column: 1 / -1; color: #455c64; }
+.payment-audit-before, .payment-audit-after { padding: 7px 9px; border-radius: 6px; overflow-wrap: anywhere; }
+.payment-audit-before { color: #991b1b; background: #fee2e2; }
+.payment-audit-after { color: #166534; background: #dcfce7; }
+.advance-payment-modal .ant-modal-content { display: flex; flex-direction: column; max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px); overflow: hidden; }
+.advance-payment-modal .ant-modal-header { flex-shrink: 0; }
+.advance-payment-modal .ant-modal-body { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.advance-modal-summary, .advance-modal-search { flex-shrink: 0; }
+.advance-modal-search { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 12px; }
+.advance-modal-search .ant-input-affix-wrapper { flex: 1; min-width: 0; }
+.advance-modal-search > span { color: #607a80; font-size: 12px; white-space: nowrap; }
 .advance-payment-modal .payment-table-wrap { max-height: min(56vh, 520px); max-height: min(56dvh, 520px); overflow: auto; border: 1px solid #e1ebec; border-radius: 8px; }
 .advance-payment-modal .advance-detail-table th { position: sticky; top: 0; z-index: 1; padding: 5px 10px; font-size: 10px; }
 .advance-payment-modal .advance-detail-table td { padding: 4px 10px; font-size: 11px; }
@@ -30,6 +41,7 @@
 .advance-payment-modal .advance-detail-table tbody tr:nth-child(odd) td { background: #f1f8f7; }
 .advance-payment-modal .advance-detail-table tbody tr:nth-child(even),
 .advance-payment-modal .advance-detail-table tbody tr:nth-child(even) td { background: #fff; }
+@media(max-width:768px){.advance-payment-modal .ant-modal-body{flex:1}.advance-modal-search{align-items:stretch;flex-direction:column;margin-bottom:8px}.advance-payment-modal .ant-modal-body .payment-table-wrap{flex:1;min-height:0;max-height:none}}
 .payment-stats { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; }
 .payment-stat { display: flex; min-height: 94px; justify-content: center; flex-direction: column; padding: 18px 20px; background: linear-gradient(135deg,#dff7f2,#c9eee7); border: 1px solid #a9ddd4; border-radius: 13px; box-shadow: 0 6px 17px rgba(22,72,83,.08); }
 .payment-stat.month { background: linear-gradient(135deg,#e4edff,#cfddfa); border-color:#b9ccef }.payment-stat.today { background:linear-gradient(135deg,#fff3d6,#f8dfac);border-color:#efd194}.payment-stat.debt { background:linear-gradient(135deg,#ffe8e6,#f8cbc8);border-color:#efb6b2 }

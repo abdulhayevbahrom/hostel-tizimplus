@@ -27,7 +27,8 @@ import {
 import { PaymentPrintIcon } from "./PaymentReceiptModal";
 import { printPaymentReceipt } from "./paymentReceipt";
 import { AdvancePaymentsTab } from "./AdvancePaymentsTab";
-import { breakdownTotal, effectivePaymentParts, paymentBreakdown, paymentMethods, paymentMethodsText } from "../../utils/paymentParts";
+import { paymentAuditChanges } from "../../utils/paymentAudit";
+import { breakdownTotal, effectivePaymentParts, paymentBreakdown, paymentMethods } from "../../utils/paymentParts";
 import "./Payments.css";
 
 const methods = paymentMethods;
@@ -117,6 +118,7 @@ export function PaymentsPage({ currentEmployee }) {
     setOpen(true);
   };
   const openEdit = (payment) => {
+    form.resetFields();
     setEditingPayment(payment);
     form.setFieldsValue({
       contract: payment.contract?.id,
@@ -405,7 +407,7 @@ export function PaymentsPage({ currentEmployee }) {
         )}
       </section>
 
-      </> : <AdvancePaymentsTab />}
+      </> : <AdvancePaymentsTab canEdit={isOwner} onEdit={openEdit} onCancelPayment={remove} cancelling={deleting} />}
 
       <Modal open={filtersOpen} onCancel={() => setFiltersOpen(false)} footer={null} title="Filterlar" rootClassName="payment-filters-modal" destroyOnHidden>
         <div className="payment-filter-modal-options">
@@ -426,7 +428,15 @@ export function PaymentsPage({ currentEmployee }) {
               <div>
                 <strong>{actionNames[entry.action] || entry.action}</strong>
                 <p>{employeeName(entry.performedBy)}</p>
-                {entry.action === "updated" && <small>{money(entry.before?.amount)} → {money(entry.after?.amount)} · {paymentMethodsText(entry.before)} → {paymentMethodsText(entry.after)}</small>}
+                {entry.action === "updated" && <div className="payment-audit-changes">
+                  {paymentAuditChanges(entry.before, entry.after).map((change) => <div key={change.key}>
+                    <b>{change.label}</b>
+                    <span className="payment-audit-before">{change.before}</span>
+                    <span aria-hidden="true">→</span>
+                    <span className="payment-audit-after">{change.after}</span>
+                  </div>)}
+                  {!paymentAuditChanges(entry.before, entry.after).length && <small>To‘lov qayta saqlangan; asosiy ma’lumotlar o‘zgarmagan.</small>}
+                </div>}
                 {entry.action === "cancelled" && <small>Bekor qilingan summa: {money(entry.before?.amount)}</small>}
                 <time>{dayjs(entry.performedAt || historyPayment?.createdAt).format("DD.MM.YYYY HH:mm")}</time>
               </div>

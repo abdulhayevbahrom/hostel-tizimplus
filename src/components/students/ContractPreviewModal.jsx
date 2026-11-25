@@ -151,7 +151,7 @@ export const ContractDocument = forwardRef(function ContractDocument(
             <p>Tel: {student.phone}</p>
             <p>Pasport: {formatPassport(student)}</p>
             <p>JSHSHIR: {student.jshr || "—"}</p>
-            <p>Xona: {formatRoomInfo(contract.room)}</p>
+            <p>Xona: {formatRoomInfo(contract.room)}{contract.bedNumber ? ` · ${contract.bedNumber}-o‘rin` : ''}</p>
             <p>
               Muddat: {formatDate(contract.startDate)} —{" "}
               {formatDate(contract.endDate)}

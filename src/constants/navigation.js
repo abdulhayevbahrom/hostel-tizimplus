@@ -1,6 +1,7 @@
 export const navigationItems = [
   { id: 'dashboard', path: '/', icon: 'home', label: 'Bosh sahifa' },
   { id: 'students', path: '/students', icon: 'students', label: 'Talabalar' },
+  { id: 'student-admission', section: 'students', path: '/students/new', icon: 'student-add', label: 'Talaba qabul qilish' },
   { id: 'contracts', path: '/contracts', icon: 'contracts', label: 'Shartnomalar' },
   { id: 'rooms', path: '/rooms', icon: 'rooms', label: 'Xonalar' },
   { id: 'attendance', path: '/attendance', icon: 'attendance', label: 'Davomat' },
