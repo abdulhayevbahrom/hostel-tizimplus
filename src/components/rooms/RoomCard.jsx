@@ -6,8 +6,9 @@ export function RoomCard({ room, deleting, onResidents, onView, onEdit, onDelete
   const recordedOccupiedCount = room.occupiedCount ?? room.residents?.length
   const occupiedCount = Math.min(capacity, Math.max(0, Number(recordedOccupiedCount) || 0))
   const availableCount = room.beds ? room.beds.filter((bed) => bed.available).length : capacity - occupiedCount
-  const displayedStatus = room.status === 'maintenance' ? optionLabel(statusOptions, room.status) : occupiedCount ? `${occupiedCount} ta band` : 'Bo‘sh'
-  const displayedStatusClass = room.status === 'maintenance' ? room.status : occupiedCount ? 'occupied' : 'available'
+  const allocationError = room.bedAllocationError
+  const displayedStatus = allocationError ? 'Tekshirish kerak' : room.status === 'maintenance' ? optionLabel(statusOptions, room.status) : occupiedCount ? `${occupiedCount} ta band` : 'Bo‘sh'
+  const displayedStatusClass = allocationError ? 'warning' : room.status === 'maintenance' ? room.status : occupiedCount ? 'occupied' : 'available'
 
   return (
     <article className={`room-card room-card-${room.status}`}>
@@ -19,19 +20,22 @@ export function RoomCard({ room, deleting, onResidents, onView, onEdit, onDelete
         <div><span>Qavat:</span><strong>{room.floor}</strong></div>
         <div>
           <span>Sig‘imi:</span>
-          <strong className="room-capacity">
-            <span title="Jami / bo‘sh o‘rinlar">{capacity} / {availableCount}</span>
-            <span className="room-bed-dots room-bed-numbers" aria-label={`${occupiedCount} ta band, ${availableCount} ta bo‘sh joy`}>
-              {Array.from({ length: capacity }, (_, index) => (
-                <i key={index} className={room.beds?.[index]?.occupied ?? index < occupiedCount ? 'room-bed-number occupied' : 'room-bed-number available'}
-                  title={`${index + 1}-o‘rin: ${room.beds?.[index]?.occupied ?? index < occupiedCount ? 'band' : 'bo‘sh'}`}>{index + 1}</i>
-              ))}
-            </span>
-          </strong>
+          <strong className="room-capacity" title="Jami / bo‘sh o‘rinlar">{capacity}/{allocationError ? '—' : availableCount}</strong>
         </div>
         <div><span>Kategoriya:</span><strong>{optionLabel(categoryOptions, room.category)}</strong></div>
         <div><span>Kimlar uchun:</span><strong>{optionLabel(genderOptions, room.gender)}</strong></div>
         <div><span>Blok:</span><strong>{room.block || '—'}</strong></div>
+      </div>
+      {allocationError && <p className="room-allocation-warning" role="status">O‘rinlarni raqamlashda ziddiyat bor. Biriktirilgan talabalar, shartnoma sanalari va xona sig‘imini tekshiring.</p>}
+      <div className="room-card-beds">
+        <div className="room-bed-numbers" role="group" aria-label={allocationError ? 'O‘rinlar bandligini tekshirish kerak' : `${occupiedCount} ta band, ${availableCount} ta bo‘sh joy`}>
+          {Array.from({ length: capacity }, (_, index) => {
+            const occupied = room.beds?.[index]?.occupied ?? index < occupiedCount
+            const state = allocationError ? 'unknown' : occupied ? 'occupied' : 'available'
+            const label = allocationError ? 'tekshirish kerak' : occupied ? 'band' : 'bo‘sh'
+            return <span key={index} className={`room-bed-number ${state}`} title={`${index + 1}-o‘rin: ${label}`} aria-label={`${index + 1}-o‘rin: ${label}`}>{index + 1}</span>
+          })}
+        </div>
       </div>
       <div className="room-card-actions">
         <button className="room-icon-btn residents" onClick={() => onResidents(room)} aria-label="Xonadagi talabalar" title="Xonadagi talabalar"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20v-2.5A4.5 4.5 0 0 1 7 13h2a4.5 4.5 0 0 1 4.5 4.5V20M14 14.5a4 4 0 0 1 7 2.5V20"/></svg></button>
