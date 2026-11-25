@@ -240,7 +240,7 @@ export const baseApi = createApi({
       providesTags: (result) => [{ type: 'Room', id: 'LIST' }, ...(result?.rooms || []).map((room) => ({ type: 'Room', id: room.id }))],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refreshRooms = () => scheduleInvalidate(dispatch, [{ type: 'Room', id: 'LIST' }], 'Room:LIST')
-        const unsubscribe = subscribeSocket(['rooms:changed'], refreshRooms)
+        const unsubscribe = subscribeSocket(['rooms:changed', 'student-contracts:changed', 'students:changed'], refreshRooms)
         await cacheEntryRemoved
         unsubscribe()
       },
@@ -251,7 +251,7 @@ export const baseApi = createApi({
       providesTags: (_result, _error, { roomId }) => [{ type: 'Room', id: roomId }, { type: 'StudentContract', id: 'LIST' }],
       async onCacheEntryAdded({ roomId }, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Room', id: roomId }], `Room:${roomId}:students`)
-        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed'], refresh)
+        const unsubscribe = subscribeSocket(['payments:changed', 'student-contracts:changed', 'students:changed', 'rooms:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
