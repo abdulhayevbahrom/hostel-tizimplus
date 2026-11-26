@@ -1,0 +1,13 @@
+.contract-expiry-filter { display: grid; gap: 5px; min-width: 0; color: #587078; font-size: 12px; }
+.contract-expiry-filter > span { font-weight: 600; }
+.contract-expiry-filter .ant-picker-range { width: 100%; min-width: 0; min-height: 36px; border-color: #8ca6ad; border-radius: 7px; background: #f8fbfc; }
+.students-toolbar-actions > .contract-expiry-filter { flex: 0 1 300px; }
+.students-page .students-toolbar-actions { align-items: flex-end; }
+.active-contracts-card .student-history-tools { flex-wrap: wrap; align-items: flex-end; }
+.active-contracts-card .student-history-tools > div:last-child { flex-wrap: wrap; align-items: flex-end; min-width: 0; }
+.active-contracts-card .contract-expiry-filter .ant-picker-range { width: 300px; max-width: 100%; min-height: 38px; }
+@media (max-width: 800px) {
+  .students-toolbar-actions > .contract-expiry-filter { order: 2; flex-basis: 100%; }
+  .active-contracts-card .student-history-tools > div:last-child { align-items: stretch; }
+  .active-contracts-card .contract-expiry-filter .ant-picker-range { width: 100%; }
+}

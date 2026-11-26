@@ -26,6 +26,9 @@
 .active-contracts-card .student-history-table tr.contract-expiring-soon td { background: #ffe5e3; border-bottom-color: #efb9b5; }
 .active-contracts-card .student-history-table tr.contract-expiring-soon td:first-child { box-shadow: inset 4px 0 #c94d4d; }
 .active-contracts-card .student-history-table tr.contract-expiring-soon:hover td { background: #ffdcd9; }
+.active-contracts-card .student-history-table tr.contract-ending-today td { background: #fff0c2; border-bottom-color: #e1b75d; }
+.active-contracts-card .student-history-table tr.contract-ending-today td:first-child { box-shadow: inset 4px 0 #d99a16; }
+.active-contracts-card .student-history-table tr.contract-ending-today:hover td { background: #ffe5a0; }
 .active-contract-dates { display: grid; gap: 3px; font-weight: 700; white-space: nowrap; }
 .active-contract-date-start { color: #17613c; }
 .active-contract-date-end { color: #a9232e; }
@@ -77,6 +80,7 @@
   .active-contracts-summary .amount strong { font-size: 19px; }
   .active-contracts-card .student-history-table tr.contract-expiring-soon { background: #ffe5e3; border-color: #e9aaa6; }
   .active-contracts-card .student-history-table tr.contract-expiring-soon td:first-child { box-shadow: none; }
+  .active-contracts-card .student-history-table tr.contract-ending-today { background: #fff0c2; border-color: #d99a16; }
   .active-contract-dates { text-align: right; }
   .active-contracts-card .contracts-excel-button { width: 100%; height: 34px; }
   .cancelled-contract-payments { width: auto; grid-template-columns: 1fr auto; gap: 10px; margin: 0 12px 12px; }

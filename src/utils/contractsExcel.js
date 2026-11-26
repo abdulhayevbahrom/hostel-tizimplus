@@ -46,6 +46,7 @@ export async function downloadContractsExcel(contracts, filters = {}) {
     filters.search && `Qidiruv: ${filters.search}`,
     filters.contractType && `Shartnoma turi: ${filters.contractType === 'student_contract' ? 'Talaba SH' : 'Oddiy SH'}`,
     filters.roomLabel && `Xona: ${filters.roomLabel}`,
+    filters.contractEndFrom && filters.contractEndTo && `Tugash sanasi: ${filters.contractEndFrom} – ${filters.contractEndTo}`,
   ].filter(Boolean).join(' · ') || 'Barcha amaldagi shartnomalar'
 
   worksheet.insertRow(2, [filterText])

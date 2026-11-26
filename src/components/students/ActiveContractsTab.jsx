@@ -17,6 +17,8 @@ import { ContractFormModal } from "./ContractFormModal";
 import { ContractPreviewModal } from "./ContractPreviewModal";
 import { ContractDownloadButton } from "./ContractDownloadButton";
 import { ContractPrintButton } from "./ContractPrintButton";
+import { ContractExpiryFilter } from "./ContractExpiryFilter";
+import { isContractEndingToday } from "../../utils/contractExpiry";
 import "./ContractRules.css";
 import "./ActiveContracts.css";
 
@@ -40,6 +42,11 @@ export function ActiveContractsTab() {
   const [search, setSearch] = useState("");
   const [room, setRoom] = useState();
   const [contractType, setContractType] = useState();
+  const [contractEndRange, setContractEndRange] = useState(null);
+  const expiryParams = {
+    ...(contractEndRange?.[0] ? { contractEndFrom: contractEndRange[0].format('YYYY-MM-DD') } : {}),
+    ...(contractEndRange?.[1] ? { contractEndTo: contractEndRange[1].format('YYYY-MM-DD') } : {}),
+  };
   const [cancelledView, setCancelledView] = useState('month');
   const [cancelledPeriod, setCancelledPeriod] = useState(() => dayjs());
   const [previewContract, setPreviewContract] = useState(null);
@@ -49,6 +56,7 @@ export function ActiveContractsTab() {
   const { data, isLoading, isFetching, error } =
     useGetActiveStudentContractsQuery({
       page,
+      ...expiryParams,
       cancelledView,
       cancelledPeriod: cancelledPeriod.format(cancelledView === 'year' ? 'YYYY' : 'YYYY-MM'),
       ...(deferredSearch ? { search: deferredSearch } : {}),
@@ -114,6 +122,7 @@ export function ActiveContractsTab() {
     try {
       const exportData = await loadExport({
         export: 1,
+        ...expiryParams,
         ...(deferredSearch ? { search: deferredSearch } : {}),
         ...(room ? { room } : {}),
         ...(contractType ? { contractType } : {}),
@@ -122,6 +131,8 @@ export function ActiveContractsTab() {
       await downloadContractsExcel(exportData.contracts || [], {
         search: deferredSearch,
         contractType,
+        contractEndFrom: contractEndRange?.[0]?.format('DD.MM.YYYY'),
+        contractEndTo: contractEndRange?.[1]?.format('DD.MM.YYYY'),
         roomLabel: roomLabel
           ? `${roomLabel.block} blok · ${roomLabel.roomNumber}-xona`
           : "",
@@ -187,6 +198,10 @@ export function ActiveContractsTab() {
           >
             Excel
           </Button>
+          <ContractExpiryFilter value={contractEndRange} onChange={(value) => {
+            setContractEndRange(value);
+            setPage(1);
+          }} />
         </div>
       </div>
       {error && <div className="form-error">{apiErrorMessage(error)}</div>}
@@ -260,6 +275,7 @@ export function ActiveContractsTab() {
       {!isLoading && (
         <div className="student-history-result-count" aria-live="polite">
           Jami: <strong>{pagination.total}</strong> ta shartnoma
+          <span> · Muddati eng yaqin shartnomalar avval</span>
         </div>
       )}
       {isLoading ? (
@@ -288,11 +304,10 @@ export function ActiveContractsTab() {
               {(data?.contracts || []).map((contract) => (
                 <tr
                   key={contract.id}
-                  className={
-                    isExpiringWithinTwoDays(contract.endDate)
-                      ? "contract-expiring-soon"
-                      : ""
-                  }
+                  className={[
+                    isExpiringWithinTwoDays(contract.endDate) ? "contract-expiring-soon" : "",
+                    isContractEndingToday(contract.endDate) ? "contract-ending-today" : "",
+                  ].filter(Boolean).join(" ")}
                 >
                   <td data-label="Talaba">
                     <div className="history-person">

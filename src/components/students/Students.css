@@ -32,6 +32,10 @@
 .students-table tbody .student-row-blacklisted td:first-child { border-left: 3px solid #d93645; }
 .students-table tbody .student-row-contract-expiring td, .students-table tbody .student-row-contract-expiring:hover td { background: #ffe5e3; border-bottom-color: #d7918d; }
 .students-table tbody .student-row-contract-expiring td:first-child { border-left: 3px solid #cf4747; }
+.students-table tbody tr.contract-ending-today { background: #fff0c2; border-color: #d99a16; }
+.students-table tbody tr.contract-ending-today td { background: #fff0c2; border-bottom-color: #e1b75d; }
+.students-table tbody tr.contract-ending-today:hover td { background: #ffe5a0; }
+.students-table tbody tr.contract-ending-today td:first-child { border-left: 3px solid #d99a16; }
 .student-person { display: flex; min-width: 175px; align-items: center; gap: 8px; }
 .student-person img, .student-person > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; object-fit: cover; color: #fff; background: #159988; border-radius: 50%; font-weight: 800; }
 .student-person strong, .student-phone strong, .student-education strong { font-weight: 650; }

@@ -14,6 +14,8 @@ import {
 } from "../../store/baseApi";
 import { StudentFormModal } from "./StudentFormModal";
 import { StudentHistoryTab } from "./StudentHistoryTab";
+import { ContractExpiryFilter } from "./ContractExpiryFilter";
+import { isContractEndingToday } from "../../utils/contractExpiry";
 import "./Students.css";
 import "./StudentHistory.css";
 import "./StudentsTabsCompact.css";
@@ -78,6 +80,7 @@ const isContractExpiringWithinTwoDays = (endDate) => {
 
 function ContractDateFilter({ value, onChange }) {
   return <div className="students-contract-date-filter">
+    <span>Shartnoma tuzilgan sana</span>
     <DatePicker.RangePicker value={value} onChange={onChange} format="DD.MM.YYYY" allowClear
       placeholder={["Boshlanish sanasi", "Tugash sanasi"]} aria-label="Shartnoma tuzilgan sana oralig‘i" />
   </div>;
@@ -96,6 +99,11 @@ function StudentsListTab() {
   const [statusFilter, setStatusFilter] = useState(undefined);
   const [paymentFilter, setPaymentFilter] = useState(undefined);
   const [contractDateRange, setContractDateRange] = useState(null);
+  const [contractEndRange, setContractEndRange] = useState(null);
+  const updateContractEndRange = (value) => {
+    setContractEndRange(value);
+    setPage(1);
+  };
   const updateContractDateRange = (value) => {
     setContractDateRange(value);
     setPage(1);
@@ -120,6 +128,8 @@ function StudentsListTab() {
     paymentStatus: paymentFilter,
     contractCreatedFrom: contractDateRange?.[0]?.format("YYYY-MM-DD"),
     contractCreatedTo: contractDateRange?.[1]?.format("YYYY-MM-DD"),
+    contractEndFrom: contractEndRange?.[0]?.format("YYYY-MM-DD"),
+    contractEndTo: contractEndRange?.[1]?.format("YYYY-MM-DD"),
   }, { refetchOnMountOrArgChange: true });
   const { data: universityData } = useGetUniversitiesQuery();
   const { data: facultyData } = useGetFacultiesQuery();
@@ -216,6 +226,7 @@ function StudentsListTab() {
                 </svg>
               </button>
               <ContractDateFilter value={contractDateRange} onChange={updateContractDateRange} />
+              <ContractExpiryFilter value={contractEndRange} onChange={updateContractEndRange} />
               <button type="button" className="students-create-button" onClick={() => navigate('/students/new')}>+ Yangi talaba</button>
             </div>
             <div className="students-toolbar-filters">
@@ -326,6 +337,7 @@ function StudentsListTab() {
           <>
             <div className="students-result-count" aria-live="polite">
               Jami: <strong>{pagination.total}</strong> ta talaba
+              <span> · Shartnoma muddati eng yaqin talabalar avval</span>
             </div>
             <div
               className={`students-table-wrap ${isFetching ? "is-fetching" : ""}`}
@@ -362,6 +374,7 @@ function StudentsListTab() {
                         className={[
                           student.disciplinaryStatus === "blacklisted" ? "student-row-blacklisted" : "",
                           isContractExpiringWithinTwoDays(student.activeContractEndDate) ? "student-row-contract-expiring" : "",
+                          isContractEndingToday(student.activeContractEndDate) ? "contract-ending-today" : "",
                         ].filter(Boolean).join(" ")}
                       >
                         <td className="student-person-cell" data-label="Talaba">
@@ -560,6 +573,7 @@ function StudentsListTab() {
       >
         <div className="students-filters-modal-body">
           <ContractDateFilter value={contractDateRange} onChange={updateContractDateRange} />
+          <ContractExpiryFilter value={contractEndRange} onChange={updateContractEndRange} />
           <Select
             allowClear
             showSearch
