@@ -111,6 +111,7 @@ export function PaymentsPage({ currentEmployee }) {
       paymentPurpose: "contract",
       contract: undefined,
       installment: undefined,
+      depositPeriod: undefined,
       ...paymentDateFields(),
       note: "",
       fundHolder: "cashier",
@@ -124,6 +125,7 @@ export function PaymentsPage({ currentEmployee }) {
       contract: payment.contract?.id,
       paymentPurpose: payment.paymentPurpose || "contract",
       installment: payment.allocations?.[0]?.installment?.id,
+      depositPeriod: payment.depositPeriod || undefined,
       amount: payment.amount,
       breakdown: paymentBreakdown(payment),
       fundHolder: effectivePaymentParts(payment).find((part) => ["card", "online"].includes(part.method))?.fundHolder || "organization",
@@ -139,7 +141,7 @@ export function PaymentsPage({ currentEmployee }) {
           id: editingPayment.id,
           breakdown: values.breakdown,
           fundHolder: values.fundHolder,
-          installment: values.installment,
+          installment: paymentPurpose === "deposit" ? selected?.installments?.find((item) => item.periodKey === values.depositPeriod)?._id : values.installment,
           paymentDate: formatPaymentDate(paymentDate, paymentTime),
           note: values.note,
         }).unwrap();
@@ -147,6 +149,7 @@ export function PaymentsPage({ currentEmployee }) {
       } else {
         const result = await createPayment({
           ...values,
+          installment: paymentPurpose === "deposit" ? selected?.installments?.find((item) => item.periodKey === values.depositPeriod)?._id : values.installment,
           paymentDate: formatPaymentDate(paymentDate, paymentTime),
           student: selected?.student?._id,
           breakdown: values.breakdown,
@@ -313,7 +316,7 @@ export function PaymentsPage({ currentEmployee }) {
                     </td>
                     <td data-label="Oy">
                       <span className="payment-period">
-                        {payment.allocations?.[0]?.installment?.periodKey ||
+                        {payment.depositPeriod || payment.allocations?.[0]?.installment?.periodKey ||
                           "—"}
                       </span>
                     </td>
@@ -479,7 +482,7 @@ export function PaymentsPage({ currentEmployee }) {
               optionFilterProp="label"
               placeholder="Talabani qidiring"
               onChange={() =>
-                form.setFieldsValue({ installment: undefined, amount: null })
+                form.setFieldsValue({ installment: undefined, depositPeriod: undefined, amount: null, breakdown: { cash: null, card: null, online: null, bank: null } })
               }
               options={selectableContracts.map((item) => ({
                 value: item._id,
@@ -487,7 +490,7 @@ export function PaymentsPage({ currentEmployee }) {
               }))}
             />
           </Form.Item>
-          <Form.Item name="paymentPurpose" label="To‘lov maqsadi"><Segmented block disabled={Boolean(editingPayment)} options={[{ value: "contract", label: "Shartnoma to‘lovi" }, { value: "deposit", label: "Deposit", disabled: !editingPayment && Number(selected?.depositBalance || 0) <= 0 }]} onChange={() => form.setFieldsValue({ installment: undefined, breakdown: { cash: null, card: null, online: null, bank: null } })} /></Form.Item>
+          <Form.Item name="paymentPurpose" label="To‘lov maqsadi"><Segmented block disabled={Boolean(editingPayment)} options={[{ value: "contract", label: "Shartnoma to‘lovi" }, { value: "deposit", label: "Deposit", disabled: !editingPayment && Number(selected?.depositBalance || 0) <= 0 }]} onChange={() => form.setFieldsValue({ installment: undefined, depositPeriod: undefined, breakdown: { cash: null, card: null, online: null, bank: null } })} /></Form.Item>
           {paymentPurpose === "contract" && <Form.Item
             name="installment"
             label="Qaysi oy uchun"
@@ -505,6 +508,9 @@ export function PaymentsPage({ currentEmployee }) {
                 };
               })}
             />
+          </Form.Item>}
+          {paymentPurpose === "deposit" && <Form.Item name="depositPeriod" label="Deposit qaysi oy uchun" rules={[{ required: true, message: 'Deposit oyini tanlang' }]}>
+            <Select disabled={!selected} placeholder="Shartnoma oyini tanlang" options={[...new Set(installments.map((item) => item.periodKey))].map((period) => ({ value: period, label: period }))} />
           </Form.Item>}
           {selected && (
             <div className="selected-contract">

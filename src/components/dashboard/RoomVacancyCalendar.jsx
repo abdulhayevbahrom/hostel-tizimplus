@@ -6,6 +6,10 @@ const contractDate = new Intl.DateTimeFormat('ru-RU', {
   timeZone: 'Asia/Tashkent', day: '2-digit', month: '2-digit', year: 'numeric',
 })
 const formatDate = (value) => value ? contractDate.format(new Date(value)) : '—'
+const statusLabels = { active: 'Faol', cancelled: 'Bekor qilingan', completed: 'Yakunlangan' }
+const roomLabel = (room) => [room.block && `${room.block} blok`,
+  room.floor != null && room.floor !== '' && `${room.floor}-qavat`, `${room.roomNumber}-xona`,
+  room.bedNumber && `${room.bedNumber}-o‘rin`].filter(Boolean).join(' · ')
 
 export function RoomVacancyCalendar({ room, summary, period, selectedDate }) {
   const history = new Map((summary.daily || []).map((day) => [day.date,
@@ -30,13 +34,21 @@ export function RoomVacancyCalendar({ room, summary, period, selectedDate }) {
               {occupant?.studentId ? <Tooltip trigger={['hover', 'focus']} title={
                 <div className="vacancy-bed-tooltip">
                   <strong>{occupant.fullName || 'Talaba'}</strong>
+                  <span>Shartnoma holati: <b className={`vacancy-contract-${occupant.status || 'unknown'}`}>
+                    {statusLabels[occupant.status] || 'Ma’lumot yo‘q'}
+                  </b></span>
                   <span>Shartnoma boshlanishi: {formatDate(occupant.startDate)}</span>
                   <span>Shartnoma tugashi: {formatDate(occupant.endDate)}</span>
+                  {occupant.status === 'cancelled' && occupant.cancelledAt && <span>Bekor qilingan sana: {formatDate(occupant.cancelledAt)}</span>}
+                  {occupant.previousRoom && occupant.currentRoom && <div className="vacancy-bed-transfer">
+                    <span>Oldingi xona: <b>{roomLabel(occupant.previousRoom)}</b></span>
+                    <span>Hozirgi xona: <b>{roomLabel(occupant.currentRoom)}</b></span>
+                  </div>}
                   <small>Talaba profilini ochish uchun bosing</small>
                 </div>
               }>
                 <Link className="vacancy-bed-student" to={`/student/${occupant.studentId}`}
-                  aria-label={`${index + 1}-o‘rin, ${dayjs(date).format('DD.MM.YYYY')}: ${occupant.fullName || 'Talaba'}, shartnoma ${formatDate(occupant.startDate)} — ${formatDate(occupant.endDate)}. Talaba profilini ochish`} />
+                  aria-label={`${index + 1}-o‘rin, ${dayjs(date).format('DD.MM.YYYY')}: ${occupant.fullName || 'Talaba'}, shartnoma ${formatDate(occupant.startDate)} — ${formatDate(occupant.endDate)}, holati: ${statusLabels[occupant.status] || 'Ma’lumot yo‘q'}${occupant.previousRoom && occupant.currentRoom ? `, oldingi xona: ${roomLabel(occupant.previousRoom)}, hozirgi xona: ${roomLabel(occupant.currentRoom)}` : ''}. Talaba profilini ochish`} />
               </Tooltip> : state === 'vacant' || state === 'occupied' ? null : '—'}
             </td>
           })}<td className="vacancy-bed-total">{emptyDays} kun</td></tr>

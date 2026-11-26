@@ -360,7 +360,7 @@ export const baseApi = createApi({
     }),
     updateStudentContract: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/student-contracts/${id}`, method: 'PUT', body }),
-      invalidatesTags: (_result, _error, { id }) => [{ type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'Deposit', id: 'LIST' }, { type: 'Room', id: 'LIST' }, { type: 'StudentContract', id }, { type: 'StudentContract', id: 'LIST' }, { type: 'StudentContract', id: 'ACTIVE' }, { type: 'StudentContract', id: 'HISTORY' }, { type: 'Student', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Debtor', id: 'LIST' }],
     }),
     deleteStudentContract: builder.mutation({
       query: (id) => ({ url: `/student-contracts/${id}`, method: 'DELETE' }),
@@ -428,10 +428,35 @@ export const baseApi = createApi({
       providesTags: [{ type: 'Deposit', id: 'LIST' }],
       async onCacheEntryAdded(_argument, { cacheEntryRemoved, dispatch }) {
         const refresh = () => scheduleInvalidate(dispatch, [{ type: 'Deposit', id: 'LIST' }], 'Deposit:LIST')
-        const unsubscribe = subscribeSocket(['payments:changed', 'settings:changed', 'student-contracts:changed'], refresh)
+        const unsubscribe = subscribeSocket(['deposits:changed', 'payments:changed', 'settings:changed', 'student-contracts:changed'], refresh)
         await cacheEntryRemoved
         unsubscribe()
       },
+    }),
+    getDepositHistory: builder.query({
+      query: (contractId) => `/deposits/${contractId}/history`,
+      transformResponse: (response) => response.data,
+      providesTags: [{ type: 'Deposit', id: 'LIST' }],
+    }),
+    updateDeposit: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/deposits/${id}`, method: 'PUT', body }),
+      invalidatesTags: ['Deposit', 'Payment', 'StudentContract', 'CashSession', 'Report', 'Dashboard'],
+    }),
+    cancelDeposit: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/deposits/${id}`, method: 'DELETE', body }),
+      invalidatesTags: ['Deposit', 'Payment', 'StudentContract', 'CashSession', 'Report', 'Dashboard'],
+    }),
+    createDepositRefund: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/deposits/${id}/refunds`, method: 'POST', body }),
+      invalidatesTags: ['Deposit', 'Payment', 'StudentContract', 'CashSession', 'Report', 'Dashboard'],
+    }),
+    updateDepositRefund: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/deposits/refunds/${id}`, method: 'PUT', body }),
+      invalidatesTags: ['Deposit', 'Payment', 'StudentContract', 'CashSession', 'Report', 'Dashboard'],
+    }),
+    cancelDepositRefund: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `/deposits/refunds/${id}`, method: 'DELETE', body }),
+      invalidatesTags: ['Deposit', 'Payment', 'StudentContract', 'CashSession', 'Report', 'Dashboard'],
     }),
     getAuditLogs: builder.query({
       query: (params = {}) => ({ url: '/audit-logs', params }),
@@ -561,16 +586,16 @@ export const baseApi = createApi({
     createPayment: builder.mutation({
       query: (body) => ({ url: '/payments', method: 'POST', body }),
       transformResponse: (response) => response.data,
-      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Deposit', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
     }),
     deletePayment: builder.mutation({
       query: (id) => ({ url: `/payments/${id}`, method: 'DELETE' }),
-      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Deposit', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
     }),
     updatePayment: builder.mutation({
       query: ({ id, ...body }) => ({ url: `/payments/${id}`, method: 'PUT', body }),
       transformResponse: (response) => response.data,
-      invalidatesTags: [{ type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
+      invalidatesTags: [{ type: 'Deposit', id: 'LIST' }, { type: 'Payment', id: 'LIST' }, { type: 'Payment', id: 'OPTIONS' }, { type: 'Payment', id: 'ADVANCE' }, { type: 'StudentContract', id: 'LIST' }, { type: 'Debtor', id: 'LIST' }],
     }),
     getUniversities: builder.query({
       query: () => '/universities',
@@ -792,6 +817,12 @@ export const {
   useGetDebtorsQuery,
   useLazyGetDebtorsQuery,
   useGetDepositsQuery,
+  useGetDepositHistoryQuery,
+  useUpdateDepositMutation,
+  useCancelDepositMutation,
+  useCreateDepositRefundMutation,
+  useUpdateDepositRefundMutation,
+  useCancelDepositRefundMutation,
   useGetAuditLogsQuery,
   useGetStudentAuditLogsQuery,
   useSetDebtorDeadlineMutation,

@@ -12,6 +12,7 @@
 .student-admission-form .contract-room-filter,
 .student-admission-form .contract-room-field,
 .student-admission-form .contract-bed-field,
+.student-admission-form .contract-status-field,
 .student-admission-form .contract-room-feedback,
 .student-admission-form .contract-payment-calculation,
 .student-admission-form .contract-payment-note,
@@ -40,7 +41,7 @@
 .student-admission-form .contract-room-picker strong { font-size: 13px; }
 .student-admission-form .contract-room-picker span, .student-admission-form .contract-room-picker small { font-size: 10px; }
 .student-admission-form .contract-room-picker button:disabled { opacity: .6; cursor: wait; }
-.student-admission-form .student-form-actions { position: sticky; bottom: 12px; z-index: 5; margin: 0; padding: 16px 24px; background: #fff; border: 1px solid #d8e5e8; border-radius: 12px; box-shadow: 0 4px 18px #183f4e12; }
+.student-admission-form .student-form-actions { position: static; margin: 0; padding: 16px 24px; background: #fff; border: 1px solid #d8e5e8; border-radius: 12px; box-shadow: 0 4px 18px #183f4e12; }
 .student-admission-form .student-form-actions .ant-btn { min-height: 40px; min-width: 120px; font-size: 15px; }
 .admission-rooms-loading { min-height: 60px; }
 @media (max-width: 1199px) {
@@ -51,6 +52,6 @@
   .student-admission-form .student-form-section { padding: 16px; }
   .student-admission-form > .student-form-section:first-child, .student-admission-form .contract-fields { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .student-admission-form .contract-room-picker button { width: calc(50% - 5px); }
-  .student-admission-form .student-form-actions { bottom: 8px; padding: 12px; }
+  .student-admission-form .student-form-actions { padding: 12px; }
   .student-admission-form .student-form-actions .ant-btn { flex: 1; min-width: 0; }
 }

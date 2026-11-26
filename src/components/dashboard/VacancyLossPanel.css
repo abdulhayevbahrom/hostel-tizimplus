@@ -37,9 +37,13 @@
 .vacancy-bed-student { display: block; width: 100%; height: 100%; min-height: 22px; color: inherit; cursor: pointer; }
 .vacancy-bed-student:hover { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .8); }
 .vacancy-bed-student:focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
-.vacancy-bed-tooltip { display: grid; gap: 5px; }
+.vacancy-bed-tooltip { display: grid; gap: 5px; line-height: 1.5; overflow-wrap: anywhere; }
 .vacancy-bed-tooltip strong { overflow-wrap: anywhere; }
 .vacancy-bed-tooltip small { margin-top: 3px; opacity: .8; }
+.vacancy-contract-active { color: #86efac; }
+.vacancy-contract-cancelled { color: #fca5a5; }
+.vacancy-contract-completed { color: #d1d5db; }
+.vacancy-bed-transfer { display: grid; gap: 5px; margin-top: 3px; padding-top: 8px; border-top: 1px solid #ffffff40; }
 .vacancy-bed-unknown { background: #f0ece7; color: #657080; }
 .vacancy-bed-total { color: #253952; font-weight: 600; }
 .vacancy-bed-note { margin: 0; color: #657080; font-size: 12px; line-height: 1.6; }
