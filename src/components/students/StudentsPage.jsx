@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from "react";
-import { ConfigProvider, DatePicker, Modal, Pagination, Popconfirm, Select } from "antd";
+import { Button, ConfigProvider, DatePicker, Modal, Pagination, Popconfirm, Select } from "antd";
+import { FileExcelOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
@@ -9,6 +10,7 @@ import {
   useGetFacultiesQuery,
   useGetRoomsQuery,
   useGetStudentsQuery,
+  useLazyGetStudentsQuery,
   useGetUniversitiesQuery,
   useUpdateStudentMutation,
 } from "../../store/baseApi";
@@ -16,46 +18,18 @@ import { StudentFormModal } from "./StudentFormModal";
 import { StudentHistoryTab } from "./StudentHistoryTab";
 import { ContractExpiryFilter } from "./ContractExpiryFilter";
 import { isContractEndingToday } from "../../utils/contractExpiry";
+import { downloadStudentsExcel } from "../../utils/studentsExcel";
+import { educationTypeLabel, getPaymentTimingDetail, paymentStatusLabel, studentStatusLabel } from "../../utils/studentLabels";
 import "./Students.css";
 import "./StudentHistory.css";
 import "./StudentsTabsCompact.css";
 
-const studentStatusLabel = {
-  green: "Qoladi",
-  warning: "50/50",
-  red: "Ketadi",
-};
-const paymentStatusLabel = {
-  onTime: "Ha",
-  almostOnTime: "Yo‘q",
-  late: "Yo‘q",
-  pending: "Kutilmoqda",
-};
-const paymentTimingDetailLabel = {
-  onTime: "Vaqtida",
-  almostOnTime: "Deyarli vaqtida",
-  late: "Kechikkan",
-  pending: "Kutilmoqda",
-};
 const paymentFilterLabels = {
   fullyPaid: "To‘liq to‘lagan",
   late: "Kechikkan",
   pending: "Kutilmoqda",
 };
 
-function getPaymentTimingDetail(status, days) {
-  if (Number.isInteger(days)) {
-    if (status === "pending") return `${days} kun qoldi`;
-    if (status === "late") return `${days} kun kechikkan`;
-  }
-  return `Muddat holati: ${paymentTimingDetailLabel[status]}`;
-}
-const educationTypeLabel = {
-  daytime: "Kunduzgi",
-  evening: "Kechki",
-  extramural: "Sirtqi",
-  employed: "Ishlaydi",
-};
 const educationTypeOptions = Object.entries(educationTypeLabel).map(([value, label]) => ({ value, label }));
 const courseOptions = [1, 2, 3, 4, 5, 6].map((value) => ({ value, label: `${value}-kurs` }));
 
@@ -110,14 +84,8 @@ function StudentsListTab() {
   };
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const deferredQuery = useDeferredValue(query.trim());
-  const {
-    data,
-    isLoading,
-    isFetching,
-    error: listError,
-  } = useGetStudentsQuery({
+  const studentFilters = {
     search: deferredQuery,
-    page,
     university: universityFilter,
     faculty: facultyFilter,
     course: courseFilter,
@@ -130,7 +98,15 @@ function StudentsListTab() {
     contractCreatedTo: contractDateRange?.[1]?.format("YYYY-MM-DD"),
     contractEndFrom: contractEndRange?.[0]?.format("YYYY-MM-DD"),
     contractEndTo: contractEndRange?.[1]?.format("YYYY-MM-DD"),
-  }, { refetchOnMountOrArgChange: true });
+  };
+  const {
+    data,
+    isLoading,
+    isFetching,
+    error: listError,
+  } = useGetStudentsQuery({ ...studentFilters, page }, { refetchOnMountOrArgChange: true });
+  const [loadExport] = useLazyGetStudentsQuery();
+  const [exporting, setExporting] = useState(false);
   const { data: universityData } = useGetUniversitiesQuery();
   const { data: facultyData } = useGetFacultiesQuery();
   const { data: roomData } = useGetRoomsQuery();
@@ -199,6 +175,18 @@ function StudentsListTab() {
       toast.error(apiErrorMessage(requestError));
     }
   };
+  const exportExcel = async () => {
+    setExporting(true);
+    try {
+      const exportData = await loadExport({ ...studentFilters, export: 1 }).unwrap();
+      await downloadStudentsExcel(exportData.students || []);
+      toast.success(`${exportData.students?.length || 0} ta talaba Excel faylga yuklandi`);
+    } catch (requestError) {
+      toast.error(apiErrorMessage(requestError));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <ConfigProvider theme={{ token: { colorBorder: "#8ca6ad", colorText: "#263b45", colorTextPlaceholder: "#5e7580", colorBgContainer: "#f8fbfc", colorPrimary: "#0f766e" } }}>
@@ -227,6 +215,11 @@ function StudentsListTab() {
               </button>
               <ContractDateFilter value={contractDateRange} onChange={updateContractDateRange} />
               <ContractExpiryFilter value={contractEndRange} onChange={updateContractEndRange} />
+              <Button className="students-excel-button" icon={<FileExcelOutlined />} loading={exporting}
+                disabled={isFetching || deferredQuery !== query.trim() || !!listError}
+                onClick={exportExcel}>
+                Excel yuklash
+              </Button>
               <button type="button" className="students-create-button" onClick={() => navigate('/students/new')}>+ Yangi talaba</button>
             </div>
             <div className="students-toolbar-filters">

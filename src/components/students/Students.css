@@ -7,6 +7,8 @@
 .students-toolbar-actions > .students-contract-date-filter { flex: 0 1 330px; }
 .students-toolbar-actions > input::placeholder { color: #5e7580; opacity: 1; }
 .students-create-button { flex-shrink: 0; min-height: 36px; padding: 0 18px; color: #fff; background: linear-gradient(135deg, #159988, #0f766e); border: 0; border-radius: 7px; font-weight: 750; white-space: nowrap; }
+.students-toolbar-actions .students-excel-button { flex-shrink: 0; height: 36px; padding: 0 12px; color: #147a49; background: #edf9f1; border-color: #7bc5a2; border-radius: 7px; font-size: 12px; font-weight: 750; }
+.students-toolbar-actions .students-excel-button:not(:disabled):hover { color: #fff; background: #16834f; border-color: #16834f; }
 .students-toolbar-actions > input,
 .students-toolbar-filters > input { width: 100%; height: 36px; padding: 0 11px; color: #263b45; background: #f8fbfc; border: 1px solid #8ca6ad; border-radius: 7px; outline: 0; }
 .students-toolbar-filters { display: grid; width: 100%; grid-template-columns: repeat(8,minmax(0,1fr)); gap: 8px; align-items: center; }
@@ -192,6 +194,7 @@
   .students-toolbar-actions > .students-contract-date-filter { order: 1; flex-basis: 100%; }
   .students-toolbar-actions > input { flex-basis: 100px; width: 100%; height: 32px; }
   .students-create-button { min-height: 32px; padding: 0 10px; font-size: 12px; }
+  .students-toolbar-actions .students-excel-button { height: 32px; padding: 0 8px; }
   .students-toolbar-filters { display: none; }
   .students-toolbar-actions > input,
   .students-toolbar-filters > input { padding: 0 10px; font-size: 13px; }
